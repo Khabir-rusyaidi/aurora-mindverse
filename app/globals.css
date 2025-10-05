@@ -1,0 +1,184 @@
+/* === Aurora Mind Verse Theme === */
+body {
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  background-color: #75c6ff;
+  font-family: "Poppins", system-ui, -apple-system, sans-serif;
+}
+
+/* === Title === */
+.amv-title {
+  color: #000;
+  font-weight: 700;
+  text-align: center;
+  margin-top: 40px;
+  font-size: 2rem;
+  letter-spacing: 0.02em;
+}
+
+.amv-subtitle {
+  color: #000;
+  text-align: center;
+  margin-top: -10px;
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+/* === Welcome Section === */
+.welcome-section {
+  width: 80%;
+  max-width: 900px;
+  text-align: left;
+  margin-top: 20px;
+}
+
+.welcome-title {
+  color: #111;
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+.divider {
+  width: 100%;
+  max-width: 650px;
+  height: 3px;
+  background-color: #315edb;
+  border: none;
+  margin: 5px 0 15px 0;
+}
+
+.welcome-text {
+  color: #111;
+  font-size: 1.05rem;
+  line-height: 1.6;
+}
+
+/* === Login Box === */
+.login-box {
+  background-color: #3eb2ff;
+  padding: 40px;
+  border-radius: 25px;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.2);
+  width: 90%;
+  max-width: 600px;
+  margin: 40px auto;
+}
+
+.login-box form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+input,
+select {
+  padding: 10px;
+  border: 1px solid #000;
+  border-radius: 5px;
+  font-size: 1rem;
+}
+
+.links {
+  display: flex;
+  justify-content: space-between;
+  font-weight: 600;
+}
+
+.links a {
+  color: #000;
+  text-decoration: none;
+}
+
+.links a:hover {
+  text-decoration: underline;
+}
+
+.login-btn {
+  background-color: #315edb;
+  color: white;
+  font-weight: 700;
+  font-size: 1.2rem;
+  padding: 10px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  width: 100%;
+}
+
+.login-btn:hover {
+  background-color: #274ab8;
+}
+/* ------- Shared card style (same as Login) ------- */
+.form-card {
+  background-color: #3eb2ff;
+  padding: 40px;
+  border-radius: 25px;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.2);
+  width: 90%;
+  max-width: 900px; /* a little wider than login to fit two columns nicely */
+  margin: 20px auto 60px auto;
+}
+
+/* Big “REGISTER” heading under the site title */
+.register-heading {
+  color: #111;
+  font-size: 2.1rem;
+  font-weight: 800;
+  text-align: center;
+  letter-spacing: 0.02em;
+  margin: 22px 0 10px 0;
+}
+
+/* Two-column responsive form grid */
+.register-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+/* Full-width items (select + email rows) */
+.register-grid .full {
+  grid-column: 1 / -1;
+}
+
+/* Inputs, selects (match login look) */
+.form-card input,
+.form-card select {
+  padding: 14px;
+  border: 1px solid #000;
+  border-radius: 8px;
+  font-size: 1rem;
+  background: #ffffff;
+}
+
+/* Primary submit button (same vibe as login) */
+.primary-btn {
+  background-color: #315edb;
+  color: #fff;
+  font-weight: 800;
+  font-size: 1.05rem;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  height: 48px;
+}
+
+.primary-btn:hover {
+  background-color: #274ab8;
+}
+
+/* Stack to one column on smaller screens */
+@media (max-width: 760px) {
+  .register-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .primary-btn {
+    width: 100%;
+  }
+}
