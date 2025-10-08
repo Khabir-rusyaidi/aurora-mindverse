@@ -2,12 +2,12 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 export default function AuthCallback() {
   const router = useRouter();
 
   useEffect(() => {
-    // small pause so users see the message, then go to login
     const t = setTimeout(() => router.replace("/"), 1200);
     return () => clearTimeout(t);
   }, [router]);
@@ -23,7 +23,7 @@ export default function AuthCallback() {
           Thanks! We’ve verified your email. Redirecting you to the login page…
         </p>
         <p className="welcome-text" style={{ marginTop: 12 }}>
-          If nothing happens, <a href="/" style={{ fontWeight: 700 }}>click here</a>.
+          If nothing happens, <Link href="/" style={{ fontWeight: 700 }}>click here</Link>.
         </p>
       </div>
     </div>

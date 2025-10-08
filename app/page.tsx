@@ -5,6 +5,8 @@ import "./globals.css";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 
+type UserMeta = { role?: "teacher" | "student" };
+
 export default function LoginPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
@@ -24,17 +26,14 @@ export default function LoginPage() {
 
     setLoading(true);
     try {
-      // Try sign-in
       const { data, error } = await supabase.auth.signInWithPassword({ email, password });
 
       if (error) {
-        // show clear auth error (no generic “submitted” message)
         alert(error.message || "Invalid email or password.");
         return;
       }
 
-      // Redirect by saved role in user metadata
-      const role = (data.user?.user_metadata as any)?.role;
+      const role = (data.user?.user_metadata as UserMeta)?.role;
       if (!role) {
         alert('This account has no role set. Ask admin to set {"role":"teacher"} or {"role":"student"} in Supabase.');
         return;
@@ -64,11 +63,9 @@ export default function LoginPage() {
 
       <div className="login-box">
         <form onSubmit={handleSubmit}>
-          {/* use email input so browsers validate format */}
           <input type="email" placeholder="Enter email" required />
           <input type="password" placeholder="Enter password" required />
 
-          {/* optional UI only; not used for auth logic */}
           <select>
             <option value="">Role (optional)</option>
             <option value="student">Student</option>
@@ -88,3 +85,4 @@ export default function LoginPage() {
     </div>
   );
 }
+

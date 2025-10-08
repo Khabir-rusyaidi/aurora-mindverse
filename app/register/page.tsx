@@ -1,39 +1,45 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import "../globals.css";
-import { supabase } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
+import { supabase } from "@/lib/supabase";
+
+type Role = "student" | "teacher" | "";
 
 export default function RegisterPage() {
   const router = useRouter();
 
+  const [role, setRole] = useState<Role>("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [password2, setPassword2] = useState("");
+  const [teacherCode, setTeacherCode] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (submitting) return;
 
-    const form = e.currentTarget;
-    const role = (form.querySelector("select") as HTMLSelectElement)?.value;
-    const email = (form.querySelector('input[type="email"]') as HTMLInputElement)?.value;
-    const password = (form.querySelectorAll('input[type="password"]')[0] as HTMLInputElement)?.value;
-    const password2 = (form.querySelectorAll('input[type="password"]')[1] as HTMLInputElement)?.value;
-    const teacherCode = (form.querySelector('input[type="text"]') as HTMLInputElement)?.value;
-
-    // Basic validation
+    // basic validation
     if (!role || !email || !password || !password2) {
       alert("Please fill in all required fields.");
       return;
     }
-
     if (password !== password2) {
       alert("Passwords do not match.");
       return;
     }
 
-    // Teacher code check
+    // teacher code check
     if (role === "teacher") {
-      const expected = process.env.NEXT_PUBLIC_TEACHER_CODE || process.env.TEACHER_CODE;
+      const expected =
+        process.env.NEXT_PUBLIC_TEACHER_CODE ||
+        process.env.TEACHER_CODE ||
+        "";
+
       if (!expected) {
-        alert("Teacher code not configured in .env.local");
+        alert("Teacher code not configured in environment variables.");
         return;
       }
       if (teacherCode.trim() !== expected.trim()) {
@@ -42,32 +48,34 @@ export default function RegisterPage() {
       }
     }
 
-    // Create user in Supabase
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: { role }, // store role in metadata
-        emailRedirectTo:
-          typeof window !== "undefined"
-            ? `${window.location.origin}/auth/callback`
-            : undefined,
-      },
-    });
+    setSubmitting(true);
+    try {
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: { role }, // save role in user metadata
+          emailRedirectTo:
+            typeof window !== "undefined"
+              ? `${window.location.origin}/auth/callback`
+              : undefined,
+        },
+      });
 
-    if (error) {
-      console.error(error);
-      alert(error.message);
-      return;
+      if (error) {
+        alert(error.message);
+        return;
+      }
+
+      alert("Registration successful! Please check your email to verify (if required).");
+      router.replace("/"); // back to login
+    } finally {
+      setSubmitting(false);
     }
-
-    alert("Registration successful! Check your email for verification (if required).");
-    router.push("/"); // go back to login page
-    form.reset();
   };
 
   return (
-    <div className="register-page">
+    <div className="login-page">
       <h1 className="amv-title">AURORA MIND VERSE</h1>
       <p className="amv-subtitle">STEP INTO THE NEW ERA</p>
 
@@ -75,7 +83,13 @@ export default function RegisterPage() {
 
       <div className="form-card">
         <form onSubmit={onSubmit} className="register-grid">
-          <select className="full" required defaultValue="">
+          {/* Role */}
+          <select
+            className="full"
+            required
+            value={role}
+            onChange={(e) => setRole(e.target.value as Role)}
+          >
             <option value="" disabled>
               Please select your role
             </option>
@@ -83,14 +97,42 @@ export default function RegisterPage() {
             <option value="teacher">Teacher</option>
           </select>
 
-          <input className="full" type="email" placeholder="Email" required />
+          {/* Email */}
+          <input
+            className="full"
+            type="email"
+            placeholder="Email"
+            required
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
 
-          <input type="password" placeholder="Password" required />
-          <input type="password" placeholder="Re-type Password" required />
+          {/* Passwords */}
+          <input
+            type="password"
+            placeholder="Password"
+            required
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+          <input
+            type="password"
+            placeholder="Re-type Password"
+            required
+            value={password2}
+            onChange={(e) => setPassword2(e.target.value)}
+          />
 
-          <input type="text" placeholder="If teacher enter code here" />
-          <button type="submit" className="primary-btn">
-            Submit
+          {/* Teacher code (optional unless role=teacher) */}
+          <input
+            type="text"
+            placeholder="If teacher enter code here"
+            value={teacherCode}
+            onChange={(e) => setTeacherCode(e.target.value)}
+          />
+
+          <button type="submit" className="primary-btn" disabled={submitting}>
+            {submitting ? "Submitting..." : "Submit"}
           </button>
         </form>
       </div>
