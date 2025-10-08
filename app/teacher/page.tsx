@@ -35,7 +35,6 @@ export default function TeacherDashboard() {
       const { data: rows, error } = await supabase
         .from("subjects")
         .select("id,title,description,image_url,artsteps_url")
-        .eq("teacher_id", u.id)
         .order("created_at", { ascending: false });
 
       if (!error && rows) setSubjects(rows as Subject[]);
