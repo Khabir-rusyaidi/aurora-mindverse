@@ -2,8 +2,8 @@
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
-import { supabase } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
+import { supabase } from "@/lib/supabase";
 
 type UserMeta = { role?: "teacher" | "student" };
 
@@ -16,6 +16,22 @@ type Subject = {
   teacher_id: string;
 };
 
+/** Simple trash outline icon to match your UI */
+function TrashIcon(props: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox="0 0 24 24" width="22" height="22" {...props}>
+      <path
+        d="M3 6h18M9 6V4h6v2M7 6l1 14a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2L17 6M10 11v6M14 11v6"
+        stroke="currentColor"
+        strokeWidth={2}
+        fill="none"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
 export default function TeacherDashboard() {
   const router = useRouter();
 
@@ -24,10 +40,9 @@ export default function TeacherDashboard() {
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // 1) Load user & subjects
+  // Load current user + subjects
   useEffect(() => {
     (async () => {
-      // current user
       const { data: userRes, error: userErr } = await supabase.auth.getUser();
       const u = userRes?.user;
       if (userErr || !u) {
@@ -35,7 +50,7 @@ export default function TeacherDashboard() {
         return;
       }
 
-      // Only teachers can access this page
+      // Allow only teachers into this page
       const role = (u.user_metadata as UserMeta)?.role;
       if (role !== "teacher") {
         router.replace("/");
@@ -45,22 +60,20 @@ export default function TeacherDashboard() {
       setMyEmail(u.email ?? null);
       setMyId(u.id);
 
-      // Get ALL subjects so teachers can see each other’s
+      // Fetch ALL subjects so teachers can see each other’s
       const { data: rows, error } = await supabase
         .from("subjects")
         .select("id,title,description,image_url,artsteps_url,teacher_id")
         .order("created_at", { ascending: false });
 
-      if (!error && rows) {
-        setSubjects(rows as Subject[]);
-      }
+      if (!error && rows) setSubjects(rows as Subject[]);
       setLoading(false);
     })();
   }, [router]);
 
   const displayName = (myEmail ?? "").split("@")[0].toUpperCase();
 
-  // 2) Delete handler (owner only; enforced again by RLS)
+  // Delete (owner only; RLS enforces too)
   const handleDelete = async (subject: Subject) => {
     if (!myId) return;
 
@@ -71,7 +84,7 @@ export default function TeacherDashboard() {
       .from("subjects")
       .delete()
       .eq("id", subject.id)
-      .eq("teacher_id", myId); // matches your RLS
+      .eq("teacher_id", myId);
 
     if (error) {
       alert(error.message);
@@ -118,7 +131,7 @@ export default function TeacherDashboard() {
         </div>
       </div>
 
-      {/* === WELCOME SECTION === */}
+      {/* === WELCOME === */}
       <div className="welcome-section">
         <h2 className="welcome-title">Welcome To Our Application</h2>
         <hr className="divider" />
@@ -127,7 +140,7 @@ export default function TeacherDashboard() {
           they will also be able to walk inside a virtual world like a video game to explore the topics provided.
         </p>
 
-        {/* Actions aligned to the right, below the paragraph */}
+        {/* Actions to the right */}
         <div className="actions-right below-right">
           <a className="pill-btn" href="https://www.artsteps.com/" target="_blank" rel="noreferrer">
             <span className="plus">+</span> Create Artsteps
@@ -149,11 +162,7 @@ export default function TeacherDashboard() {
         {subjects.map((s) => (
           <div key={s.id} className="subject-row" style={{ marginBottom: 16 }}>
             <div className="subject-thumb">
-              {s.image_url ? (
-                <img src={s.image_url} alt={s.title} />
-              ) : (
-                "ADD PICTURE"
-              )}
+              {s.image_url ? <img src={s.image_url} alt={s.title} /> : "ADD PICTURE"}
             </div>
 
             <div className="subject-main">
@@ -162,16 +171,20 @@ export default function TeacherDashboard() {
             </div>
 
             <div className="subject-actions">
-              {/* Owner-only actions (Edit / Delete) */}
               {s.teacher_id === myId ? (
                 <>
-                  <Link className="edit-link" href={`/teacher/subject/${s.id}/edit`}>✎ Edit</Link>
+                  <Link className="edit-link" href={`/teacher/subject/${s.id}/edit`}>
+                    <span style={{ marginRight: 6 }}>✎</span> Edit
+                  </Link>
+
                   <button
-                    className="danger-btn"
+                    type="button"
+                    className="delete-link"
                     onClick={() => handleDelete(s)}
-                    style={{ marginLeft: 12 }}
+                    aria-label={`Delete ${s.title}`}
                   >
-                    🗑 Delete
+                    <TrashIcon className="trash-svg" />
+                    <span>Delete</span>
                   </button>
                 </>
               ) : (

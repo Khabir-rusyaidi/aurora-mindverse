@@ -266,15 +266,49 @@ select {
   margin-top: 12px;         /* push them a bit down */
   align-items: flex-end;    /* keep right edge aligned */
 }
-.danger-btn {
-  background-color: #e53935;
-  color: #fff;
+/* Keep the actions on one row, aligned like your screenshot */
+.subject-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+/* “Edit” as a simple link with a small icon */
+.edit-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 700;
+  color: #111;
+  text-decoration: none;
+  background: transparent;
+}
+
+/* “Delete” in red with a trash outline icon */
+.delete-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
   font-weight: 800;
   font-size: 1.05rem;
-  border: none;
-  border-radius: 10px;
-  cursor: pointer;
-  height: 44px;
-  padding: 0 14px;
+  color: #ef4444;      /* red text */
 }
-.danger-btn:hover { background-color: #c62828; }
+
+.delete-link:hover {
+  color: #b91c1c;      /* darker red on hover */
+}
+
+/* Trash outline to match your UI */
+.trash-svg {
+  stroke: #111;        /* dark outline like your screenshot */
+  width: 22px;
+  height: 22px;
+}
+
+.delete-link:hover .trash-svg {
+  stroke: #b91c1c;
+}
