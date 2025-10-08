@@ -182,3 +182,87 @@ select {
     width: 100%;
   }
 }
+/* ===== Top bar (brand left, nav + profile right) ===== */
+.topbar {
+  width: 100%;
+  background: #3eb2ff;
+  padding: 12px 22px;
+  box-sizing: border-box;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.brand-block { display: flex; flex-direction: column; line-height: 1.1; }
+.brand-block .amv-title { margin: 0; font-size: 1.7rem; text-align: left; }
+.brand-block .amv-subtitle { margin: 2px 0 0 0; font-weight: 700; font-size: 0.95rem; text-align: left; }
+
+.nav-right { display: flex; align-items: center; gap: 22px; }
+.nav-links a {
+  color: #000; font-weight: 700; text-decoration: none; font-size: 0.95rem;
+}
+.nav-links a:hover { text-decoration: underline; }
+
+.profile-pill {
+  background: #fff; border-radius: 12px; padding: 8px 12px;
+  display: inline-flex; align-items: center; gap: 8px; font-weight: 800;
+  border: 1px solid rgba(0,0,0,0.15);
+}
+.profile-icon { font-size: 1rem; }
+
+/* ===== Welcome + Actions (right side buttons) ===== */
+.actions-right {
+  display: flex; flex-direction: column; gap: 14px;
+  align-items: flex-end;
+}
+.pill-btn {
+  background: #e9e9e9;
+  border-radius: 26px;
+  padding: 10px 16px;
+  display: inline-flex; align-items: center; gap: 10px;
+  font-weight: 800; text-decoration: none; color: #111; border: none;
+}
+.pill-btn .plus {
+  width: 28px; height: 28px; border-radius: 50%;
+  border: 2px solid #000; display: inline-flex; align-items: center; justify-content: center;
+}
+
+/* ===== Subject row (wide single card) ===== */
+.subject-row {
+  background: #e0e0e0;
+  border-radius: 28px;
+  padding: 22px;
+  display: grid;
+  grid-template-columns: 180px 1fr 220px;
+  gap: 18px;
+  align-items: center;
+}
+.subject-thumb {
+  width: 180px; height: 160px; background: #3eb2ff; border-radius: 26px;
+  display: flex; align-items: center; justify-content: center; font-weight: 700;
+  overflow: hidden;
+}
+.subject-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.subject-main h3 { margin: 0 0 8px 0; }
+.subject-actions { display: flex; flex-direction: column; gap: 12px; align-items: flex-end; }
+.edit-link { text-decoration: none; display: inline-flex; align-items: center; gap: 6px; font-weight: 700; color: #111; }
+.enter-btn { background:#2d7ef3; color:#fff; border:none; border-radius:10px; height:44px; padding:0 16px; font-weight:800; }
+
+/* ===== Create / Edit subject card ===== */
+.create-card {
+  background: #3eb2ff;
+  max-width: 960px;
+  margin: 22px auto 60px auto;
+  padding: 28px;
+  border-radius: 28px;
+  box-shadow: 0 8px 18px rgba(0,0,0,.2);
+}
+.create-title { text-align: center; font-size: 1.6rem; font-weight: 900; margin-bottom: 18px; }
+.create-grid { display: grid; gap: 14px; }
+.create-grid input, .create-grid textarea {
+  padding: 14px; border: 1px solid #000; border-radius: 8px; font-size: 1rem; background: #fff;
+}
+/* place actions below the welcome paragraph, aligned right */
+.actions-right.below-right {
+  margin-top: 12px;         /* push them a bit down */
+  align-items: flex-end;    /* keep right edge aligned */
+}
