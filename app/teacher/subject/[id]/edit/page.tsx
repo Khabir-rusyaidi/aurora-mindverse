@@ -1,95 +1,167 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 
-export default function EditSubjectPage() {
-  const { id } = useParams<{ id: string }>();
+type UserMeta = { role?: "teacher" | "student" };
+
+type SubjectRow = {
+  id: string;
+  title: string;
+  description: string;
+  image_url: string | null;
+  artsteps_url: string | null;
+  teacher_id: string;
+};
+
+function pathFromPublicUrl(url: string): string | null {
+  try {
+    const u = new URL(url);
+    const parts = u.pathname.split("/object/public/subjects/");
+    return parts.length === 2 ? decodeURIComponent(parts[1]) : null;
+  } catch {
+    return null;
+  }
+}
+
+export default function EditSubjectPage({
+  params,
+}: {
+  params: { id: string };
+}) {
   const router = useRouter();
+
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
 
   const [title, setTitle] = useState("");
   const [desc, setDesc] = useState("");
   const [link, setLink] = useState("");
-  const [preview, setPreview] = useState<string | null>(null);
-  const [file, setFile] = useState<File | null>(null);
-  const [saving, setSaving] = useState(false);
+  const [currentImageUrl, setCurrentImageUrl] = useState<string | null>(null);
+  const [newFile, setNewFile] = useState<File | null>(null);
 
-  // Step 1: Load subject data when page opens
   useEffect(() => {
     (async () => {
+      // must be signed in & teacher
       const { data: userRes } = await supabase.auth.getUser();
-      const uid = userRes?.user?.id;
-      if (!uid) { router.push("/"); return; }
+      const user = userRes?.user;
+      if (!user) {
+        router.replace("/");
+        return;
+      }
+      const role = (user.user_metadata as UserMeta)?.role;
+      if (role !== "teacher") {
+        router.replace("/");
+        return;
+      }
 
+      // load the subject row (owned by this teacher)
       const { data, error } = await supabase
         .from("subjects")
-        .select("title,description,image_url,artsteps_url,teacher_id")
-        .eq("id", id)
+        .select("id,title,description,image_url,artsteps_url,teacher_id")
+        .eq("id", params.id)
+        .eq("teacher_id", user.id)
         .single();
 
       if (error || !data) {
-        alert("Subject not found");
-        router.push("/teacher");
-        return;
-      }
-      if (data.teacher_id !== uid) {
-        alert("You can only edit your own subjects");
-        router.push("/teacher");
+        alert("Subject not found or you do not have permission.");
+        router.replace("/teacher");
         return;
       }
 
-      setTitle(data.title || "");
-      setDesc(data.description || "");
-      setLink(data.artsteps_url || "");
-      setPreview(data.image_url || null);
+      const s = data as SubjectRow;
+      setTitle(s.title);
+      setDesc(s.description);
+      setLink(s.artsteps_url ?? "");
+      setCurrentImageUrl(s.image_url ?? null);
+      setLoading(false);
     })();
-  }, [id, router]);
+  }, [params.id, router]);
 
-  // Step 2: Update file preview
-  const onFile = (f: File | null) => {
-    setFile(f);
-    if (f) setPreview(URL.createObjectURL(f));
-  };
-
-  // Step 3: Save updates
-  const save = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSave = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (saving) return;
+    if (!title.trim() || !desc.trim()) {
+      alert("Please fill Title and Description.");
+      return;
+    }
+
     setSaving(true);
     try {
       const { data: userRes } = await supabase.auth.getUser();
       const uid = userRes?.user?.id;
-      if (!uid) { alert("Not logged in"); return; }
-
-      let imageUrl: string | null | undefined = undefined;
-      if (file) {
-        const ext = file.name.split(".").pop() || "jpg";
-        const path = `${uid}/${Date.now()}.${ext}`;
-        const { error: upErr } = await supabase.storage.from("subjects").upload(path, file);
-        if (upErr) { alert("Upload failed: " + upErr.message); setSaving(false); return; }
-        const { data: pub } = supabase.storage.from("subjects").getPublicUrl(path);
-        imageUrl = pub?.publicUrl ?? null;
+      if (!uid) {
+        alert("Not signed in.");
+        return;
       }
 
-      const payload: any = {
+      // If a new image is chosen, upload it first
+      let nextImageUrl: string | null | undefined = undefined; // undefined = don't change; null = clear
+      if (newFile) {
+        const ext = newFile.name.split(".").pop() || "jpg";
+        const path = `${uid}/${Date.now()}.${ext}`;
+
+        const { error: upErr } = await supabase.storage.from("subjects").upload(path, newFile);
+        if (upErr) {
+          alert(`Upload failed: ${upErr.message}`);
+          return;
+        }
+        const { data: pub } = supabase.storage.from("subjects").getPublicUrl(path);
+        nextImageUrl = pub?.publicUrl ?? null;
+      }
+
+      // Update the row
+      const payload: Partial<SubjectRow> = {
         title: title.trim(),
         description: desc.trim(),
         artsteps_url: link.trim() || null,
       };
-      if (imageUrl !== undefined) payload.image_url = imageUrl;
+      if (nextImageUrl !== undefined) {
+        payload.image_url = nextImageUrl;
+      }
 
-      const { error } = await supabase.from("subjects").update(payload).eq("id", id);
-      if (error) { alert(error.message); return; }
+      const { error: updErr } = await supabase
+        .from("subjects")
+        .update(payload)
+        .eq("id", params.id)
+        .eq("teacher_id", uid);
 
-      alert("Subject updated successfully!");
-      router.push("/teacher");
+      if (updErr) {
+        alert(updErr.message);
+        return;
+      }
+
+      // If image was replaced successfully, delete the old one
+      if (nextImageUrl && currentImageUrl) {
+        const oldPath = pathFromPublicUrl(currentImageUrl);
+        if (oldPath) {
+          await supabase.storage.from("subjects").remove([oldPath]);
+        }
+      }
+
+      alert("Saved!");
+      router.replace("/teacher");
     } finally {
       setSaving(false);
     }
   };
 
+  if (loading) {
+    return (
+      <div style={{ width: "90%", maxWidth: 900, margin: "60px auto" }}>
+        <h1 className="amv-title">AURORA MIND VERSE</h1>
+        <p className="amv-subtitle">STEP INTO THE NEW ERA</p>
+        <div className="form-card">
+          <p className="welcome-text">Loading subject…</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div style={{ width: "95%", maxWidth: 1150, margin: "0 auto" }}>
+    <div style={{ width: "95%", maxWidth: 1000, margin: "0 auto" }}>
       <div className="topbar">
         <div className="brand-block">
           <h1 className="amv-title">AURORA MIND VERSE</h1>
@@ -97,16 +169,18 @@ export default function EditSubjectPage() {
         </div>
       </div>
 
-      <div className="create-card">
+      <div className="form-card" style={{ marginTop: 20 }}>
         <h2 className="create-title">EDIT SUBJECT</h2>
-        <form onSubmit={save} className="create-grid">
+
+        <form onSubmit={handleSave} className="create-grid">
           <input
             type="text"
-            placeholder="Subject Name"
+            placeholder="Title"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             required
           />
+
           <input
             type="text"
             placeholder="Description"
@@ -114,26 +188,56 @@ export default function EditSubjectPage() {
             onChange={(e) => setDesc(e.target.value)}
             required
           />
+
           <input
             type="url"
-            placeholder="link artsteps"
+            placeholder="Artsteps link (optional)"
             value={link}
             onChange={(e) => setLink(e.target.value)}
           />
-          <div style={{ display: "grid", gap: 8 }}>
-            <input type="file" accept="image/*" onChange={(e) => onFile(e.target.files?.[0] ?? null)} />
-            {preview && (
-              <img
-                src={preview}
-                alt="Preview"
-                style={{ width: "100%", maxHeight: 220, objectFit: "cover", borderRadius: 12 }}
-              />
-            )}
+
+          <div className="full" style={{ display: "grid", gap: 10 }}>
+            <label style={{ fontWeight: 700 }}>Current image</label>
+            <div style={{ display: "flex", gap: 16, alignItems: "center" }}>
+              {currentImageUrl ? (
+                <img
+                  src={currentImageUrl}
+                  alt="subject"
+                  style={{ width: 180, height: 120, objectFit: "cover", borderRadius: 8 }}
+                />
+              ) : (
+                <span style={{ opacity: 0.8 }}>No image</span>
+              )}
+            </div>
+
+            <label style={{ fontWeight: 700, marginTop: 6 }}>
+              Replace image (optional)
+            </label>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={(e) => setNewFile(e.target.files?.[0] ?? null)}
+            />
           </div>
 
-          <button type="submit" className="login-btn" disabled={saving}>
-            {saving ? "Saving..." : "SAVE"}
-          </button>
+          <div className="full" style={{ display: "flex", gap: 12, marginTop: 6 }}>
+            <button type="submit" className="login-btn" disabled={saving}>
+              {saving ? "Saving..." : "Save"}
+            </button>
+
+            <Link
+              href="/teacher"
+              className="pill-btn"
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                height: 44,
+              }}
+            >
+              Cancel
+            </Link>
+          </div>
         </form>
       </div>
     </div>
