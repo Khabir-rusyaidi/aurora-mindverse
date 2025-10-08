@@ -1,12 +1,50 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import "./globals.css";
+import { useRouter } from "next/navigation";
+import { supabase } from "@/lib/supabase";
 
 export default function LoginPage() {
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const router = useRouter();
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    alert("Login submitted!");
+    if (loading) return;
+
+    const form = e.currentTarget;
+    const email = (form.querySelector('input[type="email"]') as HTMLInputElement)?.value.trim();
+    const password = (form.querySelector('input[type="password"]') as HTMLInputElement)?.value;
+
+    if (!email || !password) {
+      alert("Please fill in email and password.");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      // Try sign-in
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+
+      if (error) {
+        // show clear auth error (no generic “submitted” message)
+        alert(error.message || "Invalid email or password.");
+        return;
+      }
+
+      // Redirect by saved role in user metadata
+      const role = (data.user?.user_metadata as any)?.role;
+      if (!role) {
+        alert('This account has no role set. Ask admin to set {"role":"teacher"} or {"role":"student"} in Supabase.');
+        return;
+      }
+
+      router.replace(role === "teacher" ? "/teacher" : "/student");
+      form.reset();
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -26,28 +64,27 @@ export default function LoginPage() {
 
       <div className="login-box">
         <form onSubmit={handleSubmit}>
-          <input type="text" placeholder="Enter email/username" required />
+          {/* use email input so browsers validate format */}
+          <input type="email" placeholder="Enter email" required />
           <input type="password" placeholder="Enter password" required />
 
-          <select required>
-            <option value="">Role</option>
+          {/* optional UI only; not used for auth logic */}
+          <select>
+            <option value="">Role (optional)</option>
             <option value="student">Student</option>
             <option value="teacher">Teacher</option>
           </select>
 
           <div className="links">
             <a href="/register">Register now</a>
-            <a href="#" className="forgot">
-              Forgot password?
-            </a>
+            <a href="#" className="forgot">Forgot password?</a>
           </div>
 
-          <button type="submit" className="login-btn">
-            Login
+          <button type="submit" className="login-btn" disabled={loading}>
+            {loading ? "Logging in..." : "Login"}
           </button>
         </form>
       </div>
     </div>
   );
 }
-
