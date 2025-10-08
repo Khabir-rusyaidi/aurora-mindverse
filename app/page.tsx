@@ -66,6 +66,7 @@ export default function LoginPage() {
           <input type="email" placeholder="Enter email" required />
           <input type="password" placeholder="Enter password" required />
 
+          {/* optional UI only; not used for auth logic */}
           <select>
             <option value="">Role (optional)</option>
             <option value="student">Student</option>
