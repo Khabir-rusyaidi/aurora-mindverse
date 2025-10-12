@@ -441,10 +441,11 @@ select {
 
 .fp-row {
   display: grid;
-  grid-template-columns: 1fr 140px;
-  gap: 14px;
+  grid-template-columns: 1fr 130px; /* slightly narrower button */
+  gap: 18px; /* increased spacing between input & button */
   align-items: center;
 }
+
 
 .fp-resend {
   height: 48px;
