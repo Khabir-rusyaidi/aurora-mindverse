@@ -599,3 +599,155 @@ body {
   opacity: 0.6;
   cursor: not-allowed;
 }
+/* =============================
+   Aurora Mind Verse – Forgot Password (exact match)
+   ============================= */
+
+/* Page background (very light blue) */
+.fp2-root {
+  min-height: 100vh;
+  background: #80c7ff; /* outer light blue */
+  display: grid;
+  place-items: start center;
+  font-family: "Poppins", system-ui, -apple-system, Segoe UI, Roboto, Arial;
+}
+
+/* Center vertical column (slightly darker) */
+.fp2-column {
+  width: 760px;              /* matches screenshot column width */
+  min-height: 100vh;
+  background: #6ec1f6;       /* middle blue strip */
+  border-radius: 12px;        /* soft rounded edges like image */
+}
+
+/* Inner layout */
+.fp2-inner {
+  max-width: 760px;
+  margin: 36px auto 64px;
+  padding: 0 24px;
+  position: relative;
+}
+
+/* Back arrow top-left */
+.fp2-back {
+  position: relative;
+  height: 28px;
+  margin-left: 18px;
+  margin-bottom: 10px;
+}
+.fp2-arrow {
+  font-size: 28px;
+  color: #000;
+  cursor: pointer;
+  user-select: none;
+  line-height: 1;
+}
+
+/* Brand + tagline (black, centered) */
+.fp2-brand {
+  margin: 6px 0 4px;
+  text-align: center;
+  color: #000;
+  font-weight: 800;
+  font-size: 28px;           /* bold like screenshot */
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+.fp2-tag {
+  margin: 0 0 22px;
+  text-align: center;
+  color: #000;
+  font-size: 14px;
+  letter-spacing: 1px;
+}
+
+/* Card (darker blue, big radius) */
+.fp2-card {
+  width: 720px;              /* card width inside the column */
+  margin: 0 auto;
+  background: #47b9f3;       /* darker blue as in image */
+  border-radius: 32px;        /* big rounded corners (matches look) */
+  padding: 28px 30px 34px;
+  box-sizing: border-box;
+}
+
+/* Card title + sub */
+.fp2-title {
+  margin: 0 0 6px;
+  text-align: center;
+  color: #000;
+  font-size: 28px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+.fp2-sub {
+  margin: 0 0 18px;
+  text-align: center;
+  color: #000;
+  font-size: 16px;
+}
+
+/* Inputs (black border) */
+.fp2-input {
+  width: 100%;
+  height: 48px;
+  padding: 0 12px;
+  border: 2px solid #000;
+  border-radius: 10px;
+  background: #a9ddff; /* slightly lighter fill like in image */
+  color: #000;
+  font-size: 16px;
+  outline: none;
+  box-sizing: border-box;
+}
+.fp2-input::placeholder { color: #1f1f1f; opacity: 0.8; }
+
+/* OTP row with RESEND on the right */
+.fp2-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 14px;
+  margin-bottom: 14px;
+}
+.fp2-grow { flex: 1; }
+
+/* RESEND button (same style as screenshot) */
+.fp2-resend {
+  height: 48px;
+  padding: 0 18px;
+  border-radius: 10px;
+  border: 2px solid #000;
+  background: linear-gradient(180deg, #4363e7 0%, #3a53c7 100%);
+  color: #fff;
+  font-weight: 800;
+  font-size: 18px;
+  letter-spacing: .5px;
+  cursor: pointer;
+}
+.fp2-resend:disabled {
+  opacity: .6;
+  cursor: not-allowed;
+}
+
+/* SUBMIT full-width (same blue as RESEND) */
+.fp2-submit {
+  margin-top: 6px;
+  width: 100%;
+  height: 54px;
+  border-radius: 10px;
+  border: 2px solid #000;
+  background: linear-gradient(180deg, #4363e7 0%, #3a53c7 100%);
+  color: #fff;
+  font-weight: 800;
+  font-size: 20px;
+  letter-spacing: .5px;
+  cursor: pointer;
+}
+.fp2-submit:disabled { opacity: .6; cursor: not-allowed; }
+
+/* Responsive fit for small screens (keeps proportions) */
+@media (max-width: 820px) {
+  .fp2-column { width: 100vw; border-radius: 0; }
+  .fp2-card { width: 94vw; }
+}

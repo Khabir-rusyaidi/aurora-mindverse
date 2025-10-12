@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 
 export default function ForgotPassword() {
@@ -19,92 +19,102 @@ export default function ForgotPassword() {
   }, [cooldown]);
 
   async function sendOtp() {
-    if (!email) return alert("Enter your email first");
+    if (!email) return alert("Enter your email first.");
     setLoading(true);
     try {
-      await new Promise((r) => setTimeout(r, 1000)); // fake delay
+      // call your API here
+      // await fetch("/api/forgot-password/request-otp", { ... })
+      await new Promise((r) => setTimeout(r, 500));
       setOtpSent(true);
       setCooldown(60);
-      alert("OTP sent! Check your email.");
     } finally {
       setLoading(false);
     }
   }
 
-  async function submitNewPassword() {
-    if (!otp) return alert("Enter OTP");
-    if (pwd.length < 8) return alert("Password must be at least 8 characters");
-    if (pwd !== pwd2) return alert("Passwords do not match");
-    alert("Password reset successful!");
+  function submitNewPassword() {
+    if (!otp) return alert("Enter OTP.");
+    if (pwd.length < 8) return alert("Min 8 characters.");
+    if (pwd !== pwd2) return alert("Passwords do not match.");
+    alert("Password updated. You can log in now.");
   }
 
   return (
-    <div className="forgot-wrapper">
-      <div className="forgot-arrow">
-        <Link href="/">
-          <span className="arrow-icon">←</span>
-        </Link>
-      </div>
+    <div className="fp2-root">
+      <div className="fp2-column">
+        <div className="fp2-inner">
 
-      <h1 className="forgot-brand">AURORA MIND VERSE</h1>
-      <p className="forgot-tagline">STEP INTO THE NEW ERA</p>
+          {/* Back arrow (to login) */}
+          <div className="fp2-back">
+            <Link href="/" aria-label="Back to login">
+              <span className="fp2-arrow">←</span>
+            </Link>
+          </div>
 
-      <div className="forgot-card">
-        <h2 className="forgot-title">RESET YOUR PASSWORD</h2>
-        <p className="forgot-sub">We'll send a secure link to your email</p>
+          {/* Brand */}
+          <h1 className="fp2-brand">AURORA MIND VERSE</h1>
+          <p className="fp2-tag">STEP INTO THE NEW ERA</p>
 
-        <input
-          className="forgot-input"
-          type="email"
-          placeholder="Enter your email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
+          {/* Card */}
+          <div className="fp2-card">
+            <h2 className="fp2-title">RESET YOUR PASSWORD</h2>
+            <p className="fp2-sub">We&apos;ll send a secure link to your email</p>
 
-        <div className="forgot-row">
-          <input
-            className="forgot-input"
-            type="text"
-            placeholder="Send OTP number"
-            maxLength={6}
-            value={otp}
-            onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
-          />
-          <button
-            className="forgot-resend"
-            onClick={sendOtp}
-            disabled={loading || cooldown > 0}
-          >
-            {cooldown > 0 ? `RESEND (${cooldown})` : "RESEND"}
-          </button>
+            <input
+              className="fp2-input"
+              type="email"
+              placeholder="Enter your email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+
+            <div className="fp2-row">
+              <input
+                className="fp2-input fp2-grow"
+                type="text"
+                placeholder="Send OTP number"
+                maxLength={6}
+                value={otp}
+                onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
+              />
+              <button
+                className="fp2-resend"
+                onClick={sendOtp}
+                disabled={loading || cooldown > 0}
+              >
+                {cooldown > 0 ? `RESEND (${cooldown})` : "RESEND"}
+              </button>
+            </div>
+
+            {otpSent && (
+              <>
+                <input
+                  className="fp2-input"
+                  type="password"
+                  placeholder="New password"
+                  value={pwd}
+                  onChange={(e) => setPwd(e.target.value)}
+                />
+                <input
+                  className="fp2-input"
+                  type="password"
+                  placeholder="Confirm new password"
+                  value={pwd2}
+                  onChange={(e) => setPwd2(e.target.value)}
+                />
+              </>
+            )}
+
+            <button
+              className="fp2-submit"
+              onClick={submitNewPassword}
+              disabled={loading}
+            >
+              SUBMIT
+            </button>
+          </div>
+
         </div>
-
-        {otpSent && (
-          <>
-            <input
-              className="forgot-input"
-              type="password"
-              placeholder="New password"
-              value={pwd}
-              onChange={(e) => setPwd(e.target.value)}
-            />
-            <input
-              className="forgot-input"
-              type="password"
-              placeholder="Confirm new password"
-              value={pwd2}
-              onChange={(e) => setPwd2(e.target.value)}
-            />
-          </>
-        )}
-
-        <button
-          className="forgot-submit"
-          onClick={submitNewPassword}
-          disabled={loading}
-        >
-          SUBMIT
-        </button>
       </div>
     </div>
   );
