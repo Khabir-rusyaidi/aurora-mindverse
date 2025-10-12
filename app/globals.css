@@ -312,3 +312,10 @@ select {
 .delete-link:hover .trash-svg {
   stroke: #b91c1c;
 }
+.profile-container { position: relative; display: inline-block; }
+.logout-btn {
+  position: absolute; top: 110%; right: 0;
+  background: #fff; border: 1px solid #000; border-radius: 8px;
+  padding: 8px 12px; font-weight: 700; color: red; cursor: pointer;
+}
+.logout-btn:hover { background: #f8d7da; }

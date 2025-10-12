@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import { useCurrentUser } from "@/lib/useCurrentUser";
 
 type UserMeta = { role?: "teacher" | "student" };
 
@@ -16,17 +17,14 @@ type Subject = {
   teacher_id: string;
 };
 
-/** Simple trash outline icon to match your UI */
+/** Simple trash outline icon */
 function TrashIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
     <svg viewBox="0 0 24 24" width="22" height="22" {...props}>
       <path
         d="M3 6h18M9 6V4h6v2M7 6l1 14a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2L17 6M10 11v6M14 11v6"
-        stroke="currentColor"
-        strokeWidth={2}
-        fill="none"
-        strokeLinecap="round"
-        strokeLinejoin="round"
+        stroke="currentColor" strokeWidth={2} fill="none"
+        strokeLinecap="round" strokeLinejoin="round"
       />
     </svg>
   );
@@ -34,8 +32,14 @@ function TrashIcon(props: React.SVGProps<SVGSVGElement>) {
 
 export default function TeacherDashboard() {
   const router = useRouter();
+  const userName = useCurrentUser();                   // 👈 shows FIRDAUS/TAY etc.
+  const [showLogout, setShowLogout] = useState(false); // 👈 toggle dropdown
 
-  const [myEmail, setMyEmail] = useState<string | null>(null);
+  async function handleLogout() {
+    await supabase.auth.signOut();
+    router.replace("/");
+  }
+
   const [myId, setMyId] = useState<string | null>(null);
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [loading, setLoading] = useState(true);
@@ -45,22 +49,13 @@ export default function TeacherDashboard() {
     (async () => {
       const { data: userRes, error: userErr } = await supabase.auth.getUser();
       const u = userRes?.user;
-      if (userErr || !u) {
-        router.replace("/");
-        return;
-      }
+      if (userErr || !u) { router.replace("/"); return; }
 
-      // Allow only teachers into this page
       const role = (u.user_metadata as UserMeta)?.role;
-      if (role !== "teacher") {
-        router.replace("/");
-        return;
-      }
+      if (role !== "teacher") { router.replace("/"); return; }
 
-      setMyEmail(u.email ?? null);
       setMyId(u.id);
 
-      // Fetch ALL subjects so teachers can see each other’s
       const { data: rows, error } = await supabase
         .from("subjects")
         .select("id,title,description,image_url,artsteps_url,teacher_id")
@@ -71,12 +66,9 @@ export default function TeacherDashboard() {
     })();
   }, [router]);
 
-  const displayName = (myEmail ?? "").split("@")[0].toUpperCase();
-
   // Delete (owner only; RLS enforces too)
   const handleDelete = async (subject: Subject) => {
     if (!myId) return;
-
     const ok = window.confirm(`Delete "${subject.title}"? This cannot be undone.`);
     if (!ok) return;
 
@@ -86,12 +78,8 @@ export default function TeacherDashboard() {
       .eq("id", subject.id)
       .eq("teacher_id", myId);
 
-    if (error) {
-      alert(error.message);
-      return;
-    }
-
-    setSubjects((prev) => prev.filter((s) => s.id !== subject.id));
+    if (error) { alert(error.message); return; }
+    setSubjects(prev => prev.filter(s => s.id !== subject.id));
     alert("Subject deleted.");
   };
 
@@ -102,6 +90,12 @@ export default function TeacherDashboard() {
           <div className="brand-block">
             <h1 className="amv-title">AURORA MIND VERSE</h1>
             <p className="amv-subtitle">STEP INTO THE NEW ERA</p>
+          </div>
+          <div className="nav-right">
+            <div className="nav-links"><Link href="/about">About Us</Link>&nbsp;&nbsp;<Link href="/contact">Contact</Link></div>
+            <div className="profile-container">
+              <button className="profile-pill"><span className="profile-icon">👤</span> {userName}</button>
+            </div>
           </div>
         </div>
         <p className="welcome-text" style={{ marginTop: 24 }}>Loading…</p>
@@ -124,9 +118,14 @@ export default function TeacherDashboard() {
             &nbsp;&nbsp;
             <Link href="/contact">Contact</Link>
           </div>
-          <div className="profile-pill">
-            <span className="profile-icon">👤</span>
-            {displayName || "TEACHER"}
+
+          <div className="profile-container">
+            <button className="profile-pill" onClick={() => setShowLogout(v => !v)}>
+              <span className="profile-icon">👤</span> {userName}
+            </button>
+            {showLogout && (
+              <button className="logout-btn" onClick={handleLogout}>LOG OUT</button>
+            )}
           </div>
         </div>
       </div>
@@ -140,7 +139,6 @@ export default function TeacherDashboard() {
           they will also be able to walk inside a virtual world like a video game to explore the topics provided.
         </p>
 
-        {/* Actions to the right */}
         <div className="actions-right below-right">
           <a className="pill-btn" href="https://www.artsteps.com/" target="_blank" rel="noreferrer">
             <span className="plus">+</span> Create Artsteps
@@ -154,10 +152,7 @@ export default function TeacherDashboard() {
       {/* === SUBJECTS === */}
       <div style={{ width: "90%", margin: "18px auto 0 auto" }}>
         <h2 style={{ margin: "12px 0 16px 0" }}>My Subject</h2>
-
-        {!subjects.length && (
-          <p style={{ opacity: 0.8 }}>No subjects yet.</p>
-        )}
+        {!subjects.length && (<p style={{ opacity: 0.8 }}>No subjects yet.</p>)}
 
         {subjects.map((s) => (
           <div key={s.id} className="subject-row" style={{ marginBottom: 16 }}>

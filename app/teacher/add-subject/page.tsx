@@ -3,24 +3,30 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import { useCurrentUser } from "@/lib/useCurrentUser";
 
 export default function AddSubjectPage() {
   const router = useRouter();
+  const userName = useCurrentUser();
+  const [showLogout, setShowLogout] = useState(false);
+
   const [title, setTitle] = useState("");
   const [desc, setDesc] = useState("");
-  const [link, setLink] = useState("");
+  const [link, setLink] = useState("");           // Artsteps URL (optional)
   const [file, setFile] = useState<File | null>(null);
   const [isSaving, setIsSaving] = useState(false);
 
-  const [showLogout, setShowLogout] = useState(false);
   const handleLogout = async () => {
     await supabase.auth.signOut();
-    router.push("/");
+    router.replace("/");
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!title.trim() || !desc.trim()) { alert("Please enter Title and Description."); return; }
+    if (!title.trim() || !desc.trim()) {
+      alert("Please enter Title and Description.");
+      return;
+    }
 
     setIsSaving(true);
     try {
@@ -44,6 +50,7 @@ export default function AddSubjectPage() {
         image_url: imageUrl,
         artsteps_url: link.trim() || null,
       });
+
       if (insErr) { alert(insErr.message); return; }
 
       alert("Subject created!");
@@ -54,12 +61,12 @@ export default function AddSubjectPage() {
   };
 
   return (
-    <div style={{ width: "100%" }}>
+    <div style={{ width: "95%", maxWidth: 1150, margin: "0 auto" }}>
       {/* top bar */}
       <div className="topbar">
         <div className="brand-block">
-          <h1 className="amv-title" style={{ marginTop: 0, textAlign: "left" }}>AURORA MIND VERSE</h1>
-          <p className="amv-subtitle" style={{ marginTop: 2, textAlign: "left" }}>STEP INTO THE NEW ERA</p>
+          <h1 className="amv-title">AURORA MIND VERSE</h1>
+          <p className="amv-subtitle">STEP INTO THE NEW ERA</p>
         </div>
 
         <div className="nav-right">
@@ -69,42 +76,28 @@ export default function AddSubjectPage() {
             <a href="/contact">Contact</a>
           </div>
 
-          <div style={{ position: "relative" }}>
+          <div className="profile-container">
             <button className="profile-pill" onClick={() => setShowLogout(v => !v)}>
-              <span className="profile-icon">👤</span> PROFILE
+              <span className="profile-icon">👤</span> {userName}
             </button>
             {showLogout && (
-              <button
-                onClick={handleLogout}
-                style={{
-                    position: "absolute", right: 0, top: 42,
-                    background: "#fff", color: "#e53935",
-                    border: "1px solid rgba(0,0,0,0.15)",
-                    padding: "8px 12px", borderRadius: 10,
-                    fontWeight: 800, cursor: "pointer"
-                }}
-              >
-                LOG OUT
-              </button>
+              <button className="logout-btn" onClick={handleLogout}>LOG OUT</button>
             )}
           </div>
         </div>
       </div>
 
-      {/* back button (top-left) */}
+      {/* back arrow (left) */}
       <button
         aria-label="Back"
         onClick={() => router.back()}
-        style={{
-          border: "none", background: "transparent",
-          fontSize: 22, cursor: "pointer", margin: "8px 0 0 14px"
-        }}
+        style={{ border: "none", background: "transparent", fontSize: 22, cursor: "pointer", margin: "8px 0 0 14px" }}
       >
         ←
       </button>
 
-      {/* create subject card */}
-      <div className="create-card" style={{ width: "90%", maxWidth: 1150 }}>
+      {/* form card */}
+      <div className="create-card">
         <h2 className="create-title">CREATE SUBJECT</h2>
         <form onSubmit={handleSubmit} className="create-grid">
           <input type="text" placeholder="Subject Name" value={title} onChange={(e)=>setTitle(e.target.value)} required />
