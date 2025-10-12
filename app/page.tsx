@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import "./globals.css";
 import { useRouter } from "next/navigation";
+import Link from "next/link";                  // ✅ add this
 import { supabase } from "@/lib/supabase";
 
 type UserMeta = { role?: "teacher" | "student" };
@@ -74,8 +75,9 @@ export default function LoginPage() {
           </select>
 
           <div className="links">
-            <a href="/register">Register now</a>
-            <a href="#" className="forgot">Forgot password?</a>
+            {/* ✅ real navigation */}
+            <Link href="/register">Register now</Link>
+            <Link href="/forgot-password" className="forgot">Forgot password?</Link>
           </div>
 
           <button type="submit" className="login-btn" disabled={loading}>
