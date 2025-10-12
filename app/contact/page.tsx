@@ -3,14 +3,16 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import { useCurrentUser } from "@/lib/useCurrentUser";
 
 export default function ContactPage() {
   const router = useRouter();
   const [showLogout, setShowLogout] = useState(false);
+  const userName = useCurrentUser(); // <<— shows FIRDAUS / TAY, etc.
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
-    router.push("/");
+    router.push("/"); // back to login
   };
 
   return (
@@ -26,7 +28,7 @@ export default function ContactPage() {
           <div className="nav-links" />
           <div style={{ position: "relative" }}>
             <button className="profile-pill" onClick={() => setShowLogout(v => !v)}>
-              <span className="profile-icon">👤</span> PROFILE
+              <span className="profile-icon">👤</span> {userName}
             </button>
             {showLogout && (
               <button
@@ -50,10 +52,7 @@ export default function ContactPage() {
       <button
         aria-label="Back"
         onClick={() => router.back()}
-        style={{
-          border: "none", background: "transparent",
-          fontSize: 22, cursor: "pointer", margin: "8px 0 0 14px"
-        }}
+        style={{ border: "none", background: "transparent", fontSize: 22, cursor: "pointer", margin: "8px 0 0 14px" }}
       >
         ←
       </button>
