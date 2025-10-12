@@ -39,8 +39,8 @@ export default function LoginPage() {
         return;
       }
 
-      router.replace(role === "teacher" ? "/teacher" : "/student");
       form.reset();
+      router.replace(role === "teacher" ? "/teacher" : "/student");
     } finally {
       setLoading(false);
     }

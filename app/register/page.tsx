@@ -1,101 +1,91 @@
 "use client";
 
 import React, { useState } from "react";
-import "./globals.css";
+import "../globals.css";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 
-type UserMeta = { role?: "teacher" | "student" };
+type Role = "student" | "teacher" | "";
 
-export default function LoginPage() {
+export default function RegisterPage() {
   const router = useRouter();
-  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const [role, setRole] = useState<Role>("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [password2, setPassword2] = useState("");
+  const [teacherCode, setTeacherCode] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+
+  const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (loading) return;
+    if (submitting) return;
 
-    const form = e.currentTarget;
-    const email = (form.querySelector('input[type="email"]') as HTMLInputElement)?.value.trim();
-    const password = (form.querySelector('input[type="password"]') as HTMLInputElement)?.value;
+    if (!role || !email || !password || !password2) { alert("Please fill in all required fields."); return; }
+    if (password !== password2) { alert("Passwords do not match."); return; }
 
-    if (!email || !password) {
-      alert("Please fill in email and password.");
-      return;
+    if (role === "teacher") {
+      const expected = (process.env.NEXT_PUBLIC_TEACHER_CODE || process.env.TEACHER_CODE || "").trim();
+      if (!expected) { alert("Teacher code not configured in environment variables."); return; }
+      if (teacherCode.trim() !== expected) { alert("Invalid teacher code."); return; }
     }
 
-    setLoading(true);
+    setSubmitting(true);
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: { role },
+          emailRedirectTo:
+            typeof window !== "undefined"
+              ? `${window.location.origin}/auth/callback`
+              : undefined,
+        },
+      });
+      if (error) { alert(error.message); return; }
 
-      if (error) {
-        alert(error.message || "Invalid email or password.");
-        return;
-      }
-
-      const role = (data.user?.user_metadata as UserMeta)?.role;
-      if (!role) {
-        alert('This account has no role set. Ask admin to set {"role":"teacher"} or {"role":"student"} in Supabase.');
-        return;
-      }
-
-      form.reset();
-      router.replace(role === "teacher" ? "/teacher" : "/student");
+      alert("Registration successful! Please check your email to verify (if required).");
+      router.replace("/");
     } finally {
-      setLoading(false);
+      setSubmitting(false);
     }
   };
 
   return (
     <div className="login-page" style={{ width: "100%" }}>
-      {/* Back button (top-left), separate from the title to match your UI */}
+      {/* Back button (top-left) */}
       <button
         aria-label="Back"
         onClick={() => router.back()}
         style={{
-          border: "none",
-          background: "transparent",
-          fontSize: 22,
-          cursor: "pointer",
-          margin: "14px 0 0 14px",
+          border: "none", background: "transparent",
+          fontSize: 22, cursor: "pointer", margin: "14px 0 0 14px"
         }}
       >
         ←
       </button>
 
-      {/* Keep your centered title/subtitle */}
       <h1 className="amv-title">AURORA MIND VERSE</h1>
       <p className="amv-subtitle">STEP INTO THE NEW ERA</p>
 
-      <div className="welcome-section">
-        <h2 className="welcome-title">Welcome To Our Application</h2>
-        <hr className="divider" />
-        <p className="welcome-text">
-          Through this website platform, students will not only read or watch
-          learning materials passively but they will also be able to walk inside
-          a virtual world like a video game to explore the topics provided.
-        </p>
-      </div>
+      <h2 className="register-heading">REGISTER</h2>
 
-      <div className="login-box">
-        <form onSubmit={handleSubmit}>
-          <input type="email" placeholder="Enter email" required />
-          <input type="password" placeholder="Enter password" required />
-
-          {/* optional UI only; not used for auth logic */}
-          <select>
-            <option value="">Role (optional)</option>
+      <div className="form-card">
+        <form onSubmit={onSubmit} className="register-grid">
+          <select className="full" required value={role} onChange={(e) => setRole(e.target.value as Role)}>
+            <option value="" disabled>Please select your role</option>
             <option value="student">Student</option>
             <option value="teacher">Teacher</option>
           </select>
 
-          <div className="links">
-            <a href="/register">Register now</a>
-            <a href="#" className="forgot">Forgot password?</a>
-          </div>
+          <input className="full" type="email" placeholder="Email" required value={email} onChange={(e)=>setEmail(e.target.value)} />
+          <input type="password" placeholder="Password" required value={password} onChange={(e)=>setPassword(e.target.value)} />
+          <input type="password" placeholder="Re-type Password" required value={password2} onChange={(e)=>setPassword2(e.target.value)} />
+          <input type="text" placeholder="If teacher enter code here" value={teacherCode} onChange={(e)=>setTeacherCode(e.target.value)} />
 
-          <button type="submit" className="login-btn" disabled={loading}>
-            {loading ? "Logging in..." : "Login"}
+          <button type="submit" className="primary-btn" disabled={submitting}>
+            {submitting ? "Submitting..." : "Submit"}
           </button>
         </form>
       </div>
