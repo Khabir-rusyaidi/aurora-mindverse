@@ -19,58 +19,53 @@ export default function ForgotPassword() {
   }, [cooldown]);
 
   async function sendOtp() {
-    if (!email) return alert("Enter your email first.");
+    if (!email) return alert("Enter your email first");
     setLoading(true);
     try {
-      // call your API here
-      // await fetch("/api/forgot-password/request-otp", { ... })
-      await new Promise((r) => setTimeout(r, 500));
+      await new Promise((r) => setTimeout(r, 500)); // fake delay
       setOtpSent(true);
       setCooldown(60);
+      alert("OTP sent!");
     } finally {
       setLoading(false);
     }
   }
 
   function submitNewPassword() {
-    if (!otp) return alert("Enter OTP.");
-    if (pwd.length < 8) return alert("Min 8 characters.");
-    if (pwd !== pwd2) return alert("Passwords do not match.");
-    alert("Password updated. You can log in now.");
+    if (!otp) return alert("Enter OTP");
+    if (pwd.length < 8) return alert("Password must be at least 8 characters");
+    if (pwd !== pwd2) return alert("Passwords do not match");
+    alert("Password reset successful!");
   }
 
   return (
-    <div className="fp2-root">
-      <div className="fp2-column">
-        <div className="fp2-inner">
-
-          {/* Back arrow (to login) */}
-          <div className="fp2-back">
+    <div className="fp-root">
+      <div className="fp-column">
+        <div className="fp-inner">
+          <div className="fp-back">
             <Link href="/" aria-label="Back to login">
-              <span className="fp2-arrow">←</span>
+              <span className="fp-arrow">←</span>
             </Link>
           </div>
 
-          {/* Brand */}
-          <h1 className="fp2-brand">AURORA MIND VERSE</h1>
-          <p className="fp2-tag">STEP INTO THE NEW ERA</p>
+          <h1 className="fp-brand">AURORA MIND VERSE</h1>
+          <p className="fp-tagline">STEP INTO THE NEW ERA</p>
 
-          {/* Card */}
-          <div className="fp2-card">
-            <h2 className="fp2-title">RESET YOUR PASSWORD</h2>
-            <p className="fp2-sub">We&apos;ll send a secure link to your email</p>
+          <div className="fp-card">
+            <h2 className="fp-title">RESET YOUR PASSWORD</h2>
+            <p className="fp-sub">We&apos;ll send a secure link to your email</p>
 
             <input
-              className="fp2-input"
+              className="fp-input"
               type="email"
               placeholder="Enter your email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
 
-            <div className="fp2-row">
+            <div className="fp-row">
               <input
-                className="fp2-input fp2-grow"
+                className="fp-input fp-grow"
                 type="text"
                 placeholder="Send OTP number"
                 maxLength={6}
@@ -78,7 +73,7 @@ export default function ForgotPassword() {
                 onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
               />
               <button
-                className="fp2-resend"
+                className="fp-resend"
                 onClick={sendOtp}
                 disabled={loading || cooldown > 0}
               >
@@ -89,14 +84,14 @@ export default function ForgotPassword() {
             {otpSent && (
               <>
                 <input
-                  className="fp2-input"
+                  className="fp-input"
                   type="password"
                   placeholder="New password"
                   value={pwd}
                   onChange={(e) => setPwd(e.target.value)}
                 />
                 <input
-                  className="fp2-input"
+                  className="fp-input"
                   type="password"
                   placeholder="Confirm new password"
                   value={pwd2}
@@ -106,14 +101,13 @@ export default function ForgotPassword() {
             )}
 
             <button
-              className="fp2-submit"
+              className="fp-submit"
               onClick={submitNewPassword}
               disabled={loading}
             >
               SUBMIT
             </button>
           </div>
-
         </div>
       </div>
     </div>
