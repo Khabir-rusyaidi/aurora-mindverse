@@ -918,3 +918,73 @@ body {
     width: 92vw;
   }
 }
+/* ==== AMV Forgot Password – Pixel Match Fix Pack ==== */
+
+/* 1) Lighter blues (page, column, card) */
+.fp-root       { background: #a8dcff !important; }      /* page */
+.fp-column     { background: #c3e9ff !important; }      /* center strip */
+.fp-card       { background: #8fd6ff !important; }      /* card */
+
+/* 2) Remove all shadows (your ref image is flat) */
+.fp-column, .fp-card, .fp-inner,
+.fp-submit, .fp-resend { box-shadow: none !important; }
+
+/* 3) Arrow: thin, no circle/pill */
+.fp-back { margin-left: 22px !important; margin-bottom: 6px !important; }
+.fp-arrow{
+  display:inline-block;
+  background: none !important;
+  border: 0 !important;
+  padding: 0 !important;
+  font-size: 20px !important;   /* smaller like the image */
+  font-weight: 500 !important;
+  color:#000 !important;
+  line-height:1 !important;
+}
+
+/* 4) Card geometry & spacing */
+.fp-card{
+  width: 720px !important;
+  border-radius: 28px !important;     /* slightly smaller radius */
+  padding: 26px 30px 30px !important;
+  border: 1px solid rgba(0,0,0,0.06);  /* soft outline like screenshot */
+}
+
+/* 5) Headings */
+.fp-brand  { font-size: 26px !important; letter-spacing: 1px !important; }
+.fp-tagline{ font-size: 12px !important; margin-bottom: 18px !important; }
+.fp-title  { font-size: 26px !important; }
+.fp-sub    { font-size: 15px !important; }
+
+/* 6) Inputs: lighter fill, 2px black border, rounded like ref */
+.fp-input{
+  height: 46px !important;
+  background: #cfeeff !important;   /* lighter */
+  border: 2px solid #000 !important;
+  border-radius: 12px !important;
+  margin-bottom: 14px !important;
+}
+
+/* 7) OTP row gap & button */
+.fp-row   { gap: 10px !important; margin-bottom: 14px !important; }
+.fp-resend{
+  height: 46px !important;
+  border: 2px solid #000 !important;
+  border-radius: 10px !important;
+  background: linear-gradient(#5674f0, #445fd2) !important; /* a touch lighter */
+  font-size: 18px !important;
+  font-weight: 800 !important;
+}
+
+/* 8) Submit button: same blue and full width */
+.fp-submit{
+  height: 50px !important;
+  border: 2px solid #000 !important;
+  border-radius: 10px !important;
+  background: linear-gradient(#5674f0, #445fd2) !important; /* lighter match */
+  font-size: 19px !important;
+  font-weight: 800 !important;
+}
+
+/* 9) Kill any lingering shadows from global styles */
+* { text-shadow: none !important; }
