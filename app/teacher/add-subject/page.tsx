@@ -12,6 +12,13 @@ export default function AddSubjectPage() {
   const [file, setFile] = useState<File | null>(null);
   const [isSaving, setIsSaving] = useState(false);
 
+  // profile dropdown state
+  const [showLogout, setShowLogout] = useState(false);
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    router.push("/"); // back to login
+  };
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!title.trim() || !desc.trim()) {
@@ -55,16 +62,69 @@ export default function AddSubjectPage() {
   };
 
   return (
-    <div style={{ width: "95%", maxWidth: 1150, margin: "0 auto" }}>
-      {/* top bar */}
+    <div style={{ width: "100%" }}>
+      {/* top bar (same look; add About/Contact + Profile dropdown) */}
       <div className="topbar">
         <div className="brand-block">
-          <h1 className="amv-title">AURORA MIND VERSE</h1>
-          <p className="amv-subtitle">STEP INTO THE NEW ERA</p>
+          <h1 className="amv-title" style={{ marginTop: 0, textAlign: "left" }}>AURORA MIND VERSE</h1>
+          <p className="amv-subtitle" style={{ marginTop: 2, textAlign: "left" }}>STEP INTO THE NEW ERA</p>
+        </div>
+
+        <div className="nav-right">
+          <div className="nav-links">
+            <a href="/about">About Us</a>
+            &nbsp;&nbsp;
+            <a href="/contact">Contact</a>
+          </div>
+
+          {/* profile pill + toggle logout (inline style so no CSS changes needed) */}
+          <div style={{ position: "relative" }}>
+            <button
+              className="profile-pill"
+              onClick={() => setShowLogout(v => !v)}
+            >
+              <span className="profile-icon">👤</span> FIRDAUS
+            </button>
+            {showLogout && (
+              <button
+                onClick={handleLogout}
+                style={{
+                  position: "absolute",
+                  right: 0,
+                  top: 42,
+                  background: "#fff",
+                  color: "#e53935",
+                  border: "1px solid rgba(0,0,0,0.15)",
+                  padding: "8px 12px",
+                  borderRadius: 10,
+                  fontWeight: 800,
+                  cursor: "pointer",
+                }}
+              >
+                LOG OUT
+              </button>
+            )}
+          </div>
         </div>
       </div>
 
-      <div className="create-card">
+      {/* back button (outside, left) */}
+      <button
+        aria-label="Back"
+        onClick={() => router.back()}
+        style={{
+          border: "none",
+          background: "transparent",
+          fontSize: 22,
+          cursor: "pointer",
+          margin: "8px 0 0 14px",
+        }}
+      >
+        ←
+      </button>
+
+      {/* create subject card (unchanged UI) */}
+      <div className="create-card" style={{ width: "90%", maxWidth: 1150 }}>
         <h2 className="create-title">CREATE SUBJECT</h2>
         <form onSubmit={handleSubmit} className="create-grid">
           <input
@@ -79,7 +139,10 @@ export default function AddSubjectPage() {
             type="url" placeholder="link artsteps"
             value={link} onChange={(e)=>setLink(e.target.value)}
           />
-          <input type="file" accept="image/*" onChange={(e)=>setFile(e.target.files?.[0] ?? null)} />
+          <input
+            type="file" accept="image/*"
+            onChange={(e)=>setFile(e.target.files?.[0] ?? null)}
+          />
 
           <button type="submit" className="login-btn" disabled={isSaving}>
             {isSaving ? "Saving..." : "CREATE"}
@@ -89,3 +152,4 @@ export default function AddSubjectPage() {
     </div>
   );
 }
+
