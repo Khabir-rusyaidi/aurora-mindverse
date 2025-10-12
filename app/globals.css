@@ -319,3 +319,29 @@ select {
   padding: 8px 12px; font-weight: 700; color: red; cursor: pointer;
 }
 .logout-btn:hover { background: #f8d7da; }
+
+.contact-card {
+  background: #3eb2ff;
+  padding: 30px;
+  border-radius: 28px;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.2);
+  width: 80%;
+  max-width: 700px;
+  margin: 40px auto;
+  text-align: center;
+}
+
+.contact-card h2 {
+  font-size: 1.6rem;
+  font-weight: 900;
+  margin-bottom: 20px;
+}
+
+.contact-row {
+  background: #5cc0fd;
+  border: 1.5px solid rgba(0, 0, 0, 0.5);
+  border-radius: 10px;
+  padding: 12px 16px;
+  margin: 14px 10px;
+  font-weight: 700;
+}
