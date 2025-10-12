@@ -22,7 +22,8 @@ export default function ForgotPassword() {
     if (!email) return alert("Enter your email first");
     setLoading(true);
     try {
-      await new Promise((r) => setTimeout(r, 500)); // fake delay
+      // TODO: call your API here
+      await new Promise((r) => setTimeout(r, 500));
       setOtpSent(true);
       setCooldown(60);
       alert("OTP sent!");
@@ -42,6 +43,7 @@ export default function ForgotPassword() {
     <div className="fp-root">
       <div className="fp-column">
         <div className="fp-inner">
+          {/* BACK ARROW (plain, no circle) */}
           <div className="fp-back">
             <Link href="/" aria-label="Back to login">
               <span className="fp-arrow">←</span>
@@ -110,6 +112,66 @@ export default function ForgotPassword() {
           </div>
         </div>
       </div>
+
+      {/* ===== Arrow de-circle + exact look overrides ===== */}
+      <style jsx global>{`
+        .fp-back {
+          margin-left: 40px;
+          margin-bottom: 10px;
+        }
+        /* Nuke any default styles that add the black circle */
+        .fp-back a,
+        .fp-back a * {
+          all: unset;
+          cursor: pointer;
+        }
+        .fp-arrow {
+          display: inline-block;
+          font-size: 20px;
+          font-weight: 500;
+          color: #000;
+          line-height: 1;
+          background: none !important;
+          border: none !important;
+          border-radius: 0 !important;
+          padding: 0 !important;
+          margin: 0 !important;
+          box-shadow: none !important;
+        }
+
+        /* (Optional) keep rest of your current styles; below are safe tweaks
+           to keep it matching your reference exactly. Comment out if not needed. */
+        .fp-root { background: #77c9ff; }
+        .fp-column { background: #77c9ff; }
+        .fp-card {
+          background: #40b7ff;
+          border-radius: 30px;
+          box-shadow: none;
+          border: none;
+        }
+        .fp-input {
+          background: #77c9ff;
+          border: 1px solid #000;
+          border-radius: 6px;
+          height: 42px;
+          box-shadow: none;
+          color: #000;
+          font-size: 14px;
+        }
+        .fp-row { gap: 5px; }
+        .fp-resend,
+        .fp-submit {
+          background: #3a55c8;
+          border: 1px solid #000;
+          border-radius: 6px;
+          box-shadow: none;
+          color: #fff;
+          font-weight: 700;
+          letter-spacing: 0.5px;
+        }
+        .fp-resend { height: 42px; padding: 0 14px; font-size: 15px; }
+        .fp-submit { height: 45px; width: 100%; font-size: 15px; }
+      `}</style>
     </div>
   );
 }
