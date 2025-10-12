@@ -22,8 +22,7 @@ export default function ForgotPassword() {
     if (!email) return alert("Enter your email first");
     setLoading(true);
     try {
-      // TODO: call your API here
-      await new Promise((r) => setTimeout(r, 500));
+      await new Promise((r) => setTimeout(r, 500)); // fake delay
       setOtpSent(true);
       setCooldown(60);
       alert("OTP sent!");
@@ -43,17 +42,17 @@ export default function ForgotPassword() {
     <div className="fp-root">
       <div className="fp-column">
         <div className="fp-inner">
-          {/* BACK ARROW (plain, no circle) */}
-          <div className="fp-back">
-            <Link href="/" aria-label="Back to login">
-              <span className="fp-arrow">←</span>
-            </Link>
-          </div>
-
           <h1 className="fp-brand">AURORA MIND VERSE</h1>
           <p className="fp-tagline">STEP INTO THE NEW ERA</p>
 
           <div className="fp-card">
+            {/* Back arrow inside the card */}
+            <div className="fp-card-back">
+              <Link href="/" aria-label="Back to login">
+                <span className="fp-arrow-box">←</span>
+              </Link>
+            </div>
+
             <h2 className="fp-title">RESET YOUR PASSWORD</h2>
             <p className="fp-sub">We&apos;ll send a secure link to your email</p>
 
@@ -113,64 +112,156 @@ export default function ForgotPassword() {
         </div>
       </div>
 
-      {/* ===== Arrow de-circle + exact look overrides ===== */}
+      {/* === Inline style to match design perfectly === */}
       <style jsx global>{`
-        .fp-back {
-          margin-left: 40px;
-          margin-bottom: 10px;
-        }
-        /* Nuke any default styles that add the black circle */
-        .fp-back a,
-        .fp-back a * {
-          all: unset;
-          cursor: pointer;
-        }
-        .fp-arrow {
-          display: inline-block;
-          font-size: 20px;
-          font-weight: 500;
-          color: #000;
-          line-height: 1;
-          background: none !important;
-          border: none !important;
-          border-radius: 0 !important;
-          padding: 0 !important;
-          margin: 0 !important;
-          box-shadow: none !important;
+        .fp-root {
+          min-height: 100vh;
+          background: #77c9ff;
+          display: grid;
+          place-items: start center;
+          font-family: "Poppins", sans-serif;
         }
 
-        /* (Optional) keep rest of your current styles; below are safe tweaks
-           to keep it matching your reference exactly. Comment out if not needed. */
-        .fp-root { background: #77c9ff; }
-        .fp-column { background: #77c9ff; }
+        .fp-column {
+          background: #77c9ff;
+          width: 760px;
+          min-height: 100vh;
+        }
+
+        .fp-inner {
+          max-width: 760px;
+          margin: 36px auto 64px;
+          padding: 0 24px;
+          position: relative;
+        }
+
+        .fp-brand {
+          text-align: center;
+          color: #000;
+          font-weight: 700;
+          font-size: 24px;
+          letter-spacing: 1px;
+          margin: 4px 0;
+        }
+
+        .fp-tagline {
+          text-align: center;
+          color: #000;
+          font-size: 13px;
+          margin-bottom: 25px;
+          letter-spacing: 1px;
+        }
+
         .fp-card {
           background: #40b7ff;
           border-radius: 30px;
+          padding: 28px 32px 32px;
+          width: 720px;
+          margin: 0 auto;
+          position: relative;
           box-shadow: none;
           border: none;
         }
+
+        /* === Arrow square inside card === */
+        .fp-card-back {
+          position: absolute;
+          top: 18px;
+          left: 18px;
+        }
+
+        .fp-arrow-box {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          width: 30px;
+          height: 30px;
+          border: 1.5px solid #000;
+          border-radius: 6px;
+          font-size: 18px;
+          font-weight: 500;
+          color: #000;
+          background: transparent;
+          cursor: pointer;
+          transition: background 0.2s ease;
+        }
+
+        .fp-arrow-box:hover {
+          background: rgba(0, 0, 0, 0.1);
+        }
+
+        .fp-title {
+          color: #000;
+          font-size: 22px;
+          font-weight: 700;
+          text-align: center;
+          margin-bottom: 5px;
+        }
+
+        .fp-sub {
+          color: #000;
+          text-align: center;
+          font-size: 14px;
+          margin-bottom: 18px;
+        }
+
         .fp-input {
+          width: 100%;
           background: #77c9ff;
           border: 1px solid #000;
           border-radius: 6px;
           height: 42px;
-          box-shadow: none;
+          outline: none;
           color: #000;
           font-size: 14px;
-        }
-        .fp-row { gap: 5px; }
-        .fp-resend,
-        .fp-submit {
-          background: #3a55c8;
-          border: 1px solid #000;
-          border-radius: 6px;
+          margin-bottom: 15px;
           box-shadow: none;
+          padding: 0 10px;
+        }
+
+        .fp-row {
+          display: flex;
+          gap: 5px;
+          width: 100%;
+          margin-bottom: 15px;
+        }
+
+        .fp-grow {
+          flex: 1;
+        }
+
+        .fp-resend {
+          height: 42px;
+          background: #3a55c8;
           color: #fff;
           font-weight: 700;
-          letter-spacing: 0.5px;
+          font-size: 15px;
+          border: 1px solid #000;
+          border-radius: 6px;
+          padding: 0 14px;
+          cursor: pointer;
         }
-        .fp-resend { height: 42px; padding: 0 14px; font-size: 15px; }
-        .fp-submit { height: 45px; width: 100%; font-size: 15px; }
+
+        .fp-resend:hover {
+          background: #334ac0;
+        }
+
+        .fp-submit {
+          background: #3a55c8;
+          color: #fff;
+          border: 1px solid #000;
+          border-radius: 6px;
+          font-weight: 700;
+          width: 100%;
+          height: 45px;
+          font-size: 15px;
+          letter-spacing: 0.5px;
+          cursor: pointer;
+        }
+
+        .fp-submit:hover {
+          background: #334ac0;
+        }
       `}</style>
     </div>
   );
