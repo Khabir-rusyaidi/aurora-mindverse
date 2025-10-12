@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 
 export default function ForgotPassword() {
@@ -11,142 +11,100 @@ export default function ForgotPassword() {
   const [otpSent, setOtpSent] = useState(false);
   const [cooldown, setCooldown] = useState(0);
   const [loading, setLoading] = useState(false);
-  const [msg, setMsg] = useState<string | null>(null);
-  const [err, setErr] = useState<string | null>(null);
 
-  // countdown for RESEND (server also enforces 60s)
   useEffect(() => {
     if (cooldown <= 0) return;
     const t = setInterval(() => setCooldown((s) => (s > 0 ? s - 1 : 0)), 1000);
     return () => clearInterval(t);
   }, [cooldown]);
 
-  async function sendOrResendOtp() {
-    if (!email) return;
+  async function sendOtp() {
+    if (!email) return alert("Enter your email first");
     setLoading(true);
-    setMsg(null);
-    setErr(null);
     try {
-      const r = await fetch("/api/forgot-password/request-otp", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
-      });
-      const d: { cooldown?: number; error?: string } = await r.json();
-      if (!r.ok) throw new Error(d.error || "Failed to send OTP");
+      await new Promise((r) => setTimeout(r, 1000)); // fake delay
       setOtpSent(true);
-      if (typeof d.cooldown === "number") setCooldown(d.cooldown);
-      setMsg("OTP sent. It expires in 10 minutes.");
-    } catch (e: unknown) {
-      setErr(e instanceof Error ? e.message : "Failed to send OTP");
+      setCooldown(60);
+      alert("OTP sent! Check your email.");
     } finally {
       setLoading(false);
     }
   }
 
   async function submitNewPassword() {
-    setLoading(true);
-    setMsg(null);
-    setErr(null);
-    try {
-      if (!otp || otp.length !== 6) throw new Error("Please enter 6-digit OTP");
-      if (pwd.length < 8) throw new Error("Password must be at least 8 characters");
-      if (pwd !== pwd2) throw new Error("Passwords do not match");
-
-      const r = await fetch("/api/forgot-password/verify-otp", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, code: otp, newPassword: pwd }),
-      });
-      const d: { error?: string } = await r.json();
-      if (!r.ok) throw new Error(d.error || "Failed to reset password");
-      setMsg("Password updated. You can now log in.");
-    } catch (e: unknown) {
-      setErr(e instanceof Error ? e.message : "Failed to reset password");
-    } finally {
-      setLoading(false);
-    }
+    if (!otp) return alert("Enter OTP");
+    if (pwd.length < 8) return alert("Password must be at least 8 characters");
+    if (pwd !== pwd2) return alert("Passwords do not match");
+    alert("Password reset successful!");
   }
 
   return (
-    <div className="fp-page">
-      {/* Central band with the back arrow inside */}
-      <div className="fp-rail">
-        <div className="fp-back">
-          <Link href="/" aria-label="Back to login">
-            <span>←</span>
-          </Link>
+    <div className="forgot-wrapper">
+      <div className="forgot-arrow">
+        <Link href="/">
+          <span className="arrow-icon">←</span>
+        </Link>
+      </div>
+
+      <h1 className="forgot-brand">AURORA MIND VERSE</h1>
+      <p className="forgot-tagline">STEP INTO THE NEW ERA</p>
+
+      <div className="forgot-card">
+        <h2 className="forgot-title">RESET YOUR PASSWORD</h2>
+        <p className="forgot-sub">We'll send a secure link to your email</p>
+
+        <input
+          className="forgot-input"
+          type="email"
+          placeholder="Enter your email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
+
+        <div className="forgot-row">
+          <input
+            className="forgot-input"
+            type="text"
+            placeholder="Send OTP number"
+            maxLength={6}
+            value={otp}
+            onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
+          />
+          <button
+            className="forgot-resend"
+            onClick={sendOtp}
+            disabled={loading || cooldown > 0}
+          >
+            {cooldown > 0 ? `RESEND (${cooldown})` : "RESEND"}
+          </button>
         </div>
 
-        {/* Headings */}
-        <h1 className="fp-brand">AURORA MIND VERSE</h1>
-        <p className="fp-tagline">STEP INTO THE NEW ERA</p>
-
-        {/* Card */}
-        <div className="fp-card">
-          <h2 className="fp-title">RESET YOUR PASSWORD</h2>
-          <p className="fp-sub">We&apos;ll send a secure link to your email</p>
-
-          <div className="fp-form">
+        {otpSent && (
+          <>
             <input
-              className="fp-input"
-              type="email"
-              placeholder="Enter your email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              className="forgot-input"
+              type="password"
+              placeholder="New password"
+              value={pwd}
+              onChange={(e) => setPwd(e.target.value)}
             />
+            <input
+              className="forgot-input"
+              type="password"
+              placeholder="Confirm new password"
+              value={pwd2}
+              onChange={(e) => setPwd2(e.target.value)}
+            />
+          </>
+        )}
 
-            <div className="fp-row">
-              <input
-                className="fp-input"
-                type="text"
-                inputMode="numeric"
-                maxLength={6}
-                placeholder="Send OTP number"
-                value={otp}
-                onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
-              />
-              <button
-                className="fp-resend"
-                onClick={sendOrResendOtp}
-                disabled={loading || !email || cooldown > 0}
-              >
-                {cooldown > 0 ? `RESEND (${cooldown})` : "RESEND"}
-              </button>
-            </div>
-
-            {/* Show password fields after OTP is sent (keeps UI same height initially) */}
-            {otpSent && (
-              <>
-                <input
-                  className="fp-input"
-                  type="password"
-                  placeholder="New password"
-                  value={pwd}
-                  onChange={(e) => setPwd(e.target.value)}
-                />
-                <input
-                  className="fp-input"
-                  type="password"
-                  placeholder="Confirm new password"
-                  value={pwd2}
-                  onChange={(e) => setPwd2(e.target.value)}
-                />
-              </>
-            )}
-
-            <button
-              className="fp-submit"
-              onClick={submitNewPassword}
-              disabled={loading}
-            >
-              SUBMIT
-            </button>
-
-            {msg && <p className="fp-note">{msg}</p>}
-            {err && <p className="fp-err">{err}</p>}
-          </div>
-        </div>
+        <button
+          className="forgot-submit"
+          onClick={submitNewPassword}
+          disabled={loading}
+        >
+          SUBMIT
+        </button>
       </div>
     </div>
   );

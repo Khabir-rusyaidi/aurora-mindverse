@@ -474,3 +474,128 @@ select {
 
 .fp-note { text-align: center; color: #065f46; font-weight: 600; }
 .fp-err  { text-align: center; color: #b91c1c; font-weight: 700; }
+
+/* ====== Aurora Mind Verse Forgot Password (Light Blue Theme) ====== */
+
+body {
+  background-color: #77c8ff;
+  margin: 0;
+  font-family: "Poppins", sans-serif;
+}
+
+.forgot-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  min-height: 100vh;
+  padding-top: 40px;
+}
+
+.forgot-arrow {
+  align-self: flex-start;
+  margin-left: 40px;
+  margin-bottom: 10px;
+}
+
+.arrow-icon {
+  font-size: 28px;
+  color: black;
+  cursor: pointer;
+}
+
+.forgot-brand {
+  font-weight: 700;
+  font-size: 22px;
+  text-align: center;
+  color: black;
+  letter-spacing: 2px;
+}
+
+.forgot-tagline {
+  font-size: 13px;
+  color: black;
+  text-align: center;
+  margin-bottom: 25px;
+  letter-spacing: 1px;
+}
+
+.forgot-card {
+  background-color: #4bb9ff;
+  padding: 30px;
+  border-radius: 25px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 380px;
+  box-sizing: border-box;
+}
+
+.forgot-title {
+  color: black;
+  font-weight: 700;
+  font-size: 20px;
+  margin-bottom: 5px;
+  text-align: center;
+}
+
+.forgot-sub {
+  color: black;
+  font-size: 14px;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.forgot-input {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 6px;
+  border: 1px solid black;
+  margin-bottom: 15px;
+  font-size: 14px;
+  outline: none;
+}
+
+.forgot-row {
+  display: flex;
+  gap: 5px;
+  width: 100%;
+  margin-bottom: 15px;
+}
+
+.forgot-resend {
+  background-color: #304bce;
+  color: white;
+  border: 1px solid black;
+  border-radius: 6px;
+  font-weight: 600;
+  padding: 0 14px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.forgot-resend:hover {
+  background-color: #2b44b6;
+}
+
+.forgot-submit {
+  background-color: #304bce;
+  color: white;
+  border: 1px solid black;
+  border-radius: 6px;
+  font-weight: 600;
+  width: 100%;
+  padding: 10px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.forgot-submit:hover {
+  background-color: #2b44b6;
+}
+
+.forgot-submit:disabled,
+.forgot-resend:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
