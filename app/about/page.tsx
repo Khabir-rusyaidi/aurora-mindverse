@@ -9,15 +9,15 @@ type UserInfo = { email: string | null; name: string | null };
 export default function AboutPage() {
   const router = useRouter();
   const [user, setUser] = useState<UserInfo | null>(null);
-  const [showLogout, setShowLogout] = useState(false); // 👈 control log out visibility
+  const [showLogout, setShowLogout] = useState(false);
 
-  // Add fullscreen class
+  // Allow this page to escape global centered layout (you already added the CSS hook)
   useEffect(() => {
     document.body.classList.add("amv-fullscreen-about");
     return () => document.body.classList.remove("amv-fullscreen-about");
   }, []);
 
-  // Get user session
+  // Auth → get display name (email local part as fallback)
   useEffect(() => {
     let mounted = true;
     (async () => {
@@ -52,15 +52,7 @@ export default function AboutPage() {
 
   return (
     <>
-      <style jsx global>{`
-        body.amv-fullscreen-about {
-          margin: 0 !important;
-          width: 100% !important;
-          max-width: none !important;
-          overflow-x: hidden !important;
-        }
-      `}</style>
-
+      {/* full-viewport layer */}
       <div
         style={{
           position: "fixed",
@@ -68,72 +60,82 @@ export default function AboutPage() {
           width: "100vw",
           height: "100vh",
           overflow: "auto",
-          backgroundColor: "#8ED0F6",
+          backgroundColor: "#8ED0F6", // page bg
           zIndex: 50,
         }}
       >
-        {/* Header */}
-        <header style={{ width: "100%", backgroundColor: "#45B4F4", position: "relative" }}>
+        {/* HEADER BAR (blue) */}
+        <header
+          style={{
+            width: "100%",
+            backgroundColor: "#45B4F4",
+            position: "relative",
+          }}
+        >
           <div style={{ padding: "16px 0", textAlign: "center", userSelect: "none" }}>
             <h1
               style={{
                 fontWeight: 800,
                 letterSpacing: "0.02em",
                 color: "#000",
-                fontSize: "28px",
+                fontSize: 28,
+                textTransform: "uppercase",
               }}
             >
-              AURORA MIND VERSE
+              Aurora Mind Verse
             </h1>
             <p
               style={{
-                marginTop: "-4px",
+                marginTop: -4,
                 fontWeight: 800,
                 color: "rgba(0,0,0,0.9)",
-                fontSize: "14px",
+                fontSize: 14,
+                textTransform: "uppercase",
               }}
             >
-              STEP INTO THE NEW ERA
+              Step Into The New Era
             </p>
           </div>
 
-          {/* Profile & Dropdown */}
+          {/* Profile (top-right). Click to toggle LOG OUT */}
           <div
             style={{
               position: "absolute",
               right: 16,
-              top: 8,
+              top: 10,
               display: "flex",
               flexDirection: "column",
               alignItems: "flex-end",
               gap: 8,
             }}
           >
-            {/* Profile button */}
             <button
-              onClick={() => setShowLogout((prev) => !prev)} // toggle log out
+              onClick={() => setShowLogout((s) => !s)}
               style={{
                 display: "inline-flex",
                 alignItems: "center",
-                gap: 8,
+                gap: 10,
                 background: "#fff",
                 padding: "8px 14px",
                 minHeight: 36,
-                minWidth: 140,
+                minWidth: 150,
                 borderRadius: 12,
                 boxShadow: "0 1px 2px rgba(0,0,0,0.08)",
                 cursor: "pointer",
+                border: "1px solid rgba(0,0,0,0.2)",
               }}
             >
-              <span
-                style={{
-                  width: 12,
-                  height: 12,
-                  background: "#000",
-                  borderRadius: 9999,
-                  display: "inline-block",
-                }}
-              />
+              {/* person icon */}
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+                style={{ color: "black" }}
+                aria-hidden
+              >
+                <path d="M12 12c2.761 0 5-2.462 5-5.5S14.761 1 12 1 7 3.462 7 6.5 9.239 12 12 12zm0 2c-3.866 0-7 2.91-7 6.5 0 .828.672 1.5 1.5 1.5h11c.828 0 1.5-.672 1.5-1.5 0-3.59-3.134-6.5-7-6.5z" />
+              </svg>
               <span
                 style={{
                   fontWeight: 800,
@@ -146,7 +148,6 @@ export default function AboutPage() {
               </span>
             </button>
 
-            {/* Log Out appears only when clicked */}
             {showLogout && (
               <button
                 onClick={logout}
@@ -154,11 +155,12 @@ export default function AboutPage() {
                   background: "#fff",
                   color: "#ff4040",
                   padding: "8px 18px",
-                  minWidth: 140,
+                  minWidth: 150,
                   borderRadius: 12,
                   fontWeight: 800,
                   boxShadow: "0 1px 2px rgba(0,0,0,0.08)",
                   cursor: "pointer",
+                  border: "1px solid rgba(0,0,0,0.2)",
                 }}
               >
                 LOG OUT
@@ -167,8 +169,17 @@ export default function AboutPage() {
           </div>
         </header>
 
-        {/* Back Arrow */}
-        <div style={{ paddingTop: 16, paddingLeft: 32 }}>
+        {/* LIGHT BLUE STRIP (full width) */}
+        <div
+          style={{
+            width: "100%",
+            height: 40,
+            backgroundColor: "#9AD7FF", // slightly lighter strip like your image
+          }}
+        />
+
+        {/* BACK ARROW (left) */}
+        <div style={{ paddingTop: 6, paddingLeft: 24 }}>
           <button
             onClick={() => router.back()}
             aria-label="Back"
@@ -177,7 +188,6 @@ export default function AboutPage() {
               padding: 8,
               borderRadius: 8,
               background: "transparent",
-              border: "2px solid black",
               cursor: "pointer",
             }}
           >
@@ -185,8 +195,8 @@ export default function AboutPage() {
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 0 24 24"
               fill="black"
-              width="24"
-              height="24"
+              width="22"
+              height="22"
             >
               <path
                 fillRule="evenodd"
@@ -197,12 +207,13 @@ export default function AboutPage() {
           </button>
         </div>
 
-        {/* About Box */}
+        {/* BIG ROUNDED PANEL */}
         <section
           style={{
-            backgroundColor: "#45B4F4",
+            backgroundColor: "#45B4F4", // same as header
             marginLeft: 140,
             marginRight: 140,
+            marginTop: 8,
             paddingTop: 28,
             paddingBottom: 28,
             borderRadius: 28,
@@ -216,10 +227,13 @@ export default function AboutPage() {
               fontWeight: 800,
               letterSpacing: "0.02em",
               color: "#000",
+              textTransform: "uppercase",
             }}
           >
-            ABOUT US
+            About Us
           </h2>
+
+          {/* keep empty to match visual height */}
           <div style={{ height: 300 }} />
         </section>
 
