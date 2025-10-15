@@ -140,7 +140,7 @@ export default function TeacherDashboard() {
         </p>
 
         <div className="actions-right below-right">
-          <a className="pill-btn" href="https://www.artsteps.com/" target="_blank" rel="noreferrer">
+          <a className="pill-btn" href="https://metasteps.com/" target="_blank" rel="noreferrer">
             <span className="plus">+</span> Create Artsteps
           </a>
           <Link href="/teacher/add-subject" className="pill-btn">
