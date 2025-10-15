@@ -1114,3 +1114,20 @@ body {
   box-shadow: none !important;
   text-shadow: none !important;
 }
+
+/* ---- Full-screen opt-out just for the About page ---- */
+body.amv-fullscreen-about {
+  /* disable the global centered flex for this page only */
+  display: block !important;
+  align-items: initial !important;
+  justify-content: initial !important;
+
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 !important;
+  overflow-x: hidden !important;
+}
+body.amv-fullscreen-about > * {
+  max-width: none !important;
+  width: 100% !important;
+}
