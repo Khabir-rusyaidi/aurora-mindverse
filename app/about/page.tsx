@@ -9,8 +9,8 @@ type UserInfo = { email: string | null; name: string | null };
 export default function AboutPage() {
   const router = useRouter();
   const [user, setUser] = useState<UserInfo | null>(null);
-  const [menuOpen, setMenuOpen] = useState(false);
 
+  // Get logged-in user; if none, go to /login
   useEffect(() => {
     let mounted = true;
     (async () => {
@@ -26,11 +26,10 @@ export default function AboutPage() {
         (u.user_metadata?.name as string | undefined) ||
         null;
       const emailLocal = u.email ? u.email.split("@")[0] : null;
+
       if (mounted) {
-        setUser({
-          email: u.email ?? null,
-          name: (metaName || emailLocal || "User").toUpperCase(),
-        });
+        const name = (metaName || emailLocal || "User").toUpperCase();
+        setUser({ email: u.email ?? null, name });
       }
     })();
     return () => {
@@ -48,111 +47,104 @@ export default function AboutPage() {
   return (
     <div
       className="min-h-screen w-full"
-      style={{ backgroundColor: "#8ED0F6" }} // page light blue EXACT
+      style={{ backgroundColor: "#8ED0F6" }} // page light blue
     >
-      {/* HEADER BAR */}
+      {/* ===== Top Header (centered title, profile fixed to right) ===== */}
       <header
-        className="w-full"
-        style={{ backgroundColor: "#45B4F4" }} // darker blue bar EXACT
+        className="relative w-full"
+        style={{ backgroundColor: "#45B4F4" }} // header blue
       >
-        <div className="mx-auto max-w-[1280px] px-6 py-4 flex items-center justify-between">
-          <div className="leading-tight select-none">
-            <h1 className="text-[28px] sm:text-[30px] font-extrabold tracking-wide text-black">
+        {/* Centered title block */}
+        <div className="mx-auto max-w-[1400px]">
+          <div className="py-4 text-center select-none">
+            <h1 className="text-[28px] md:text-[30px] font-extrabold tracking-wide text-black">
               AURORA MIND VERSE
             </h1>
             <p className="text-[14px] font-extrabold text-black/90 -mt-1">
               STEP INTO THE NEW ERA
             </p>
           </div>
+        </div>
 
-          {/* PROFILE + DROPDOWN */}
-          <div className="relative">
-            <button
-              onClick={() => setMenuOpen((s) => !s)}
-              // force size so it never shrinks to tiny box
-              className="inline-flex items-center gap-2 rounded-xl shadow-sm"
+        {/* Profile + Logout stacked on the RIGHT (always visible) */}
+        <div className="absolute right-4 top-2 flex flex-col items-end gap-2">
+          <div
+            className="flex items-center gap-2 rounded-xl shadow-sm"
+            style={{ backgroundColor: "white", padding: "8px 14px", minHeight: 36, minWidth: 140 }}
+          >
+            <span
               style={{
-                backgroundColor: "white",
-                padding: "8px 14px",
-                minHeight: 36,
-                minWidth: 120,
+                width: 12,
+                height: 12,
+                backgroundColor: "black",
+                borderRadius: "9999px",
+                display: "inline-block",
               }}
-            >
-              <span
-                style={{
-                  width: 12,
-                  height: 12,
-                  backgroundColor: "black",
-                  borderRadius: "9999px",
-                  display: "inline-block",
-                }}
-              />
-              <span className="text-[13px] font-extrabold tracking-wide text-black">
-                {displayName}
-              </span>
-            </button>
-
-            {menuOpen && (
-              <div className="absolute right-0 mt-2">
-                <button
-                  onClick={logout}
-                  className="w-[120px] rounded-xl font-extrabold"
-                  style={{
-                    backgroundColor: "white",
-                    color: "#ff4040",
-                    padding: "8px 0",
-                    boxShadow: "0 1px 2px rgba(0,0,0,0.08)",
-                  }}
-                >
-                  LOG OUT
-                </button>
-              </div>
-            )}
+            />
+            <span className="text-[13px] font-extrabold tracking-wide text-black">
+              {displayName}
+            </span>
           </div>
+
+          <button
+            onClick={logout}
+            className="rounded-xl font-extrabold"
+            style={{
+              backgroundColor: "white",
+              color: "#ff4040",
+              padding: "8px 18px",
+              minWidth: 140,
+              boxShadow: "0 1px 2px rgba(0,0,0,0.08)",
+            }}
+          >
+            LOG OUT
+          </button>
         </div>
       </header>
 
-      {/* BACK ARROW ROW */}
-      <div className="mx-auto max-w-[1280px] px-6">
-        <button
-          aria-label="Back"
-          onClick={() => router.back()}
-          className="mt-4 rounded-lg transition"
-          style={{ padding: 8 }}
-          title="Back"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            fill="black"
-            className="h-6 w-6"
+      {/* ===== Back Arrow row (under header, left side) ===== */}
+      <div className="mx-auto max-w-[1400px]">
+        <div className="pl-[32px] pt-[16px]">
+          <button
+            onClick={() => router.back()}
+            aria-label="Back"
+            className="p-2 rounded-lg hover:bg-black/5 active:scale-95 transition"
+            title="Back"
           >
-            <path
-              fillRule="evenodd"
-              d="M10.03 4.47a.75.75 0 0 1 0 1.06L5.56 10h14.19a.75.75 0 0 1 0 1.5H5.56l4.47 4.47a.75.75 0 0 1-1.06 1.06l-5.75-5.75a.75.75 0 0 1 0-1.06l5.75-5.75a.75.75 0 0 1 1.06 0Z"
-              clipRule="evenodd"
-            />
-          </svg>
-        </button>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="black" className="h-6 w-6">
+              <path
+                fillRule="evenodd"
+                d="M10.03 4.47a.75.75 0 0 1 0 1.06L5.56 10h14.19a.75.75 0 0 1 0 1.5H5.56l4.47 4.47a.75.75 0 0 1-1.06 1.06l-5.75-5.75a.75.75 0 0 1 0-1.06l5.75-5.75a.75.75 0 0 1 1.06 0Z"
+                clipRule="evenodd"
+              />
+            </svg>
+          </button>
+        </div>
       </div>
 
-      {/* BIG ROUNDED PANEL */}
-      <main className="mx-auto max-w-[1280px] px-6">
+      {/* ===== Big rounded panel (exact spacing + shape) ===== */}
+      <main className="mx-auto max-w-[1400px]">
+        {/* match the left/right in your image with big side padding */}
         <section
-          className="mt-2 rounded-[28px] shadow-sm px-8 py-12"
-          style={{ backgroundColor: "#45B4F4" }} // same as header, like your mock
+          className="mt-2 rounded-[28px] shadow-sm"
+          style={{
+            backgroundColor: "#45B4F4", // same as header
+            marginLeft: "140px",
+            marginRight: "140px",
+            paddingTop: "28px",
+            paddingBottom: "28px",
+          }}
         >
-          <h2 className="text-center text-[24px] sm:text-[26px] font-extrabold tracking-wide text-black">
+          <h2 className="text-center text-[22px] md:text-[24px] font-extrabold tracking-wide text-black">
             ABOUT US
           </h2>
-
-          {/* leave empty to match your image height */}
-          <div style={{ height: 340 }} />
+          {/* keep empty space inside the card to match screenshot height */}
+          <div style={{ height: 300 }} />
         </section>
 
-        <div style={{ height: 100 }} />
+        {/* bottom breathing room */}
+        <div style={{ height: 120 }} />
       </main>
     </div>
   );
 }
-
