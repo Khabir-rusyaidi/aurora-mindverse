@@ -9,15 +9,15 @@ type UserInfo = { email: string | null; name: string | null };
 export default function AboutPage() {
   const router = useRouter();
   const [user, setUser] = useState<UserInfo | null>(null);
+  const [showLogout, setShowLogout] = useState(false); // 👈 control log out visibility
 
-  // 1) While this page is mounted, relax any global width limits on <body>
+  // Add fullscreen class
   useEffect(() => {
-    const cls = "amv-fullscreen-about";
-    document.body.classList.add(cls);
-    return () => document.body.classList.remove(cls);
+    document.body.classList.add("amv-fullscreen-about");
+    return () => document.body.classList.remove("amv-fullscreen-about");
   }, []);
 
-  // 2) Auth
+  // Get user session
   useEffect(() => {
     let mounted = true;
     (async () => {
@@ -52,22 +52,15 @@ export default function AboutPage() {
 
   return (
     <>
-      {/* Scoped global overrides ONLY while this page is mounted */}
       <style jsx global>{`
-        /* Remove centering / max-width applied by globals.css or any wrapper */
         body.amv-fullscreen-about {
           margin: 0 !important;
           width: 100% !important;
           max-width: none !important;
           overflow-x: hidden !important;
         }
-        /* In case a parent sets max-width on a direct child/container */
-        body.amv-fullscreen-about > * {
-          max-width: none !important;
-        }
       `}</style>
 
-      {/* Full-viewport layer so no parent can constrain width */}
       <div
         style={{
           position: "fixed",
@@ -75,11 +68,11 @@ export default function AboutPage() {
           width: "100vw",
           height: "100vh",
           overflow: "auto",
-          backgroundColor: "#8ED0F6", // page light blue
+          backgroundColor: "#8ED0F6",
           zIndex: 50,
         }}
       >
-        {/* Header (full-bleed) */}
+        {/* Header */}
         <header style={{ width: "100%", backgroundColor: "#45B4F4", position: "relative" }}>
           <div style={{ padding: "16px 0", textAlign: "center", userSelect: "none" }}>
             <h1
@@ -104,9 +97,21 @@ export default function AboutPage() {
             </p>
           </div>
 
-          {/* Profile + Logout on top-right (always visible) */}
-          <div style={{ position: "absolute", right: 16, top: 8, display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 8 }}>
-            <div
+          {/* Profile & Dropdown */}
+          <div
+            style={{
+              position: "absolute",
+              right: 16,
+              top: 8,
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "flex-end",
+              gap: 8,
+            }}
+          >
+            {/* Profile button */}
+            <button
+              onClick={() => setShowLogout((prev) => !prev)} // toggle log out
               style={{
                 display: "inline-flex",
                 alignItems: "center",
@@ -117,31 +122,52 @@ export default function AboutPage() {
                 minWidth: 140,
                 borderRadius: 12,
                 boxShadow: "0 1px 2px rgba(0,0,0,0.08)",
+                cursor: "pointer",
               }}
             >
-              <span style={{ width: 12, height: 12, background: "#000", borderRadius: 9999, display: "inline-block" }} />
-              <span style={{ fontWeight: 800, letterSpacing: "0.02em", color: "#000", fontSize: 13 }}>
+              <span
+                style={{
+                  width: 12,
+                  height: 12,
+                  background: "#000",
+                  borderRadius: 9999,
+                  display: "inline-block",
+                }}
+              />
+              <span
+                style={{
+                  fontWeight: 800,
+                  letterSpacing: "0.02em",
+                  color: "#000",
+                  fontSize: 13,
+                }}
+              >
                 {displayName}
               </span>
-            </div>
-            <button
-              onClick={logout}
-              style={{
-                background: "#fff",
-                color: "#ff4040",
-                padding: "8px 18px",
-                minWidth: 140,
-                borderRadius: 12,
-                fontWeight: 800,
-                boxShadow: "0 1px 2px rgba(0,0,0,0.08)",
-              }}
-            >
-              LOG OUT
             </button>
+
+            {/* Log Out appears only when clicked */}
+            {showLogout && (
+              <button
+                onClick={logout}
+                style={{
+                  background: "#fff",
+                  color: "#ff4040",
+                  padding: "8px 18px",
+                  minWidth: 140,
+                  borderRadius: 12,
+                  fontWeight: 800,
+                  boxShadow: "0 1px 2px rgba(0,0,0,0.08)",
+                  cursor: "pointer",
+                }}
+              >
+                LOG OUT
+              </button>
+            )}
           </div>
         </header>
 
-        {/* Back arrow under header, left */}
+        {/* Back Arrow */}
         <div style={{ paddingTop: 16, paddingLeft: 32 }}>
           <button
             onClick={() => router.back()}
@@ -151,9 +177,17 @@ export default function AboutPage() {
               padding: 8,
               borderRadius: 8,
               background: "transparent",
+              border: "2px solid black",
+              cursor: "pointer",
             }}
           >
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="black" width="24" height="24">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="black"
+              width="24"
+              height="24"
+            >
               <path
                 fillRule="evenodd"
                 d="M10.03 4.47a.75.75 0 0 1 0 1.06L5.56 10h14.19a.75.75 0 0 1 0 1.5H5.56l4.47 4.47a.75.75 0 0 1-1.06 1.06l-5.75-5.75a.75.75 0 0 1 0-1.06l5.75-5.75a.75.75 0 0 1 1.06 0Z"
@@ -163,10 +197,10 @@ export default function AboutPage() {
           </button>
         </div>
 
-        {/* Big rounded blue panel */}
+        {/* About Box */}
         <section
           style={{
-            backgroundColor: "#45B4F4", // same as header
+            backgroundColor: "#45B4F4",
             marginLeft: 140,
             marginRight: 140,
             paddingTop: 28,
@@ -186,7 +220,6 @@ export default function AboutPage() {
           >
             ABOUT US
           </h2>
-          {/* keep empty space to match your mock height */}
           <div style={{ height: 300 }} />
         </section>
 
