@@ -3,10 +3,11 @@
 import React, { useState } from "react";
 import "./globals.css";
 import { useRouter } from "next/navigation";
-import Link from "next/link";                  // ✅ add this
+import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 
-type UserMeta = { role?: "teacher" | "student" };
+type Role = "teacher" | "student";
+type UserMeta = { role?: Role; name?: string };
 
 export default function LoginPage() {
   const router = useRouter();
@@ -27,19 +28,28 @@ export default function LoginPage() {
 
     setLoading(true);
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-
-      if (error) {
-        alert(error.message || "Invalid email or password.");
+      // 1) Sign in
+      const { data: signInRes, error: signInErr } = await supabase.auth.signInWithPassword({ email, password });
+      if (signInErr) {
+        alert(signInErr.message || "Invalid email or password.");
         return;
       }
 
-      const role = (data.user?.user_metadata as UserMeta)?.role;
-      if (!role) {
-        alert('This account has no role set. Ask admin to set {"role":"teacher"} or {"role":"student"} in Supabase.');
+      // 2) Fetch fresh user to read user_metadata.role
+      const { data: userRes, error: userErr } = await supabase.auth.getUser();
+      if (userErr || !userRes?.user) {
+        alert("Could not load your account. Please try again.");
         return;
       }
 
+      const meta = (userRes.user.user_metadata || {}) as UserMeta;
+      // ✅ Default to "student" if role not set
+      const role: Role = (meta.role as Role) || "student";
+
+      // 3) Optional: store role in a cookie for middleware guards
+      document.cookie = `amv-role=${role}; Path=/; Max-Age=86400; SameSite=Lax`;
+
+      // 4) Clean form and redirect by role
       form.reset();
       router.replace(role === "teacher" ? "/teacher" : "/student");
     } finally {
@@ -56,9 +66,8 @@ export default function LoginPage() {
         <h2 className="welcome-title">Welcome To Our Application</h2>
         <hr className="divider" />
         <p className="welcome-text">
-          Through this website platform, students will not only read or watch
-          learning materials passively but they will also be able to walk inside
-          a virtual world like a video game to explore the topics provided.
+          Through this website platform, students will not only read or watch learning materials passively
+          but they will also be able to walk inside a virtual world like a video game to explore the topics provided.
         </p>
       </div>
 
@@ -67,7 +76,7 @@ export default function LoginPage() {
           <input type="email" placeholder="Enter email" required />
           <input type="password" placeholder="Enter password" required />
 
-          {/* optional UI only; not used for auth logic */}
+          {/* This select is visual only; auth logic uses Supabase user_metadata.role */}
           <select>
             <option value="">Role (optional)</option>
             <option value="student">Student</option>
@@ -75,7 +84,6 @@ export default function LoginPage() {
           </select>
 
           <div className="links">
-            {/* ✅ real navigation */}
             <Link href="/register">Register now</Link>
             <Link href="/forgot-password" className="forgot">Forgot password?</Link>
           </div>
