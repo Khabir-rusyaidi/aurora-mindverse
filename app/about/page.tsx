@@ -11,14 +11,14 @@ export default function AboutPage() {
   const [user, setUser] = useState<UserInfo | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
 
-  // Get current session/user (redirect to /login if not signed in)
+  // Fetch current user
   useEffect(() => {
     let mounted = true;
     (async () => {
       const { data } = await supabase.auth.getSession();
       const session = data.session;
       if (!session) {
-        router.replace("/login"); // change if your login route is different
+        router.replace("/login");
         return;
       }
       const u = session.user;
@@ -43,68 +43,45 @@ export default function AboutPage() {
 
   const logout = async () => {
     await supabase.auth.signOut();
-    router.replace("/login"); // change if needed
+    router.replace("/login");
   };
 
   return (
-    <div className="min-h-screen w-full bg-[#8ED0F6]"> {/* light blue like mock */}
-      {/* Header */}
-      <header className="w-full bg-[#45B4F4]">
-        <div className="mx-auto max-w-[1280px] px-6 py-4 flex items-center justify-between">
-          {/* Title block (left) */}
-          <div className="leading-tight select-none">
-            <h1 className="text-[28px] sm:text-[30px] font-extrabold tracking-wide text-black">
-              AURORA MIND VERSE
-            </h1>
-            <p className="text-[14px] font-extrabold text-black/90 -mt-1">
-              STEP INTO THE NEW ERA
-            </p>
-          </div>
-
-          {/* Profile (right) */}
-          <div className="relative">
-            <button
-              onClick={() => setMenuOpen((s) => !s)}
-              className="flex items-center gap-2 bg-white/95 px-4 py-2 rounded-xl shadow-sm hover:bg-white transition"
-            >
-              <span className="inline-flex items-center justify-center h-5 w-5 rounded-full bg-black text-white text-[10px]">
-                ●
-              </span>
-              <span className="text-[13px] font-extrabold tracking-wide text-black">
-                {displayName}
-              </span>
-            </button>
-
-            {/* LOG OUT pill (exactly like your image) */}
-            {menuOpen && (
-              <div className="absolute right-0 mt-2">
-                <button
-                  onClick={logout}
-                  className="w-[120px] bg-white text-[#ff4040] font-extrabold text-[12px] py-2 rounded-xl shadow-sm hover:opacity-90"
-                >
-                  LOG OUT
-                </button>
-              </div>
-            )}
-          </div>
+    <div className="min-h-screen w-full bg-[#6BC6FF] flex flex-col items-center">
+      {/* HEADER */}
+      <div className="w-full bg-[#3FA9F5] flex justify-between items-center px-8 py-4">
+        <div>
+          <h1 className="text-[28px] font-extrabold text-black">AURORA MIND VERSE</h1>
+          <p className="text-[14px] font-semibold text-black -mt-1">STEP INTO THE NEW ERA</p>
         </div>
-      </header>
 
-      {/* Back arrow row (below header, far left) */}
-      <div className="mx-auto max-w-[1280px] px-6">
-        <button
-          aria-label="Back"
-          onClick={() => router.back()} // change to router.push("/teacher") if you prefer fixed page
-          className="mt-4 p-2 rounded-lg hover:bg-black/5 active:scale-95 transition"
-          title="Back"
-        >
-          {/* solid black left arrow like mock */}
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            fill="currentColor"
-            className="h-6 w-6 text-black"
+        {/* PROFILE + LOGOUT */}
+        <div className="relative flex flex-col items-end">
+          <button
+            onClick={() => setMenuOpen((s) => !s)}
+            className="flex items-center gap-2 bg-white px-4 py-1 rounded-xl"
           >
+            <span className="inline-block w-2 h-2 bg-black rounded-full"></span>
+            <span className="font-semibold text-sm text-black">{displayName}</span>
+          </button>
+          {menuOpen && (
+            <button
+              onClick={logout}
+              className="mt-1 bg-white text-red-600 font-bold text-sm px-4 py-1 rounded-xl"
+            >
+              LOG OUT
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* BACK ARROW */}
+      <div className="w-full max-w-[1280px] flex items-start mt-4 px-6">
+        <button
+          onClick={() => router.back()}
+          className="p-2 rounded hover:bg-black/10 transition"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" fill="black" viewBox="0 0 24 24" className="w-6 h-6">
             <path
               fillRule="evenodd"
               d="M10.03 4.47a.75.75 0 0 1 0 1.06L5.56 10h14.19a.75.75 0 0 1 0 1.5H5.56l4.47 4.47a.75.75 0 0 1-1.06 1.06l-5.75-5.75a.75.75 0 0 1 0-1.06l5.75-5.75a.75.75 0 0 1 1.06 0Z"
@@ -114,20 +91,12 @@ export default function AboutPage() {
         </button>
       </div>
 
-      {/* Main big rounded panel */}
-      <main className="mx-auto max-w-[1280px] px-6">
-        <section className="mt-2 bg-[#45B4F4] rounded-[28px] shadow-sm px-8 py-12">
-          <h2 className="text-center text-[24px] sm:text-[26px] font-extrabold tracking-wide text-black">
-            ABOUT US
-          </h2>
-
-          {/* keep empty to match your screenshot; add content later if you want */}
-          <div className="h-[340px]" />
-        </section>
-
-        {/* bottom spacing like the mock */}
-        <div className="h-28" />
-      </main>
+      {/* ABOUT US BOX */}
+      <div className="flex justify-center w-full mt-2">
+        <div className="bg-[#3FA9F5] w-[85%] sm:w-[80%] rounded-[28px] py-12 flex flex-col items-center">
+          <h2 className="text-[22px] sm:text-[24px] font-extrabold text-black">ABOUT US</h2>
+        </div>
+      </div>
     </div>
   );
 }
