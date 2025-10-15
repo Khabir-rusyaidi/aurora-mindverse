@@ -10,6 +10,14 @@ export default function AboutPage() {
   const router = useRouter();
   const [user, setUser] = useState<UserInfo | null>(null);
 
+  // 1) While this page is mounted, relax any global width limits on <body>
+  useEffect(() => {
+    const cls = "amv-fullscreen-about";
+    document.body.classList.add(cls);
+    return () => document.body.classList.remove(cls);
+  }, []);
+
+  // 2) Auth
   useEffect(() => {
     let mounted = true;
     (async () => {
@@ -22,11 +30,17 @@ export default function AboutPage() {
       const u = session.user;
       const metaName =
         (u.user_metadata?.full_name as string | undefined) ||
-        (u.user_metadata?.name as string | undefined) || null;
+        (u.user_metadata?.name as string | undefined) ||
+        null;
       const emailLocal = u.email ? u.email.split("@")[0] : null;
-      if (mounted) setUser({ email: u.email ?? null, name: (metaName || emailLocal || "User").toUpperCase() });
+      if (mounted) {
+        const name = (metaName || emailLocal || "User").toUpperCase();
+        setUser({ email: u.email ?? null, name });
+      }
     })();
-    return () => { mounted = false; };
+    return () => {
+      mounted = false;
+    };
   }, [router]);
 
   const displayName = useMemo(() => user?.name ?? "USER", [user]);
@@ -37,47 +51,147 @@ export default function AboutPage() {
   };
 
   return (
-    // FIX: full-viewport layer so parent wrappers can't constrain width
-    <div className="fixed inset-0 z-[50] w-screen h-screen overflow-auto" style={{ backgroundColor: "#8ED0F6" }}>
-      {/* header bar */}
-      <header className="w-full" style={{ backgroundColor: "#45B4F4" }}>
-        <div className="py-4 text-center select-none">
-          <h1 className="text-[28px] md:text-[30px] font-extrabold tracking-wide text-black">
-            AURORA MIND VERSE
-          </h1>
-          <p className="text-[14px] font-extrabold text-black/90 -mt-1">STEP INTO THE NEW ERA</p>
-        </div>
+    <>
+      {/* Scoped global overrides ONLY while this page is mounted */}
+      <style jsx global>{`
+        /* Remove centering / max-width applied by globals.css or any wrapper */
+        body.amv-fullscreen-about {
+          margin: 0 !important;
+          width: 100% !important;
+          max-width: none !important;
+          overflow-x: hidden !important;
+        }
+        /* In case a parent sets max-width on a direct child/container */
+        body.amv-fullscreen-about > * {
+          max-width: none !important;
+        }
+      `}</style>
 
-        {/* profile + logout (top-right, always visible) */}
-        <div className="absolute right-4 top-2 flex flex-col items-end gap-2">
-          <div className="flex items-center gap-2 rounded-xl shadow-sm" style={{ backgroundColor: "white", padding: "8px 14px", minHeight: 36, minWidth: 140 }}>
-            <span style={{ width: 12, height: 12, backgroundColor: "black", borderRadius: 9999, display: "inline-block" }} />
-            <span className="text-[13px] font-extrabold tracking-wide text-black">{displayName}</span>
+      {/* Full-viewport layer so no parent can constrain width */}
+      <div
+        style={{
+          position: "fixed",
+          inset: 0,
+          width: "100vw",
+          height: "100vh",
+          overflow: "auto",
+          backgroundColor: "#8ED0F6", // page light blue
+          zIndex: 50,
+        }}
+      >
+        {/* Header (full-bleed) */}
+        <header style={{ width: "100%", backgroundColor: "#45B4F4", position: "relative" }}>
+          <div style={{ padding: "16px 0", textAlign: "center", userSelect: "none" }}>
+            <h1
+              style={{
+                fontWeight: 800,
+                letterSpacing: "0.02em",
+                color: "#000",
+                fontSize: "28px",
+              }}
+            >
+              AURORA MIND VERSE
+            </h1>
+            <p
+              style={{
+                marginTop: "-4px",
+                fontWeight: 800,
+                color: "rgba(0,0,0,0.9)",
+                fontSize: "14px",
+              }}
+            >
+              STEP INTO THE NEW ERA
+            </p>
           </div>
-          <button onClick={logout} className="rounded-xl font-extrabold"
-            style={{ backgroundColor: "white", color: "#ff4040", padding: "8px 18px", minWidth: 140, boxShadow: "0 1px 2px rgba(0,0,0,0.08)" }}>
-            LOG OUT
+
+          {/* Profile + Logout on top-right (always visible) */}
+          <div style={{ position: "absolute", right: 16, top: 8, display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 8 }}>
+            <div
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 8,
+                background: "#fff",
+                padding: "8px 14px",
+                minHeight: 36,
+                minWidth: 140,
+                borderRadius: 12,
+                boxShadow: "0 1px 2px rgba(0,0,0,0.08)",
+              }}
+            >
+              <span style={{ width: 12, height: 12, background: "#000", borderRadius: 9999, display: "inline-block" }} />
+              <span style={{ fontWeight: 800, letterSpacing: "0.02em", color: "#000", fontSize: 13 }}>
+                {displayName}
+              </span>
+            </div>
+            <button
+              onClick={logout}
+              style={{
+                background: "#fff",
+                color: "#ff4040",
+                padding: "8px 18px",
+                minWidth: 140,
+                borderRadius: 12,
+                fontWeight: 800,
+                boxShadow: "0 1px 2px rgba(0,0,0,0.08)",
+              }}
+            >
+              LOG OUT
+            </button>
+          </div>
+        </header>
+
+        {/* Back arrow under header, left */}
+        <div style={{ paddingTop: 16, paddingLeft: 32 }}>
+          <button
+            onClick={() => router.back()}
+            aria-label="Back"
+            title="Back"
+            style={{
+              padding: 8,
+              borderRadius: 8,
+              background: "transparent",
+            }}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="black" width="24" height="24">
+              <path
+                fillRule="evenodd"
+                d="M10.03 4.47a.75.75 0 0 1 0 1.06L5.56 10h14.19a.75.75 0 0 1 0 1.5H5.56l4.47 4.47a.75.75 0 0 1-1.06 1.06l-5.75-5.75a.75.75 0 0 1 0-1.06l5.75-5.75a.75.75 0 0 1 1.06 0Z"
+                clipRule="evenodd"
+              />
+            </svg>
           </button>
         </div>
-      </header>
 
-      {/* back arrow */}
-      <div className="pt-4 pl-8">
-        <button onClick={() => router.back()} aria-label="Back" className="p-2 rounded-lg hover:bg-black/5 active:scale-95 transition" title="Back">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="black" className="h-6 w-6">
-            <path fillRule="evenodd" d="M10.03 4.47a.75.75 0 0 1 0 1.06L5.56 10h14.19a.75.75 0 0 1 0 1.5H5.56l4.47 4.47a.75.75 0 0 1-1.06 1.06l-5.75-5.75a.75.75 0 0 1 0-1.06l5.75-5.75a.75.75 0 0 1 1.06 0Z" clipRule="evenodd"/>
-          </svg>
-        </button>
+        {/* Big rounded blue panel */}
+        <section
+          style={{
+            backgroundColor: "#45B4F4", // same as header
+            marginLeft: 140,
+            marginRight: 140,
+            paddingTop: 28,
+            paddingBottom: 28,
+            borderRadius: 28,
+            boxShadow: "0 1px 2px rgba(0,0,0,0.06)",
+          }}
+        >
+          <h2
+            style={{
+              textAlign: "center",
+              fontSize: 24,
+              fontWeight: 800,
+              letterSpacing: "0.02em",
+              color: "#000",
+            }}
+          >
+            ABOUT US
+          </h2>
+          {/* keep empty space to match your mock height */}
+          <div style={{ height: 300 }} />
+        </section>
+
+        <div style={{ height: 120 }} />
       </div>
-
-      {/* big rounded panel */}
-      <section className="rounded-[28px] shadow-sm"
-        style={{ backgroundColor: "#45B4F4", marginLeft: 140, marginRight: 140, paddingTop: 28, paddingBottom: 28 }}>
-        <h2 className="text-center text-[22px] md:text-[24px] font-extrabold tracking-wide text-black">ABOUT US</h2>
-        <div style={{ height: 300 }} />
-      </section>
-
-      <div style={{ height: 120 }} />
-    </div>
+    </>
   );
 }
