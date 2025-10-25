@@ -102,7 +102,7 @@ export default function AddSubjectPage() {
         <form onSubmit={handleSubmit} className="create-grid">
           <input type="text" placeholder="Subject Name" value={title} onChange={(e)=>setTitle(e.target.value)} required />
           <input type="text" placeholder="Description" value={desc} onChange={(e)=>setDesc(e.target.value)} required />
-          <input type="url" placeholder="link artsteps" value={link} onChange={(e)=>setLink(e.target.value)} />
+          <input type="url" placeholder="link metasteps" value={link} onChange={(e)=>setLink(e.target.value)} />
           <input type="file" accept="image/*" onChange={(e)=>setFile(e.target.files?.[0] ?? null)} />
 
           <button type="submit" className="login-btn" disabled={isSaving}>
