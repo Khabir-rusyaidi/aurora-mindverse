@@ -20,18 +20,22 @@ export default function LoginPage() {
     const form = e.currentTarget;
     const email = (form.querySelector('input[type="email"]') as HTMLInputElement)?.value.trim();
     const password = (form.querySelector('input[type="password"]') as HTMLInputElement)?.value;
-
-    // 🔹 NEW: read selected role from the <select>
-    const selectedRole = (form.querySelector("select") as HTMLSelectElement)?.value as Role | "";
+    const selectedRole = (form.querySelector("select") as HTMLSelectElement)?.value.trim().toLowerCase();
 
     if (!email || !password) {
       alert("Please fill in email and password.");
       return;
     }
 
-    // 🔹 NEW: block login when role is not selected
+    // 🔹 Check if role selected
     if (!selectedRole) {
       alert("Please select your role before logging in.");
+      return;
+    }
+
+    // 🔹 Check if role is valid
+    if (selectedRole !== "teacher" && selectedRole !== "student") {
+      alert("Please enter the correct role (Teacher or Student).");
       return;
     }
 
@@ -44,20 +48,19 @@ export default function LoginPage() {
         return;
       }
 
-      // 2) (Optional) You still fetch user; not strictly needed for role check
+      // 2) Get user (optional)
       const { data: userRes, error: userErr } = await supabase.auth.getUser();
       if (userErr || !userRes?.user) {
         alert("Could not load your account. Please try again.");
         return;
       }
 
-      // 🔹 Use the role the user selected (no defaulting)
       const role: Role = selectedRole as Role;
 
-      // 3) Store role (same as before)
+      // 3) Save cookie
       document.cookie = `amv-role=${role}; Path=/; Max-Age=86400; SameSite=Lax`;
 
-      // 4) Clean form and redirect by role
+      // 4) Redirect
       form.reset();
       router.replace(role === "teacher" ? "/teacher" : "/student");
     } finally {
@@ -84,7 +87,6 @@ export default function LoginPage() {
           <input type="email" placeholder="Enter email" required />
           <input type="password" placeholder="Enter password" required />
 
-          {/* This select stays the same visually; now it's enforced by handleSubmit */}
           <select>
             <option value="">Role (optional)</option>
             <option value="student">Student</option>
