@@ -21,32 +21,40 @@ export default function LoginPage() {
     const email = (form.querySelector('input[type="email"]') as HTMLInputElement)?.value.trim();
     const password = (form.querySelector('input[type="password"]') as HTMLInputElement)?.value;
 
+    // 🔹 NEW: read selected role from the <select>
+    const selectedRole = (form.querySelector("select") as HTMLSelectElement)?.value as Role | "";
+
     if (!email || !password) {
       alert("Please fill in email and password.");
+      return;
+    }
+
+    // 🔹 NEW: block login when role is not selected
+    if (!selectedRole) {
+      alert("Please select your role before logging in.");
       return;
     }
 
     setLoading(true);
     try {
       // 1) Sign in
-      const { data: signInRes, error: signInErr } = await supabase.auth.signInWithPassword({ email, password });
+      const { error: signInErr } = await supabase.auth.signInWithPassword({ email, password });
       if (signInErr) {
         alert(signInErr.message || "Invalid email or password.");
         return;
       }
 
-      // 2) Fetch fresh user to read user_metadata.role
+      // 2) (Optional) You still fetch user; not strictly needed for role check
       const { data: userRes, error: userErr } = await supabase.auth.getUser();
       if (userErr || !userRes?.user) {
         alert("Could not load your account. Please try again.");
         return;
       }
 
-      const meta = (userRes.user.user_metadata || {}) as UserMeta;
-      // ✅ Default to "student" if role not set
-      const role: Role = (meta.role as Role) || "student";
+      // 🔹 Use the role the user selected (no defaulting)
+      const role: Role = selectedRole as Role;
 
-      // 3) Optional: store role in a cookie for middleware guards
+      // 3) Store role (same as before)
       document.cookie = `amv-role=${role}; Path=/; Max-Age=86400; SameSite=Lax`;
 
       // 4) Clean form and redirect by role
@@ -76,7 +84,7 @@ export default function LoginPage() {
           <input type="email" placeholder="Enter email" required />
           <input type="password" placeholder="Enter password" required />
 
-          {/* This select is visual only; auth logic uses Supabase user_metadata.role */}
+          {/* This select stays the same visually; now it's enforced by handleSubmit */}
           <select>
             <option value="">Role (optional)</option>
             <option value="student">Student</option>
