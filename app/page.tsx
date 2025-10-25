@@ -20,7 +20,7 @@ export default function LoginPage() {
     const form = e.currentTarget;
     const email = (form.querySelector('input[type="email"]') as HTMLInputElement)?.value.trim();
     const password = (form.querySelector('input[type="password"]') as HTMLInputElement)?.value;
-    const selectedRole = (form.querySelector("select") as HTMLSelectElement)?.value.trim().toLowerCase();
+    const selectedRole = (form.querySelector("select") as HTMLSelectElement)?.value.trim().toLowerCase() as Role | "";
 
     if (!email || !password) {
       alert("Please fill in email and password.");
@@ -29,12 +29,6 @@ export default function LoginPage() {
 
     if (!selectedRole) {
       alert("Please select your role before logging in.");
-      return;
-    }
-
-    // 🚫 If the role entered is not valid
-    if (selectedRole !== "teacher" && selectedRole !== "student") {
-      alert("Please enter the correct role (Teacher or Student).");
       return;
     }
 
@@ -47,22 +41,33 @@ export default function LoginPage() {
         return;
       }
 
-      // 2) Get user info from Supabase
+      // 2) Get fresh user (to read saved role)
       const { data: userRes, error: userErr } = await supabase.auth.getUser();
       if (userErr || !userRes?.user) {
         alert("Could not load your account. Please try again.");
         return;
       }
 
-      // 3) Use selected role for login control
-      const role: Role = selectedRole as Role;
+      const meta = (userRes.user.user_metadata || {}) as UserMeta;
+      const savedRole = (meta.role || "").toLowerCase() as Role | "";
 
-      // 4) Save cookie
-      document.cookie = `amv-role=${role}; Path=/; Max-Age=86400; SameSite=Lax`;
+      // 🚫 NEW: Enforce correct role match
+      if (savedRole !== "teacher" && savedRole !== "student") {
+        await supabase.auth.signOut();
+        alert("Your account role is not set correctly. Please contact support.");
+        return;
+      }
 
-      // 5) Redirect by role
+      if (selectedRole !== savedRole) {
+        await supabase.auth.signOut();
+        alert("Please enter the correct role.");
+        return;
+      }
+
+      // 3) Store & redirect
+      document.cookie = `amv-role=${savedRole}; Path=/; Max-Age=86400; SameSite=Lax`;
       form.reset();
-      router.replace(role === "teacher" ? "/teacher" : "/student");
+      router.replace(savedRole === "teacher" ? "/teacher" : "/student");
     } finally {
       setLoading(false);
     }
