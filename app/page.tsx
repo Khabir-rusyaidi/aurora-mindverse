@@ -27,13 +27,12 @@ export default function LoginPage() {
       return;
     }
 
-    // 🔹 Check if role selected
     if (!selectedRole) {
       alert("Please select your role before logging in.");
       return;
     }
 
-    // 🔹 Check if role is valid
+    // 🚫 If the role entered is not valid
     if (selectedRole !== "teacher" && selectedRole !== "student") {
       alert("Please enter the correct role (Teacher or Student).");
       return;
@@ -48,19 +47,20 @@ export default function LoginPage() {
         return;
       }
 
-      // 2) Get user (optional)
+      // 2) Get user info from Supabase
       const { data: userRes, error: userErr } = await supabase.auth.getUser();
       if (userErr || !userRes?.user) {
         alert("Could not load your account. Please try again.");
         return;
       }
 
+      // 3) Use selected role for login control
       const role: Role = selectedRole as Role;
 
-      // 3) Save cookie
+      // 4) Save cookie
       document.cookie = `amv-role=${role}; Path=/; Max-Age=86400; SameSite=Lax`;
 
-      // 4) Redirect
+      // 5) Redirect by role
       form.reset();
       router.replace(role === "teacher" ? "/teacher" : "/student");
     } finally {
