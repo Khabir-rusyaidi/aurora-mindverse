@@ -1,6 +1,8 @@
-import { NextResponse } from 'next/server';
-import { supabaseAdmin } from '@/lib/supabaseAdmin';
+import { NextResponse } from "next/server";
+
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 
 export async function GET() {
-  return NextResponse.json({ ok: true, message: 'API is connected!' });
+  return NextResponse.json({ ok: true, message: "API is connected!" });
 }
