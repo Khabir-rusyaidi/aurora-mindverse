@@ -1,77 +1,84 @@
 import { NextResponse } from "next/server";
+import { Resend } from "resend";
 import bcrypt from "bcryptjs";
-import { createClient } from "@supabase/supabase-js";
+// Use ONE of these imports:
+// If you have the @ alias configured:
+import { getAdminClient } from "@/lib/supabaseAdmin";
+// If not, comment the line above and use the relative path below:
+// import { getAdminClient } from "../../../../lib/supabaseAdmin";
 
-export const dynamic = "force-dynamic"; // avoid static optimization
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 
-function getAdmin() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!url || !key) throw new Error("Supabase admin env vars missing");
-  return createClient(url, key);
+function sixDigit() {
+  return Math.floor(100000 + Math.random() * 900000).toString();
 }
 
 export async function POST(req: Request) {
   try {
-    const { email, code, newPassword }:
-      { email: string; code: string; newPassword: string } = await req.json();
+    const apiKey = process.env.RESEND_API_KEY;
+    const from = process.env.EMAIL_FROM;
+    if (!apiKey) return NextResponse.json({ ok:false, error:"Email service not configured" }, { status:500 });
+    if (!from)  return NextResponse.json({ ok:false, error:"Sender not configured" }, { status:500 });
+    const resend = new Resend(apiKey);
 
+    const { email }:{email:string} = await req.json();
     const trimmed = (email || "").trim().toLowerCase();
-    if (!trimmed || !code || !newPassword)
-      return NextResponse.json({ ok:false, error:"Missing fields" }, { status:400 });
-    if (newPassword.length < 8)
-      return NextResponse.json({ ok:false, error:"Password must be at least 8 characters" }, { status:400 });
+    if (!trimmed) return NextResponse.json({ ok:false, error:"Email required" }, { status:400 });
 
-    // lazily create admin client at runtime (prevents build-time crash)
-    const supaAdmin = getAdmin();
+    // ✅ create admin client at runtime
+    const supaAdmin = getAdminClient();
 
-    // latest unused OTP
-    const { data: row, error } = await supaAdmin
+    // throttle resend: 30s since last send
+    const { data: recent } = await supaAdmin
       .from("email_otp")
       .select("*")
       .eq("email", trimmed)
       .eq("purpose", "password_reset")
-      .eq("used", false)
-      .order("created_at", { ascending: false })
+      .order("created_at", { ascending:false })
       .limit(1)
       .maybeSingle();
 
-    if (error || !row) return NextResponse.json({ ok:false, error:"Invalid or expired code" }, { status:400 });
-
     const now = new Date();
-    if (new Date(row.expires_at).getTime() < now.getTime())
-      return NextResponse.json({ ok:false, error:"Code expired" }, { status:400 });
-    if (row.attempts >= 5)
-      return NextResponse.json({ ok:false, error:"Too many attempts" }, { status:429 });
-
-    const match = await bcrypt.compare(code, row.code_hash);
-    if (!match) {
-      await supaAdmin.from("email_otp").update({ attempts: row.attempts + 1 }).eq("id", row.id);
-      return NextResponse.json({ ok:false, error:"Incorrect code" }, { status:400 });
+    if (recent?.last_sent_at) {
+      const delta = now.getTime() - new Date(recent.last_sent_at).getTime();
+      if (delta < 30_000) {
+        const wait = Math.ceil((30_000 - delta) / 1000);
+        return NextResponse.json({ ok:false, error:`Please wait ${wait}s before resending.` }, { status:429 });
+      }
     }
 
-    // find user by email via listUsers (admin v2)
-    const { data: usersData, error: listErr } = await supaAdmin.auth.admin.listUsers({ page: 1, perPage: 200 });
-    if (listErr) return NextResponse.json({ ok:false, error:listErr.message }, { status:500 });
+    const code = sixDigit();
+    const codeHash = await bcrypt.hash(code, 10);
+    const expires = new Date(Date.now() + 10 * 60 * 1000);
 
-    const user = usersData.users.find(u => (u.email || "").toLowerCase() === trimmed);
-    if (!user) return NextResponse.json({ ok:false, error:"User not found" }, { status:404 });
+    const { error: insErr } = await supaAdmin.from("email_otp").insert({
+      email: trimmed,
+      purpose: "password_reset",
+      code_hash: codeHash,
+      expires_at: expires.toISOString(),
+      last_sent_at: now.toISOString(),
+    });
+    if (insErr) return NextResponse.json({ ok:false, error:insErr.message }, { status:500 });
 
-    // update password
-    const { error: updErr } = await supaAdmin.auth.admin.updateUserById(user.id, { password: newPassword });
-    if (updErr) return NextResponse.json({ ok:false, error:updErr.message }, { status:500 });
+    const result = await resend.emails.send({
+      from,
+      to: trimmed,
+      subject: "Your AMV password reset code",
+      html: `
+        <div style="font-family:system-ui,Segoe UI,Arial">
+          <p>Use this code to reset your AMV password:</p>
+          <p style="font-size:28px;letter-spacing:4px;"><b>${code}</b></p>
+          <p>This code expires in 10 minutes. If you didn't request it, ignore this email.</p>
+        </div>`
+    });
 
-    // mark codes used
-    await supaAdmin.from("email_otp").update({ used: true }).eq("id", row.id);
-    await supaAdmin.from("email_otp")
-      .update({ used: true })
-      .eq("email", trimmed)
-      .eq("purpose", "password_reset")
-      .neq("id", row.id);
+    if ((result as any)?.error) {
+      return NextResponse.json({ ok:false, error:(result as any).error.message || "Resend failed" }, { status:500 });
+    }
 
-    return NextResponse.json({ ok:true, message:"Password updated" });
+    return NextResponse.json({ ok:true });
   } catch (e:any) {
-    // if envs missing during runtime, surface a clear error
-    return NextResponse.json({ ok:false, error: e?.message || "Server error" }, { status:500 });
+    return NextResponse.json({ ok:false, error:e?.message || "Server error" }, { status:500 });
   }
 }

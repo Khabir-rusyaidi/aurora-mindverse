@@ -1,10 +1,13 @@
 // lib/supabaseAdmin.ts
-import { createClient } from '@supabase/supabase-js';
+import { createClient } from "@supabase/supabase-js";
 
-const url = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const serviceRole = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-
-// This client can use Admin APIs (runs only on server).
-export const supabaseAdmin = createClient(url, serviceRole, {
-  auth: { persistSession: false },
-});
+/**
+ * Create the Supabase Admin client at runtime (NOT at import time).
+ * Call this ONLY inside server code (API routes, server actions).
+ */
+export function getAdminClient() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!url || !key) throw new Error("Supabase admin env vars missing");
+  return createClient(url, key, { auth: { persistSession: false } });
+}
