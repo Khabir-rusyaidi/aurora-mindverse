@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { supabase } from "@/lib/supabase"; // <-- add this import
+import { supabase } from "@/lib/supabase"; // <-- keep this
 
 export default function ForgotPassword() {
   const router = useRouter();
@@ -22,29 +22,26 @@ export default function ForgotPassword() {
     return () => clearInterval(t);
   }, [cooldown]);
 
+  // ====== CHANGED: now sends a 6-digit OTP email ======
   async function sendOtp() {
     if (!email) return alert("Enter your email first");
     if (loading || cooldown > 0) return;
 
     setLoading(true);
-    setOtpSent(false);
-
     try {
-      // ---- Supabase built-in password reset link (works for ANY email) ----
-      const redirectTo =
-        `${process.env.NEXT_PUBLIC_SITE_URL || window.location.origin}/reset-password`;
-
-      const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo });
+      const { error } = await supabase.auth.signInWithOtp({
+        email,
+        options: { shouldCreateUser: false },
+      });
 
       if (error) {
-        // Supabase may rate-limit; just show the message
-        alert(error.message || "Failed to send reset link");
+        alert(error.message || "Failed to send OTP");
         return;
       }
 
       setOtpSent(true);
-      setCooldown(30);
-      alert("Reset link sent! Please check your email and follow the link.");
+      setCooldown(60);
+      alert("OTP sent. Check your inbox for the 6-digit code.");
     } catch (e: any) {
       alert(e?.message || "Network error");
     } finally {
@@ -52,14 +49,42 @@ export default function ForgotPassword() {
     }
   }
 
+  // ====== CHANGED: verify OTP, then update password ======
   async function submitNewPassword() {
-    // Keep the UI but route the user to the secure reset page where the
-    // actual password update happens after Supabase verifies the email link.
-    if (!email) {
-      alert("Enter your email first, then open the reset link we sent to your inbox.");
-      return;
+    if (!email || !otp || !pwd || !pwd2) return alert("Complete all fields");
+    if (pwd !== pwd2) return alert("Passwords do not match");
+
+    setLoading(true);
+    try {
+      // 1) Verify the OTP from email
+      const { error } = await supabase.auth.verifyOtp({
+        email,
+        token: otp,
+        type: "email",
+      });
+
+      if (error) {
+        alert(error.message || "Invalid or expired OTP");
+        setLoading(false);
+        return;
+      }
+
+      // 2) If OTP valid, update password
+      const { error: upErr } = await supabase.auth.updateUser({ password: pwd });
+      if (upErr) {
+        alert(upErr.message || "Failed to update password");
+        setLoading(false);
+        return;
+      }
+
+      alert("Password updated successfully.");
+      await supabase.auth.signOut();
+      router.replace("/");
+    } catch (e: any) {
+      alert(e?.message || "Network error");
+    } finally {
+      setLoading(false);
     }
-    router.push("/reset-password");
   }
 
   return (
