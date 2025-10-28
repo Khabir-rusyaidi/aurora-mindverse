@@ -3,14 +3,15 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { supabase } from "@/lib/supabase"; // <-- add this import
 
 export default function ForgotPassword() {
   const router = useRouter();
 
   const [email, setEmail] = useState("");
-  const [otp, setOtp] = useState("");
-  const [pwd, setPwd] = useState("");
-  const [pwd2, setPwd2] = useState("");
+  const [otp, setOtp] = useState("");      // kept for UI compatibility
+  const [pwd, setPwd] = useState("");      // kept for UI compatibility
+  const [pwd2, setPwd2] = useState("");    // kept for UI compatibility
   const [otpSent, setOtpSent] = useState(false);
   const [cooldown, setCooldown] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -29,24 +30,21 @@ export default function ForgotPassword() {
     setOtpSent(false);
 
     try {
-      const r = await fetch("/api/auth/otp/send", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
-      });
-      const j = await r.json();
+      // ---- Supabase built-in password reset link (works for ANY email) ----
+      const redirectTo =
+        `${process.env.NEXT_PUBLIC_SITE_URL || window.location.origin}/reset-password`;
 
-      if (!r.ok || !j.ok) {
-        // If throttled, server returns "Please wait XXs ..."
-        const waitMatch = /(\d+)s/.exec(j.error || "");
-        if (waitMatch) setCooldown(parseInt(waitMatch[1], 10));
-        alert(j.error || "Failed to send code");
+      const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo });
+
+      if (error) {
+        // Supabase may rate-limit; just show the message
+        alert(error.message || "Failed to send reset link");
         return;
       }
 
       setOtpSent(true);
-      setCooldown(30); // same as server throttle
-      alert("OTP sent! Check your email.");
+      setCooldown(30);
+      alert("Reset link sent! Please check your email and follow the link.");
     } catch (e: any) {
       alert(e?.message || "Network error");
     } finally {
@@ -55,32 +53,13 @@ export default function ForgotPassword() {
   }
 
   async function submitNewPassword() {
-    if (!email) return alert("Enter your email");
-    if (!otp || otp.length !== 6) return alert("Enter the 6-digit OTP");
-    if (pwd.length < 8) return alert("Password must be at least 8 characters");
-    if (pwd !== pwd2) return alert("Passwords do not match");
-
-    setLoading(true);
-    try {
-      const r = await fetch("/api/auth/otp/verify", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, code: otp, newPassword: pwd }),
-      });
-      const j = await r.json();
-
-      if (!r.ok || !j.ok) {
-        alert(j.error || "Failed to update password");
-        return;
-      }
-
-      alert("Password updated. Please log in with your new password.");
-      router.replace("/"); // back to login
-    } catch (e: any) {
-      alert(e?.message || "Network error");
-    } finally {
-      setLoading(false);
+    // Keep the UI but route the user to the secure reset page where the
+    // actual password update happens after Supabase verifies the email link.
+    if (!email) {
+      alert("Enter your email first, then open the reset link we sent to your inbox.");
+      return;
     }
+    router.push("/reset-password");
   }
 
   return (
@@ -99,7 +78,7 @@ export default function ForgotPassword() {
             </div>
 
             <h2 className="fp-title">RESET YOUR PASSWORD</h2>
-            <p className="fp-sub">We&apos;ll send a secure code to your email</p>
+            <p className="fp-sub">We&apos;ll send a secure link to your email</p>
 
             <input
               className="fp-input"
@@ -157,7 +136,7 @@ export default function ForgotPassword() {
         </div>
       </div>
 
-      {/* === Inline style to match your design === */}
+      {/* === Inline style to match your design (unchanged) === */}
       <style jsx global>{`
         .fp-root {
           min-height: 100vh;
