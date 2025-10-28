@@ -1,11 +1,14 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 
-export default function ResetPasswordPage() {
+// Tell Next.js not to prerender this page (safer with search params)
+export const dynamic = "force-dynamic";
+
+function ResetPasswordInner() {
   const router = useRouter();
   const search = useSearchParams();
 
@@ -21,36 +24,29 @@ export default function ResetPasswordPage() {
 
     if (code && type === "recovery") {
       supabase.auth.exchangeCodeForSession(code).then(({ error }) => {
-        if (error) {
-          setMessage(error.message);
-        }
+        if (error) setMessage(error.message);
         setReady(true);
       });
     } else {
       setMessage("Invalid or missing recovery code.");
+      setReady(true);
     }
   }, [search]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (password !== confirmPassword) {
-      return alert("Passwords do not match");
-    }
-
-    if (password.length < 8) {
-      return alert("Password must be at least 8 characters");
-    }
+    if (password !== confirmPassword) return alert("Passwords do not match");
+    if (password.length < 8) return alert("Password must be at least 8 characters");
 
     setLoading(true);
     const { error } = await supabase.auth.updateUser({ password });
-
-    if (error) {
-      setMessage(error.message);
-    } else {
-      alert("Password updated successfully. Redirecting to login...");
-      setTimeout(() => router.replace("/"), 1500);
-    }
     setLoading(false);
+
+    if (error) setMessage(error.message);
+    else {
+      alert("Password updated successfully. Redirecting to login...");
+      setTimeout(() => router.replace("/"), 1200);
+    }
   }
 
   return (
@@ -71,9 +67,7 @@ export default function ResetPasswordPage() {
             <p className="fp-sub">Enter your new password below</p>
 
             {!ready ? (
-              <p style={{ textAlign: "center", marginTop: "40px" }}>
-                Preparing reset...
-              </p>
+              <p style={{ textAlign: "center", marginTop: 40 }}>Preparing reset…</p>
             ) : (
               <form onSubmit={handleSubmit}>
                 <input
@@ -90,11 +84,7 @@ export default function ResetPasswordPage() {
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                 />
-                <button
-                  className="fp-submit"
-                  type="submit"
-                  disabled={loading}
-                >
+                <button className="fp-submit" type="submit" disabled={loading}>
                   {loading ? "UPDATING..." : "UPDATE PASSWORD"}
                 </button>
               </form>
@@ -105,7 +95,7 @@ export default function ResetPasswordPage() {
                 style={{
                   textAlign: "center",
                   color: "#000",
-                  marginTop: "10px",
+                  marginTop: 10,
                   fontWeight: 500,
                 }}
               >
@@ -116,5 +106,13 @@ export default function ResetPasswordPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function ResetPasswordPage() {
+  return (
+    <Suspense fallback={<p style={{ textAlign: "center", marginTop: 60 }}>Preparing reset…</p>}>
+      <ResetPasswordInner />
+    </Suspense>
   );
 }
