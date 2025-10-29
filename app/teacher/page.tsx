@@ -69,7 +69,7 @@ export default function TeacherDashboard() {
   // Delete (owner only; RLS enforces too)
   const handleDelete = async (subject: Subject) => {
     if (!myId) return;
-    const ok = window.confirm(Delete "${subject.title}"? This cannot be undone.);
+    const ok = window.confirm(`Delete "${subject.title}"? This cannot be undone.`);
     if (!ok) return;
 
     const { error } = await supabase
@@ -168,7 +168,7 @@ export default function TeacherDashboard() {
             <div className="subject-actions">
               {s.teacher_id === myId ? (
                 <>
-                  <Link className="edit-link" href={/teacher/subject/${s.id}/edit}>
+                  <Link className="edit-link" href={`/teacher/subject/${s.id}/edit`}>
                     <span style={{ marginRight: 6 }}>✎</span> Edit
                   </Link>
 
@@ -176,7 +176,7 @@ export default function TeacherDashboard() {
                     type="button"
                     className="delete-link"
                     onClick={() => handleDelete(s)}
-                    aria-label={Delete ${s.title}}
+                    aria-label={`Delete ${s.title}`}
                   >
                     <TrashIcon className="trash-svg" />
                     <span>Delete</span>
