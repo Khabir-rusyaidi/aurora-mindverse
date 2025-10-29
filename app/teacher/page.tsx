@@ -1,4 +1,4 @@
-"use client"; // <-- Add this line at the very top
+"use client";
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
@@ -15,14 +15,6 @@ type Subject = {
   image_url: string | null;
   artsteps_url: string | null;
   teacher_id: string;
-};
-
-type Booking = {
-  id: string;
-  subject_id: string;
-  date: string;
-  time: string;
-  name: string;
 };
 
 /** Simple trash outline icon */
@@ -44,8 +36,6 @@ export default function TeacherDashboard() {
   const [showLogout, setShowLogout] = useState(false); // 👈 toggle dropdown
   const [showCalendar, setShowCalendar] = useState(false); // 👈 toggle calendar visibility
   const [selectedSubjectId, setSelectedSubjectId] = useState<string | null>(null); // 👈 store selected subject for the calendar
-  const [currentDate, setCurrentDate] = useState(new Date()); // 👈 current date for calendar
-  const [bookings, setBookings] = useState<Booking[]>([]); // 👈 store bookings for the selected month
   const [subjects, setSubjects] = useState<Subject[]>([]); // 👈 store subjects
   const [loading, setLoading] = useState(true);
   
@@ -100,54 +90,6 @@ export default function TeacherDashboard() {
   const handleScheduleClick = (subjectId: string) => {
     setSelectedSubjectId(subjectId);
     setShowCalendar(true);
-  };
-
-  // Load bookings for the current month
-  const loadBookings = async () => {
-    if (!selectedSubjectId) return;
-
-    const startOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
-    const endOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
-
-    const { data, error } = await supabase
-      .from("bookings")
-      .select("*")
-      .eq("subject_id", selectedSubjectId)
-      .gte("date", startOfMonth.toISOString().split('T')[0])
-      .lte("date", endOfMonth.toISOString().split('T')[0]);
-
-    if (error) {
-      alert(error.message);
-    } else {
-      setBookings(data as Booking[]);
-    }
-  };
-
-  useEffect(() => {
-    if (showCalendar) loadBookings(); // Load bookings whenever calendar is shown
-  }, [currentDate, showCalendar, selectedSubjectId]);
-
-  // Change the month
-  const changeMonth = (direction: number) => {
-    const newDate = new Date(currentDate);
-    newDate.setMonth(currentDate.getMonth() + direction);
-    setCurrentDate(newDate);
-  };
-
-  // Add a booking
-  const handleBookingSubmit = async (date: string, time: string, name: string) => {
-    if (!selectedSubjectId) return;
-
-    const { error } = await supabase
-      .from("bookings")
-      .insert([{ subject_id: selectedSubjectId, date, time, name }]);
-
-    if (error) {
-      alert(error.message);
-    } else {
-      alert("Booking saved!");
-      loadBookings(); // Refresh bookings after saving
-    }
   };
 
   if (loading) {
