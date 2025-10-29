@@ -96,6 +96,12 @@ export default function TeacherDashboard() {
     alert("Subject deleted.");
   };
 
+  // Handle showing the calendar when "Schedule" is clicked
+  const handleScheduleClick = (subjectId: string) => {
+    setSelectedSubjectId(subjectId);
+    setShowCalendar(true);
+  };
+
   // Load bookings for the current month
   const loadBookings = async () => {
     if (!selectedSubjectId) return;
