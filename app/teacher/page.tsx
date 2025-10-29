@@ -1,5 +1,3 @@
-"use client";
-
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -24,19 +22,6 @@ type Booking = {
   time: string;
   name: string;
 };
-
-/** Simple trash outline icon */
-function TrashIcon(props: React.SVGProps<SVGSVGElement>) {
-  return (
-    <svg viewBox="0 0 24 24" width="22" height="22" {...props}>
-      <path
-        d="M3 6h18M9 6V4h6v2M7 6l1 14a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2L17 6M10 11v6M14 11v6"
-        stroke="currentColor" strokeWidth={2} fill="none"
-        strokeLinecap="round" strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
 
 export default function TeacherDashboard() {
   const router = useRouter();
@@ -75,9 +60,25 @@ export default function TeacherDashboard() {
     })();
   }, [router]);
 
-  const handleScheduleClick = (subjectId: string) => {
-    setSelectedSubjectId(subjectId);
-    setShowCalendar(true);
+  // Handle subject deletion
+  const handleDelete = async (subject: Subject) => {
+    if (!userName) return;
+    const ok = window.confirm(`Delete "${subject.title}"? This cannot be undone.`);
+    if (!ok) return;
+
+    const { error } = await supabase
+      .from("subjects")
+      .delete()
+      .eq("id", subject.id)
+      .eq("teacher_id", userName);
+
+    if (error) {
+      alert(error.message);
+      return;
+    }
+    
+    setSubjects(prev => prev.filter(s => s.id !== subject.id));
+    alert("Subject deleted.");
   };
 
   // Load bookings for the current month
@@ -150,31 +151,6 @@ export default function TeacherDashboard() {
 
   return (
     <div style={{ width: "95%", maxWidth: 1150, margin: "0 auto" }}>
-      {/* === TOP BAR === */}
-      <div className="topbar">
-        <div className="brand-block">
-          <h1 className="amv-title">AURORA MIND VERSE</h1>
-          <p className="amv-subtitle">STEP INTO THE NEW ERA</p>
-        </div>
-
-        <div className="nav-right">
-          <div className="nav-links">
-            <Link href="/about">About Us</Link>
-            &nbsp;&nbsp;
-            <Link href="/contact">Contact</Link>
-          </div>
-
-          <div className="profile-container">
-            <button className="profile-pill" onClick={() => setShowLogout(v => !v)}>
-              <span className="profile-icon">👤</span> {userName}
-            </button>
-            {showLogout && (
-              <button className="logout-btn" onClick={handleLogout}>LOG OUT</button>
-            )}
-          </div>
-        </div>
-      </div>
-
       {/* === SUBJECTS === */}
       <div style={{ width: "90%", margin: "18px auto 0 auto" }}>
         <h2 style={{ margin: "12px 0 16px 0" }}>My Subject</h2>
