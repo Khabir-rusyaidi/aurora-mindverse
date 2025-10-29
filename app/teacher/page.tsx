@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
@@ -32,21 +32,20 @@ function TrashIcon(props: React.SVGProps<SVGSVGElement>) {
 
 export default function TeacherDashboard() {
   const router = useRouter();
-  const userName = useCurrentUser(); // 👈 shows FIRDAUS/TAY etc.
+  const userName = useCurrentUser();                   // 👈 shows FIRDAUS/TAY etc.
   const [showLogout, setShowLogout] = useState(false); // 👈 toggle dropdown
-  const [showCalendar, setShowCalendar] = useState(false); // 👈 toggle calendar visibility
-  const [selectedSubjectId, setSelectedSubjectId] = useState<string | null>(null); // 👈 store selected subject for the calendar
-  const [subjects, setSubjects] = useState<Subject[]>([]); // 👈 store subjects
-  const [loading, setLoading] = useState(true);
-  
-  // Handle logout
+
   async function handleLogout() {
     await supabase.auth.signOut();
     router.replace("/");
   }
 
+  const [myId, setMyId] = useState<string | null>(null);
+  const [subjects, setSubjects] = useState<Subject[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // Load current user + subjects
   useEffect(() => {
-    // Fetch current user and subjects
     (async () => {
       const { data: userRes, error: userErr } = await supabase.auth.getUser();
       const u = userRes?.user;
@@ -54,6 +53,8 @@ export default function TeacherDashboard() {
 
       const role = (u.user_metadata as UserMeta)?.role;
       if (role !== "teacher") { router.replace("/"); return; }
+
+      setMyId(u.id);
 
       const { data: rows, error } = await supabase
         .from("subjects")
@@ -65,9 +66,9 @@ export default function TeacherDashboard() {
     })();
   }, [router]);
 
-  // Handle subject deletion
+  // Delete (owner only; RLS enforces too)
   const handleDelete = async (subject: Subject) => {
-    if (!userName) return;
+    if (!myId) return;
     const ok = window.confirm(`Delete "${subject.title}"? This cannot be undone.`);
     if (!ok) return;
 
@@ -75,21 +76,11 @@ export default function TeacherDashboard() {
       .from("subjects")
       .delete()
       .eq("id", subject.id)
-      .eq("teacher_id", userName);
+      .eq("teacher_id", myId);
 
-    if (error) {
-      alert(error.message);
-      return;
-    }
-    
+    if (error) { alert(error.message); return; }
     setSubjects(prev => prev.filter(s => s.id !== subject.id));
     alert("Subject deleted.");
-  };
-
-  // Handle showing the calendar when "Schedule" is clicked
-  const handleScheduleClick = (subjectId: string) => {
-    setSelectedSubjectId(subjectId);
-    setShowCalendar(true);
   };
 
   if (loading) {
@@ -114,6 +105,50 @@ export default function TeacherDashboard() {
 
   return (
     <div style={{ width: "95%", maxWidth: 1150, margin: "0 auto" }}>
+      {/* === TOP BAR === */}
+      <div className="topbar">
+        <div className="brand-block">
+          <h1 className="amv-title">AURORA MIND VERSE</h1>
+          <p className="amv-subtitle">STEP INTO THE NEW ERA</p>
+        </div>
+
+        <div className="nav-right">
+          <div className="nav-links">
+            <Link href="/about">About Us</Link>
+            &nbsp;&nbsp;
+            <Link href="/contact">Contact</Link>
+          </div>
+
+          <div className="profile-container">
+            <button className="profile-pill" onClick={() => setShowLogout(v => !v)}>
+              <span className="profile-icon">👤</span> {userName}
+            </button>
+            {showLogout && (
+              <button className="logout-btn" onClick={handleLogout}>LOG OUT</button>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* === WELCOME === */}
+      <div className="welcome-section">
+        <h2 className="welcome-title">Welcome To Our Application</h2>
+        <hr className="divider" />
+        <p className="welcome-text">
+          Through this website platform, students will not only read or watch learning materials passively but
+          they will also be able to walk inside a virtual world like a video game to explore the topics provided.
+        </p>
+
+        <div className="actions-right below-right">
+          <a className="pill-btn" href="https://metasteps.com/" target="_blank" rel="noreferrer">
+            <span className="plus">+</span> Create Metasteps
+          </a>
+          <Link href="/teacher/add-subject" className="pill-btn">
+            <span className="plus">+</span> Add Subject
+          </Link>
+        </div>
+      </div>
+
       {/* === SUBJECTS === */}
       <div style={{ width: "90%", margin: "18px auto 0 auto" }}>
         <h2 style={{ margin: "12px 0 16px 0" }}>My Subject</h2>
@@ -131,7 +166,7 @@ export default function TeacherDashboard() {
             </div>
 
             <div className="subject-actions">
-              {s.teacher_id === userName ? (
+              {s.teacher_id === myId ? (
                 <>
                   <Link className="edit-link" href={`/teacher/subject/${s.id}/edit`}>
                     <span style={{ marginRight: 6 }}>✎</span> Edit
@@ -146,69 +181,25 @@ export default function TeacherDashboard() {
                     <TrashIcon className="trash-svg" />
                     <span>Delete</span>
                   </button>
-                  {/* Add Schedule button */}
-                  <button
-                    className="schedule-link"
-                    onClick={() => handleScheduleClick(s.id)}
-                  >
-                    📅 Schedule
-                  </button>
                 </>
               ) : (
                 <span style={{ opacity: 0.7, fontSize: 12 }}>by another teacher</span>
               )}
+
+              <button
+                className="enter-btn"
+                onClick={() =>
+                  s.artsteps_url
+                    ? window.open(s.artsteps_url, "_blank")
+                    : alert("No Artsteps link yet. Add it in Edit.")
+                }
+              >
+                ENTER SUBJECT
+              </button>
             </div>
           </div>
         ))}
       </div>
-
-      {/* === CALENDAR UI === */}
-      {showCalendar && (
-        <div className="calendar">
-          <div className="calendar-header">
-            <button onClick={() => changeMonth(-1)}>&lt;</button>
-            <span>{currentDate.toLocaleString('default', { month: 'long', year: 'numeric' })}</span>
-            <button onClick={() => changeMonth(1)}>&gt;</button>
-          </div>
-
-          <div className="calendar-days">
-            {Array.from({ length: 31 }, (_, day) => {
-              const date = new Date(currentDate.getFullYear(), currentDate.getMonth(), day + 1);
-              const dateString = date.toISOString().split('T')[0];
-              const isBooked = bookings.some(b => b.date === dateString);
-
-              return (
-                <div
-                  key={day}
-                  className={`calendar-day ${isBooked ? 'booked' : ''}`}
-                  onClick={() => loadBookings()}
-                >
-                  {day + 1}
-                </div>
-              );
-            })}
-          </div>
-
-          {bookings.length > 0 && (
-            <div className="booking-details">
-              <h3>Bookings for {currentDate.toLocaleDateString()}</h3>
-              <ul>
-                {bookings.map((booking, index) => (
-                  <li key={index}>
-                    {booking.name} ({booking.time})
-                  </li>
-                ))}
-              </ul>
-              {/* Booking form */}
-              <div>
-                <input type="text" placeholder="Name" />
-                <input type="time" />
-                <button>Save</button>
-              </div>
-            </div>
-          )}
-        </div>
-      )}
     </div>
   );
 }
