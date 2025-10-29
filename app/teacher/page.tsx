@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
@@ -17,6 +17,7 @@ type Subject = {
   teacher_id: string;
 };
 
+/** Simple trash outline icon */
 function TrashIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
     <svg viewBox="0 0 24 24" width="22" height="22" {...props}>
@@ -31,17 +32,17 @@ function TrashIcon(props: React.SVGProps<SVGSVGElement>) {
 
 export default function TeacherDashboard() {
   const router = useRouter();
-  const userName = useCurrentUser();  // 👈 shows FIRDAUS/TAY etc.
+  const userName = useCurrentUser();                   // 👈 shows FIRDAUS/TAY etc.
   const [showLogout, setShowLogout] = useState(false); // 👈 toggle dropdown
-  const [myId, setMyId] = useState<string | null>(null);
-  const [subjects, setSubjects] = useState<Subject[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [role, setRole] = useState<string | null>(null);
 
   async function handleLogout() {
     await supabase.auth.signOut();
     router.replace("/");
   }
+
+  const [myId, setMyId] = useState<string | null>(null);
+  const [subjects, setSubjects] = useState<Subject[]>([]);
+  const [loading, setLoading] = useState(true);
 
   // Load current user + subjects
   useEffect(() => {
@@ -53,7 +54,6 @@ export default function TeacherDashboard() {
       const role = (u.user_metadata as UserMeta)?.role;
       if (role !== "teacher") { router.replace("/"); return; }
 
-      setRole(role);
       setMyId(u.id);
 
       const { data: rows, error } = await supabase
@@ -69,7 +69,7 @@ export default function TeacherDashboard() {
   // Delete (owner only; RLS enforces too)
   const handleDelete = async (subject: Subject) => {
     if (!myId) return;
-    const ok = window.confirm(`Delete "${subject.title}"? This cannot be undone.`);
+    const ok = window.confirm(Delete "${subject.title}"? This cannot be undone.);
     if (!ok) return;
 
     const { error } = await supabase
@@ -146,12 +146,6 @@ export default function TeacherDashboard() {
           <Link href="/teacher/add-subject" className="pill-btn">
             <span className="plus">+</span> Add Subject
           </Link>
-          {/* Only show Schedule button for teachers */}
-          {role === "teacher" && (
-            <Link href="/teacher/schedule" className="pill-btn">
-              <span className="plus">+</span> Schedule
-            </Link>
-          )}
         </div>
       </div>
 
@@ -174,7 +168,7 @@ export default function TeacherDashboard() {
             <div className="subject-actions">
               {s.teacher_id === myId ? (
                 <>
-                  <Link className="edit-link" href={`/teacher/subject/${s.id}/edit`}>
+                  <Link className="edit-link" href={/teacher/subject/${s.id}/edit}>
                     <span style={{ marginRight: 6 }}>✎</span> Edit
                   </Link>
 
@@ -182,7 +176,7 @@ export default function TeacherDashboard() {
                     type="button"
                     className="delete-link"
                     onClick={() => handleDelete(s)}
-                    aria-label={`Delete ${s.title}`}
+                    aria-label={Delete ${s.title}}
                   >
                     <TrashIcon className="trash-svg" />
                     <span>Delete</span>
