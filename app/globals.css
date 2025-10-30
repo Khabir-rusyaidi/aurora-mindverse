@@ -1133,16 +1133,16 @@ body.amv-fullscreen-about > * {
 }
 .schedule-btn {
   background-color: transparent; /* No background */
-  color: #007bff;  /* Matching the blue text color from your image */
-  padding: 0;  /* No padding, to avoid extra space around the text */
+  color: #000000;  /* Black text color */
+  padding: 0;  /* No padding */
   border: none; /* No border */
   font-size: 16px;  /* Adjust font size */
-  cursor: pointer;  /* Cursor pointer to indicate it's clickable */
-  font-weight: bold; /* Bold text for emphasis */
-  text-decoration: underline; /* Underline text for clearer click action */
+  cursor: pointer;  /* Pointer cursor on hover */
+  font-weight: bold; /* Bold text */
+  text-decoration: none; /* No underline */
 }
 
 .schedule-btn:hover {
-  color: #0056b3;  /* Darker blue color when hovered */
-  text-decoration: none;  /* Remove underline on hover */
+  color: #333333;  /* Darker black on hover */
 }
+
