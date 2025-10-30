@@ -181,6 +181,11 @@ export default function TeacherDashboard() {
                     <TrashIcon className="trash-svg" />
                     <span>Delete</span>
                   </button>
+
+                  {/* Add Schedule Button */}
+                  <Link href={`/teacher/schedule/${s.id}`}>
+                    <button className="schedule-btn">Schedule</button>
+                  </Link>
                 </>
               ) : (
                 <span style={{ opacity: 0.7, fontSize: 12 }}>by another teacher</span>
