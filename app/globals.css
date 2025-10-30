@@ -1131,54 +1131,18 @@ body.amv-fullscreen-about > * {
   max-width: none !important;
   width: 100% !important;
 }
-.schedule-page {
-  background-color: #e0f7fa;
-  padding: 20px;
-}
-
 .schedule-btn {
-  background-color: #007bff;
-  color: white;
-  padding: 10px;
-  border-radius: 5px;
-  border: none;
+  background-color: transparent; /* No background */
+  color: #007bff;  /* Matching the blue text color from your image */
+  padding: 0;  /* No padding, to avoid extra space around the text */
+  border: none; /* No border */
+  font-size: 16px;  /* Adjust font size */
+  cursor: pointer;  /* Cursor pointer to indicate it's clickable */
+  font-weight: bold; /* Bold text for emphasis */
+  text-decoration: underline; /* Underline text for clearer click action */
 }
 
-.calendar {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 10px;
-  margin-top: 20px;
-}
-
-.calendar-day {
-  background-color: #f0f0f0;
-  padding: 20px;
-  text-align: center;
-  cursor: pointer;
-  border-radius: 5px;
-}
-
-.calendar-day.selected {
-  background-color: #81c784;
-}
-
-.booking-details input {
-  padding: 8px;
-  margin: 10px 0;
-  width: 100%;
-  border-radius: 5px;
-}
-
-.booking-info p {
-  margin: 5px 0;
-}
-
-button {
-  padding: 10px;
-  background-color: #007bff;
-  color: white;
-  border-radius: 5px;
-  border: none;
-  cursor: pointer;
+.schedule-btn:hover {
+  color: #0056b3;  /* Darker blue color when hovered */
+  text-decoration: none;  /* Remove underline on hover */
 }

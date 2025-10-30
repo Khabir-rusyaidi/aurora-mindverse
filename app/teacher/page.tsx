@@ -182,8 +182,8 @@ export default function TeacherDashboard() {
                     <span>Delete</span>
                   </button>
 
-                  {/* Add Schedule Button */}
-                  <Link href={`/teacher/schedule/${s.id}`}>
+                  {/* Updated Schedule Button */}
+                  <Link href={`/teacher/subject/${s.id}/schedule`}>
                     <button className="schedule-btn">Schedule</button>
                   </Link>
                 </>
