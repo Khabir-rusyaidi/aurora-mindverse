@@ -36,25 +36,27 @@ function SubjectSchedule({ subjectId }: { subjectId: string }) {
   const [userName, setUserName] = useState("USER");
   useEffect(() => { (async () => { const { data } = await supabase.auth.getUser(); setUserName(displayName(data?.user)); })(); }, []);
 
-  /* calendar + bookings (fixed to JAN 2025 to mirror screenshot, default select 20th) */
+  /* calendar + bookings (fixed to Jan 2025 like reference) */
   const [monthCursor, setMonthCursor] = useState(() => new Date(2025, 0, 1));
   const [selectedDate, setSelectedDate] = useState(() => new Date(2025, 0, 20));
   const [bookings, setBookings] = useState<Booking[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading,   setLoading]   = useState(true);
+  const [error,     setError]     = useState("");
+
+  /* form state – 24h text to avoid am/pm rendering */
   const [name, setName] = useState("");
   const [startTime, setStartTime] = useState("00:00");
-  const [endTime, setEndTime] = useState("00:00");
-  const [error, setError] = useState("");
+  const [endTime, setEndTime]     = useState("00:00");
 
   const monthName = monthCursor.toLocaleString(undefined, { month: "long" }).toUpperCase();
-  const yearNum = monthCursor.getFullYear();
-  const days = daysInMonth(monthCursor);
+  const yearNum   = monthCursor.getFullYear();
+  const days      = daysInMonth(monthCursor);
 
   async function loadDay() {
     if (!subjectId) return;
     setLoading(true);
     const dayStart = new Date(selectedDate); dayStart.setHours(0,0,0,0);
-    const dayEnd = new Date(selectedDate);   dayEnd.setHours(23,59,59,999);
+    const dayEnd   = new Date(selectedDate); dayEnd.setHours(23,59,59,999);
     const { data, error } = await supabase
       .from("bookings")
       .select("*")
@@ -79,10 +81,16 @@ function SubjectSchedule({ subjectId }: { subjectId: string }) {
     setSelectedDate(new Date(d.getFullYear(), d.getMonth(), Math.min(selectedDate.getDate(), endOfMonth(d).getDate())));
   }
 
+  function validHHMM(v: string) {
+    return /^\d{2}:\d{2}$/.test(v) && Number(v.slice(0,2)) < 24 && Number(v.slice(3,5)) < 60;
+  }
+
   async function onSave(e: React.FormEvent) {
     e.preventDefault();
     setError("");
     if (!name.trim()) { setError("Please enter NAME."); return; }
+    if (!validHHMM(startTime) || !validHHMM(endTime)) { setError("Time must be HH:MM (24h)."); return; }
+
     const s = withTime(selectedDate, startTime);
     const eTime = withTime(selectedDate, endTime);
     if (eTime <= s) { setError("End time must be after start time."); return; }
@@ -92,6 +100,7 @@ function SubjectSchedule({ subjectId }: { subjectId: string }) {
       return s.getTime() < be && eTime.getTime() > bs;
     });
     if (clash) { setError("Time overlaps an existing booking."); return; }
+
     const { error } = await supabase.from("bookings").insert({
       subject_id: subjectId, name: name.trim(),
       start_at: s.toISOString(), end_at: eTime.toISOString()
@@ -156,8 +165,10 @@ function SubjectSchedule({ subjectId }: { subjectId: string }) {
         <div className="book-card">
           <h1 className="book-title">BOOKING CLASS</h1>
 
+          {/* date – underline only */}
           <div className="book-date">{fmtLongUpper(selectedDate)}</div>
 
+          {/* single centered line: BOOKING : ... (NO extra lines anywhere) */}
           {!loading && (
             <div className="book-line">
               <span className="bld">BOOKING :</span>
@@ -174,8 +185,10 @@ function SubjectSchedule({ subjectId }: { subjectId: string }) {
             </div>
           )}
 
+          {/* exactly ONE rule between the lines above and the “BOOKING” subheading */}
           <div className="rule" />
 
+          {/* subheading – underline only */}
           <div className="book-sub">BOOKING</div>
 
           {error && <div className="err">{error}</div>}
@@ -187,27 +200,33 @@ function SubjectSchedule({ subjectId }: { subjectId: string }) {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 className="name-line"
+                placeholder=""
               />
             </div>
 
             <div className="row time-row">
               <span className="lab">TIME :</span>
+              {/* text inputs to force 24h look */}
               <input
-                type="time"
+                type="text"
+                inputMode="numeric"
+                pattern="^\d{2}:\d{2}$"
                 value={startTime}
                 onChange={(e) => setStartTime(e.target.value)}
-                step={60}
                 className="time-plain"
                 aria-label="Start time"
+                placeholder="00:00"
               />
               <span className="dash"> - </span>
               <input
-                type="time"
+                type="text"
+                inputMode="numeric"
+                pattern="^\d{2}:\d{2}$"
                 value={endTime}
                 onChange={(e) => setEndTime(e.target.value)}
-                step={60}
                 className="time-plain"
                 aria-label="End time"
+                placeholder="00:00"
               />
             </div>
 
@@ -219,7 +238,7 @@ function SubjectSchedule({ subjectId }: { subjectId: string }) {
       </div>
 
       <style jsx>{`
-        /* page base: inherit your global Poppins; DO NOT override */
+        /* page base – keep your Poppins; exact colors from your reference */
         .amv-root{min-height:100vh;background:#7cc9f5;color:#000}
 
         /* header bar */
@@ -232,7 +251,7 @@ function SubjectSchedule({ subjectId }: { subjectId: string }) {
         .amv-pill{background:#fff;border:1px solid rgba(0,0,0,.25);padding:8px 16px;border-radius:9999px;display:inline-flex;gap:8px;align-items:center;font-weight:900}
         .amv-dot{width:12px;height:12px;border-radius:9999px;background:#000;display:inline-block}
 
-        /* back arrow (top-left under bar) */
+        /* back arrow */
         .amv-back{max-width:1200px;margin:12px auto 0;padding:0 24px}
         .backbtn{font-size:28px;font-weight:900;color:#000;text-decoration:none}
 
@@ -247,28 +266,22 @@ function SubjectSchedule({ subjectId }: { subjectId: string }) {
         .year{justify-self:start;font-size:28px;font-weight:900;margin-left:10px}
         .labels{display:grid;grid-template-columns:repeat(7,1fr);text-align:center;font-size:18px;margin:12px 0}
         .days{display:grid;grid-template-columns:repeat(7,64px);gap:18px;justify-content:center}
-        .day{
-          width:64px;height:56px;
-          background:#fff;border:4px solid #000;border-radius:14px;
-          display:flex;align-items:center;justify-content:center;
-        }
+        .day{width:64px;height:56px;background:#fff;border:4px solid #000;border-radius:14px;display:flex;align-items:center;justify-content:center}
         .num{font-weight:900;font-size:22px;line-height:1}
-        /* selected day green pill exactly like screenshot */
         .sel .num{background:#7EFF85;border:3px solid #2A8F32;border-radius:10px;padding:2px 8px}
 
         /* booking card */
-        .book-card{
-          background:#4fb4f0;border:none;border-radius:28px;
-          padding:32px 30px 28px;display:flex;flex-direction:column
-        }
+        .book-card{background:#4fb4f0;border:none;border-radius:28px;padding:32px 30px 28px;display:flex;flex-direction:column}
         .book-title{font-size:42px;font-weight:900;text-align:center;margin:0 0 12px}
-        .book-date{
-          text-align:center;font-weight:900;margin-top:4px;margin-bottom:10px;
-          text-decoration:underline;text-underline-offset:4px
-        }
-        .book-line{font-weight:900;text-align:center;margin:6px 0 10px;white-space:pre-wrap}
+
+        /* underline ONLY on date + word BOOKING */
+        .book-date{text-align:center;font-weight:900;margin-top:4px;margin-bottom:10px;text-decoration:underline;text-underline-offset:4px}
+        .book-line{font-weight:900;text-align:center;margin:8px 0 10px}
         .bld{margin-right:6px}
+
+        /* single thick rule (no other lines) */
         .rule{height:3px;background:#000;width:100%;margin:12px 0 16px}
+
         .book-sub{text-align:center;text-decoration:underline;font-weight:900;margin-bottom:18px}
 
         .err{color:#b91c1c;text-align:center;font-weight:900;margin-bottom:10px}
@@ -276,24 +289,20 @@ function SubjectSchedule({ subjectId }: { subjectId: string }) {
         .book-form{max-width:760px;margin:0 auto}
         .row{display:flex;align-items:center;justify-content:center;gap:16px;margin-bottom:22px}
         .lab{font-weight:900;min-width:120px}
+
+        /* single underline line for NAME input, nothing else */
         .name-line{width:430px;border:none;border-bottom:4px solid #000;outline:none;background:transparent;height:36px}
 
-        /* time: show as plain text numbers but editable */
+        /* time shown as text (24h) */
         .time-row{gap:14px}
         .dash{font-weight:900}
         .time-plain{
           width:128px;border:none;background:transparent;outline:none;
           font: inherit;font-weight:900;font-size:20px;line-height:1.25;text-align:center;letter-spacing:.2px;padding:0;
-          -webkit-appearance: none;appearance: textfield;
         }
-        .time-plain::-webkit-calendar-picker-indicator{opacity:0;display:none}
-        .time-plain::-webkit-clear-button{display:none}
 
         .save-row{display:flex;justify-content:flex-end;padding-right:10px;margin-top:4px}
-        .save{
-          background:#2E59BA;color:#fff;border:none;border-radius:16px;
-          padding:12px 28px;font-weight:900;cursor:pointer
-        }
+        .save{background:#2E59BA;color:#fff;border:none;border-radius:16px;padding:12px 28px;font-weight:900;cursor:pointer}
       `}</style>
     </div>
   );
