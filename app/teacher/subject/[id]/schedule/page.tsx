@@ -4,22 +4,17 @@ import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 
-/* ================= Helpers ================= */
-function endOfMonth(d: Date) {
-  return new Date(d.getFullYear(), d.getMonth() + 1, 0);
-}
-function daysInMonth(d: Date) {
-  const end = endOfMonth(d).getDate();
-  return Array.from({ length: end }, (_, i) => i + 1);
-}
+/* ============== Helpers ============== */
+function endOfMonth(d: Date) { return new Date(d.getFullYear(), d.getMonth() + 1, 0); }
+function daysInMonth(d: Date) { return Array.from({ length: endOfMonth(d).getDate() }, (_, i) => i + 1); }
 function isoDateOnly(d: Date) {
   const y = d.getFullYear();
   const m = String(d.getMonth() + 1).padStart(2, "0");
   const da = String(d.getDate()).padStart(2, "0");
   return `${y}-${m}-${da}`;
 }
-function withTime(date: Date, timeHHMM: string) {
-  const [hh, mm] = timeHHMM.split(":").map(Number);
+function withTime(date: Date, hhmm: string) {
+  const [hh, mm] = hhmm.split(":").map(Number);
   const d = new Date(date);
   d.setHours(hh, mm, 0, 0);
   return d;
@@ -30,33 +25,26 @@ function fmt24(d: Date) {
   return `${hh}:${mm}`;
 }
 function fmtLongUpper(d: Date) {
-  return d
-    .toLocaleDateString(undefined, { day: "2-digit", month: "long", year: "numeric" })
-    .toUpperCase();
+  return d.toLocaleDateString(undefined, { day: "2-digit", month: "long", year: "numeric" }).toUpperCase();
 }
-function getDisplayName(u: any | null): string {
-  if (!u) return "USER";
-  const md = u.user_metadata || {};
-  return (
-    md.name ||
-    md.full_name ||
-    md.username ||
-    (u.email ? u.email.split("@")[0] : "USER")
-  ).toString();
+function getDisplayName(user: any | null) {
+  if (!user) return "USER";
+  const md = user.user_metadata || {};
+  return (md.name || md.full_name || md.username || (user.email ? user.email.split("@")[0] : "USER")).toString();
 }
 
 type Booking = {
   id: string;
   subject_id: string;
   name: string;
-  start_at: string; // ISO
-  end_at: string;   // ISO
+  start_at: string;
+  end_at: string;
 };
 
-/* =============== Inner Page =============== */
+/* ============== Page Body ============== */
 function SubjectScheduleInner({ subjectId }: { subjectId: string }) {
-  // Header user name (from Supabase auth)
-  const [userName, setUserName] = useState<string>("USER");
+  // Header user name
+  const [userName, setUserName] = useState("USER");
   useEffect(() => {
     (async () => {
       const { data } = await supabase.auth.getUser();
@@ -65,30 +53,30 @@ function SubjectScheduleInner({ subjectId }: { subjectId: string }) {
   }, []);
 
   // UI state
-  const [monthCursor, setMonthCursor] = useState<Date>(() => new Date(2025, 0, 1)); // JAN 2025
-  const [selectedDate, setSelectedDate] = useState<Date>(() => new Date(2025, 0, 20));
+  const [monthCursor, setMonthCursor] = useState(() => new Date(2025, 0, 1)); // Jan 2025
+  const [selectedDate, setSelectedDate] = useState(() => new Date(2025, 0, 20));
   const [bookings, setBookings] = useState<Booking[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [loading, setLoading] = useState(true);
 
-  // Form state
-  const [name, setName] = useState<string>("");
-  const [startTime, setStartTime] = useState<string>("00:00");
-  const [endTime, setEndTime] = useState<string>("00:00");
-  const [error, setError] = useState<string>("");
+  // Form
+  const [name, setName] = useState("");
+  const [startTime, setStartTime] = useState("00:00");
+  const [endTime, setEndTime] = useState("00:00");
+  const [error, setError] = useState("");
 
   // Derived
   const monthName = monthCursor.toLocaleString(undefined, { month: "long" }).toUpperCase();
   const yearNum = monthCursor.getFullYear();
   const days = daysInMonth(monthCursor);
 
-  // Load bookings for the selected day (subject-scoped)
+  // Load bookings (day + subject)
   async function loadBookingsForSelectedDay() {
     if (!subjectId || !selectedDate) return;
     setLoading(true);
     setError("");
 
     const dayStart = new Date(selectedDate); dayStart.setHours(0, 0, 0, 0);
-    const dayEnd   = new Date(selectedDate); dayEnd.setHours(23, 59, 59, 999);
+    const dayEnd = new Date(selectedDate);   dayEnd.setHours(23, 59, 59, 999);
 
     const { data, error } = await supabase
       .from("bookings")
@@ -102,13 +90,9 @@ function SubjectScheduleInner({ subjectId }: { subjectId: string }) {
     setBookings(data ?? []);
     setLoading(false);
   }
+  useEffect(() => { loadBookingsForSelectedDay(); /* eslint-disable-next-line */ }, [subjectId, selectedDate]);
 
-  useEffect(() => {
-    loadBookingsForSelectedDay();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [subjectId, selectedDate]);
-
-  // Actions
+  // Month nav
   function gotoPrevMonth() {
     const d = new Date(monthCursor);
     d.setMonth(d.getMonth() - 1);
@@ -124,6 +108,7 @@ function SubjectScheduleInner({ subjectId }: { subjectId: string }) {
     setSelectedDate(new Date(d.getFullYear(), d.getMonth(), Math.min(selectedDate.getDate(), last)));
   }
 
+  // Save booking
   async function onSave(e: React.FormEvent) {
     e.preventDefault();
     setError("");
@@ -133,11 +118,11 @@ function SubjectScheduleInner({ subjectId }: { subjectId: string }) {
     const eTime = withTime(selectedDate, endTime);
     if (eTime <= s) { setError("End time must be after start time."); return; }
 
-    // Prevent overlaps (client check)
+    // overlap check
     const clash = bookings.some(b => {
       const bs = new Date(b.start_at).getTime();
       const be = new Date(b.end_at).getTime();
-      return s.getTime() < be && eTime.getTime() > bs; // overlap
+      return s.getTime() < be && eTime.getTime() > bs;
     });
     if (clash) { setError("Time overlaps an existing booking."); return; }
 
@@ -145,21 +130,17 @@ function SubjectScheduleInner({ subjectId }: { subjectId: string }) {
       subject_id: subjectId,
       name: name.trim(),
       start_at: s.toISOString(),
-      end_at: eTime.toISOString()
+      end_at: eTime.toISOString(),
     });
-
     if (error) { setError(error.message); return; }
 
-    setName("");
-    setStartTime("00:00");
-    setEndTime("00:00");
+    setName(""); setStartTime("00:00"); setEndTime("00:00");
     await loadBookingsForSelectedDay();
   }
 
-  /* =============== UI (matches your target 100%) =============== */
   return (
     <div className="min-h-screen w-full" style={{ background: "#7cc9f5" }}>
-      {/* Header (exact layout) */}
+      {/* Header */}
       <div className="w-full" style={{ background: "#39a8f0" }}>
         <div className="max-w-[1100px] mx-auto py-4 px-6 flex items-center justify-between">
           <div>
@@ -169,7 +150,6 @@ function SubjectScheduleInner({ subjectId }: { subjectId: string }) {
           <div className="flex items-center gap-8 text-sm font-semibold">
             <Link href="/about" className="hover:underline">About Us</Link>
             <Link href="/contact" className="hover:underline">Contact</Link>
-            {/* User pill with dynamic name */}
             <div className="flex items-center gap-2 bg-white px-4 py-1 rounded-full font-bold shadow">
               <span className="inline-block w-5 h-5 rounded-full bg-black" />
               <span className="uppercase">{userName}</span>
@@ -226,10 +206,7 @@ function SubjectScheduleInner({ subjectId }: { subjectId: string }) {
         </div>
 
         {/* Booking panel */}
-        <div
-          className="rounded-[28px] p-8 shadow-lg"
-          style={{ background: "#56B1F5", border: "1px solid #000000" }}
-        >
+        <div className="rounded-[28px] p-8 shadow-lg" style={{ background: "#56B1F5", border: "1px solid #000000" }}>
           <h1 className="text-3xl font-extrabold text-center mb-6 tracking-wide">BOOKING CLASS</h1>
 
           <div className="text-center mb-6">
@@ -306,13 +283,13 @@ function SubjectScheduleInner({ subjectId }: { subjectId: string }) {
   );
 }
 
-/* ===== Default export (IMPORTANT: match your folder name) ===== */
-/* If your folder is app/teacher/subject/[id]/schedule/page.tsx -> keep this: */
+/* ===== Default export — match your folder name ===== */
+/* If your folder is [id] (as in your screenshot), keep this: */
 export default function Page({ params }: { params: { id: string } }) {
   return <SubjectScheduleInner subjectId={params.id} />;
 }
 
-/* If your folder is [subjectId] instead, use this version:
+/* If your folder is [subjectId], use this instead:
 export default function Page({ params }: { params: { subjectId: string } }) {
   return <SubjectScheduleInner subjectId={params.subjectId} />;
 }
