@@ -38,7 +38,7 @@ function SubjectSchedule({ subjectId }: { subjectId: string }) {
   const [userName, setUserName] = useState("USER");
   useEffect(() => { (async () => { const { data } = await supabase.auth.getUser(); setUserName(displayName(data?.user)); })(); }, []);
 
-  // Fixed to JAN 2025 like your reference
+  // Fixed to JAN 2025 (20th selected) – like your mock
   const [monthCursor, setMonthCursor] = useState(() => new Date(2025, 0, 1));
   const [selectedDate, setSelectedDate] = useState(() => new Date(2025, 0, 20));
   const [bookings, setBookings] = useState<Booking[]>([]);
@@ -184,10 +184,7 @@ function SubjectSchedule({ subjectId }: { subjectId: string }) {
             </div>
           )}
 
-          {/* EXACTLY one thick rule (full width inside card) */}
           <div className="rule" />
-
-          {/* The word BOOKING, underlined and centered */}
           <div className="book-sub">BOOKING</div>
 
           {error && <div className="err">{error}</div>}
@@ -245,17 +242,13 @@ function SubjectSchedule({ subjectId }: { subjectId: string }) {
 #amv-schedule-scope .book-date,
 #amv-schedule-scope .book-line,
 #amv-schedule-scope .book-sub { border: none !important; box-shadow: none !important; background: transparent !important; }
-#amv-schedule-scope .book-line::before,
-#amv-schedule-scope .book-line::after,
-#amv-schedule-scope .book-sub::before,
-#amv-schedule-scope .book-sub::after { content: none !important; display: none !important; border: 0 !important; }
 #amv-schedule-scope input { border: none !important; box-shadow: none !important; background: transparent !important; text-transform: none !important; }
 
-/* ======== exact visual (with BIGGER date squares) ======== */
+/* ======== page visuals ======== */
 .amv-root{min-height:100vh;background:#7cc9f5;color:#000}
 
 .amv-topbar{background:#39a8f0;padding:16px 32px;display:flex;justify-content:space-between;align-items:center}
-.amv-brand{font-size:32px;font-weight:900;letter-spacing:.2px}
+.amv-brand{font-size:32px;font-weight:900}
 .amv-tag{margin-top:2px;font-size:14px;font-weight:700}
 .amv-right{display:flex;align-items:center;gap:24px}
 .toplink{color:#000;text-decoration:none;font-weight:700}
@@ -272,38 +265,37 @@ function SubjectSchedule({ subjectId }: { subjectId: string }) {
 .cal-card{background:#ffffff;border:none;border-radius:28px;padding:22px 26px 28px}
 .cal-head{display:grid;grid-template-columns:44px 1fr auto 44px;align-items:center}
 .arrow{background:none;border:none;font-size:22px;font-weight:900;cursor:pointer}
-.title{justify-self:center;font-size:30px;font-weight:900;letter-spacing:.6px}
+.title{justify-self:center;font-size:30px;font-weight:900}
 .year{justify-self:start;font-size:30px;font-weight:900;margin-left:10px}
 .labels{display:grid;grid-template-columns:repeat(7,1fr);text-align:center;font-size:18px;margin:14px 0}
 
-/* >>> Bigger squares & tighter centering <<< */
+/* ---- DAY GRID (adjusted to keep digits fully inside tiles) ---- */
 .days{
   display:grid;
-  grid-template-columns:repeat(7, 86px); /* was 64px */
-  gap:24px;                               /* a bit more breathing room */
+  grid-template-columns:repeat(7, 84px); /* tile width */
+  gap:24px;
   justify-content:center;
 }
 .day{
-  width:86px;               /* was 64px */
-  height:72px;              /* was 56px */
+  width:84px;
+  height:68px;                /* shorter to center optically */
   background:#fff;
   border:4px solid #000;
-  border-radius:18px;       /* slightly larger radius to match bigger tile */
+  border-radius:16px;
   display:flex;
   align-items:center;
   justify-content:center;
 }
 .num{
   font-weight:900;
-  font-size:28px;          /* was 22px */
+  font-size:24px;            /* reduced so "29", "13" sit comfortably */
   line-height:1;
 }
-/* selected day badge unchanged, but scaled for bigger tile */
 .sel .num{
   background:#7EFF85;
   border:3px solid #2A8F32;
   border-radius:10px;
-  padding:4px 10px;        /* was 2px 8px */
+  padding:3px 8px;           /* scaled to fit inside 84x68 tile */
 }
 
 /* BOOKING CARD */
@@ -312,11 +304,7 @@ function SubjectSchedule({ subjectId }: { subjectId: string }) {
   padding:26px 30px 26px;display:flex;flex-direction:column
 }
 .book-title{font-size:40px;font-weight:900;text-align:center;margin:0 0 8px}
-
-.book-date{
-  text-align:center;font-weight:900;margin-top:4px;margin-bottom:12px;
-  text-decoration:underline;text-underline-offset:4px;text-decoration-thickness:2px
-}
+.book-date{text-align:center;font-weight:900;margin-top:4px;margin-bottom:12px;text-decoration:underline;text-underline-offset:4px;text-decoration-thickness:2px}
 .book-line{font-weight:900;text-align:center;margin:8px 0 10px}
 .rule{height:3px;background:#000;width:100%;margin:12px 0 16px;border-radius:2px}
 .book-sub{text-align:center;text-decoration:underline;text-underline-offset:4px;text-decoration-thickness:2px;font-weight:900;margin-bottom:18px}
