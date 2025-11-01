@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 
-/* ---------------- helpers ---------------- */
+/* ---------- helpers ---------- */
 function endOfMonth(d: Date) { return new Date(d.getFullYear(), d.getMonth() + 1, 0); }
 function daysInMonth(d: Date) { return Array.from({ length: endOfMonth(d).getDate() }, (_, i) => i + 1); }
 function isoDateOnly(d: Date) {
@@ -31,7 +31,7 @@ function displayName(user: any | null) {
 
 type Booking = { id: string; subject_id: string; name: string; start_at: string; end_at: string; };
 
-/* ---------------- page ---------------- */
+/* ---------- page ---------- */
 function SubjectSchedule({ subjectId }: { subjectId: string }) {
   const [userName, setUserName] = useState("USER");
   useEffect(() => { (async () => { const { data } = await supabase.auth.getUser(); setUserName(displayName(data?.user)); })(); }, []);
@@ -111,33 +111,33 @@ function SubjectSchedule({ subjectId }: { subjectId: string }) {
           <div className="amv-tag">STEP INTO THE NEW ERA</div>
         </div>
         <div className="amv-right">
-          <Link href="/about" className="amv-link">About Us</Link>
-          <Link href="/contact" className="amv-link">Contact</Link>
+          <Link href="/about" className="toplink">About Us</Link>
+          <Link href="/contact" className="toplink">Contact</Link>
           <div className="amv-pill"><span className="amv-dot" /><span>{userName}</span></div>
         </div>
       </div>
 
       {/* back arrow */}
       <div className="amv-back">
-        <Link href="/teacher" className="amv-backbtn">←</Link>
+        <Link href="/teacher" className="backbtn">←</Link>
       </div>
 
-      {/* main two columns */}
-      <div className="amv-grid">
+      {/* equal-height two-column layout */}
+      <div className="gridwrap">
         {/* calendar */}
         <div className="cal-card">
           <div className="cal-head">
-            <button onClick={prevMonth} className="cal-arrow">←</button>
-            <div className="cal-month">JANUARY</div>
-            <div className="cal-year">2025</div>
-            <button onClick={nextMonth} className="cal-arrow">→</button>
+            <button onClick={prevMonth} className="arrow">&larr;</button>
+            <div className="title">{monthName}</div>
+            <div className="year">{yearNum}</div>
+            <button onClick={nextMonth} className="arrow">&rarr;</button>
           </div>
 
-          <div className="cal-days-labels">
+          <div className="labels">
             <div>Su</div><div>Mo</div><div>Tu</div><div>We</div><div>Th</div><div>Fr</div><div>Sa</div>
           </div>
 
-          <div className="cal-grid">
+          <div className="days">
             {days.map((d) => {
               const cellDate = new Date(monthCursor.getFullYear(), monthCursor.getMonth(), d);
               const isSelected = isoDateOnly(cellDate) === isoDateOnly(selectedDate);
@@ -145,23 +145,23 @@ function SubjectSchedule({ subjectId }: { subjectId: string }) {
                 <button
                   key={d}
                   onClick={() => setSelectedDate(cellDate)}
-                  className={"day-btn" + (isSelected ? " sel" : "")}
+                  className={"day" + (isSelected ? " sel" : "")}
                 >
-                  <span>{d}</span>
+                  <span className="num">{d}</span>
                 </button>
               );
             })}
           </div>
         </div>
 
-        {/* booking card */}
+        {/* booking panel */}
         <div className="book-card">
           <h1 className="book-title">BOOKING CLASS</h1>
 
           <div className="book-date">{fmtLongUpper(selectedDate)}</div>
 
           <div className="book-line">
-            <span className="book-label">BOOKING :</span>
+            <span className="bld">BOOKING :</span>
             {loading ? (
               <span>  Loading…</span>
             ) : bookings.length === 0 ? (
@@ -182,77 +182,113 @@ function SubjectSchedule({ subjectId }: { subjectId: string }) {
           {error && <div className="err">{error}</div>}
 
           <form onSubmit={onSave} className="book-form">
-            <div className="form-row">
+            <div className="row">
               <span className="lab">NAME :</span>
-              <input value={name} onChange={(e) => setName(e.target.value)} className="name-inp" />
+              <input value={name} onChange={(e) => setName(e.target.value)} className="name-line" />
             </div>
 
-            <div className="form-row">
+            <div className="row">
               <span className="lab">TIME :</span>
-              <input type="time" value={startTime} onChange={(e) => setStartTime(e.target.value)} step={60} className="time-inp" />
+              {/* visually “text”, but actually inputs */}
+              <input
+                type="time"
+                value={startTime}
+                onChange={(e) => setStartTime(e.target.value)}
+                step={60}
+                className="time-plain"
+                aria-label="Start time"
+              />
               <span> - </span>
-              <input type="time" value={endTime} onChange={(e) => setEndTime(e.target.value)} step={60} className="time-inp" />
+              <input
+                type="time"
+                value={endTime}
+                onChange={(e) => setEndTime(e.target.value)}
+                step={60}
+                className="time-plain"
+                aria-label="End time"
+              />
             </div>
 
             <div className="save-row">
-              <button type="submit" className="save-btn">SAVE</button>
+              <button type="submit" className="save">SAVE</button>
             </div>
           </form>
         </div>
       </div>
 
-      {/* page-scoped CSS */}
+      {/* styles to match your mock exactly, with flat UI and editable “text-like” times */}
       <style jsx>{`
-        /* base */
-        .amv-root{min-height:100vh;background:#7cc9f5;color:#000;font-family:system-ui, -apple-system, Segoe UI, Roboto, Arial}
-        /* top bar */
-        .amv-topbar{background:#39a8f0;padding:14px 26px;display:flex;justify-content:space-between;align-items:center}
-        .amv-brand{font-size:28px;font-weight:900;letter-spacing:.3px}
+        .amv-root{min-height:100vh;background:#7cc9f5;color:#000;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial}
+        .amv-topbar{background:#39a8f0;padding:12px 24px;display:flex;justify-content:space-between;align-items:center}
+        .amv-brand{font-size:28px;font-weight:900;letter-spacing:.2px}
         .amv-tag{margin-top:-2px;font-size:12px;font-weight:700}
-        .amv-right{display:flex;align-items:center;gap:22px}
-        .amv-link{color:#3b3bbf;text-decoration:underline;font-weight:700}
-        .amv-pill{background:#fff;border:1px solid rgba(0,0,0,.2);padding:6px 14px;border-radius:9999px;display:inline-flex;gap:10px;align-items:center;font-weight:900}
-        .amv-dot{width:16px;height:16px;border-radius:9999px;background:#000;display:inline-block}
+        .amv-right{display:flex;align-items:center;gap:18px}
+        .toplink{color:#000;text-decoration:none;font-weight:700}
+        .toplink:hover{text-decoration:underline}
+        .amv-pill{background:#fff;border:1px solid rgba(0,0,0,.2);padding:6px 12px;border-radius:9999px;display:inline-flex;gap:8px;align-items:center;font-weight:900}
+        .amv-dot{width:14px;height:14px;border-radius:9999px;background:#000;display:inline-block}
 
-        /* back arrow */
-        .amv-back{max-width:1160px;margin:6px auto 0;padding:0 20px}
-        .amv-backbtn{display:inline-block;font-size:24px;font-weight:900;line-height:1;color:#000;text-decoration:none}
+        .amv-back{max-width:1160px;margin:10px auto 0;padding:0 24px}
+        .backbtn{font-size:26px;font-weight:900;color:#000;text-decoration:none}
 
-        /* main grid */
-        .amv-grid{max-width:1160px;margin:8px auto 40px;padding:0 20px;display:grid;grid-template-columns:548px minmax(0,1fr);gap:26px}
+        .gridwrap{max-width:1160px;margin:8px auto 40px;padding:0 24px;display:grid;grid-template-columns:520px minmax(0,1fr);gap:24px;align-items:stretch}
 
-        /* calendar card */
-        .cal-card{background:#8fd2fb;border:2px solid #000;border-radius:28px;padding:18px 22px}
-        .cal-head{display:grid;grid-template-columns:40px 1fr auto 40px;align-items:center;gap:8px;margin-bottom:8px}
-        .cal-arrow{font-size:22px;font-weight:900;background:transparent;border:1px solid #000;border-radius:6px;width:36px;height:24px;line-height:20px;cursor:pointer}
-        .cal-month{justify-self:center;font-size:22px;font-weight:900;letter-spacing:.5px}
-        .cal-year{justify-self:start;font-size:22px;font-weight:900;margin-left:8px}
-        .cal-days-labels{display:grid;grid-template-columns:repeat(7,1fr);text-align:center;font-size:14px;opacity:.9;margin:4px 0 8px}
-        .cal-grid{display:grid;grid-template-columns:repeat(7,76px);gap:18px;justify-content:center;padding:6px 0 8px}
-        .day-btn{position:relative;width:76px;height:64px;border:3px solid #000;border-radius:16px;background:#fff;font-weight:800;box-shadow:0 1px 0 rgba(0,0,0,.15)}
-        .day-btn>span{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:18px}
-        .day-btn.sel::after{content:"";position:absolute;right:7px;bottom:6px;width:22px;height:22px;border:3px solid #2a8f32;background:#8cf493;border-radius:9999px}
+        /* calendar */
+        .cal-card{background:#9bd8fb;border:2px solid #000;border-radius:28px;padding:18px 18px 22px}
+        .cal-head{display:grid;grid-template-columns:44px 1fr auto 44px;align-items:center}
+        .arrow{background:none;border:none;font-size:24px;font-weight:900;cursor:pointer}
+        .title{justify-self:center;font-size:22px;font-weight:900;letter-spacing:.5px}
+        .year{justify-self:start;font-size:22px;font-weight:900;margin-left:8px}
+        .labels{display:grid;grid-template-columns:repeat(7,1fr);text-align:center;font-size:14px;margin:8px 0 10px}
+        .days{display:grid;grid-template-columns:repeat(7,66px);gap:16px;justify-content:center}
+        .day{width:66px;height:58px;border:3px solid #000;border-radius:14px;background:#fff;display:flex;align-items:center;justify-content:center}
+        .num{font-weight:900;font-size:18px;line-height:1}
+        /* selected day looks like green bubble behind number (not a corner dot) */
+        .sel .num{background:#8cf493;border:3px solid #2a8f32;border-radius:12px;padding:2px 8px}
 
-        /* booking card */
-        .book-card{background:#56b1f5;border:2px solid #000;border-radius:28px;padding:26px 28px}
-        .book-title{font-size:38px;font-weight:900;text-align:center;margin:0 0 12px}
-        .book-date{text-align:center;text-decoration:underline;text-underline-offset:3px;font-weight:900;margin-bottom:10px}
+        /* booking */
+        .book-card{background:#56b1f5;border:2px solid #000;border-radius:28px;padding:26px 28px;display:flex;flex-direction:column}
+        .book-title{font-size:36px;font-weight:900;text-align:center;margin:0 0 10px}
+        .book-date{text-align:center;text-decoration:underline;text-underline-offset:3px;font-weight:900;margin-bottom:6px}
         .book-line{font-weight:900;text-align:center;white-space:pre-line}
-        .book-label{letter-spacing:.3px}
+        .bld{letter-spacing:.3px}
         .book-list{white-space:pre-line;line-height:1.8;font-weight:700}
-        .divider{height:3px;background:#000;margin:16px 0 12px}
-        .book-sub{text-align:center;text-decoration:underline;font-weight:900;margin-bottom:16px}
+        .divider{height:2px;background:#000;margin:16px 0 12px}
+        .book-sub{text-align:center;text-decoration:underline;font-weight:900;margin-bottom:14px}
 
         .err{color:#b91c1c;text-align:center;font-weight:900;margin-bottom:10px}
-
-        .book-form{max-width:540px;margin:0 auto}
-        .form-row{display:flex;align-items:center;justify-content:center;gap:14px;margin-bottom:18px}
+        .book-form{max-width:560px;margin:0 auto}
+        .row{display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:18px}
         .lab{font-weight:900;min-width:92px}
-        .name-inp{width:360px;border:none;border-bottom:3px solid #000;outline:none;background:transparent;height:36px}
-        .time-inp{border:2px solid #000;border-radius:10px;padding:8px 12px;height:40px}
+        .name-line{width:360px;border:none;border-bottom:3px solid #000;outline:none;background:transparent;height:34px}
+
+        /* time inputs styled as plain text */
+        .time-plain{
+          width:66px;       /* enough for 00:00 */
+          border:none;
+          background:transparent;
+          outline:none;
+          font: inherit;
+          font-weight:900;
+          text-align:center;
+          height:28px;
+          padding:0;
+          -webkit-appearance: none;
+          appearance: textfield;
+        }
+        /* hide the time picker icon on WebKit */
+        .time-plain::-webkit-calendar-picker-indicator{
+          opacity:0;
+          display:none;
+          -webkit-appearance:none;
+        }
+        /* hide spinners in Firefox */
+        .time-plain::-moz-focus-outer{ border:0; }
+        .time-plain::-ms-clear{ display:none; }
+        .time-plain::-webkit-clear-button{ display:none; }
 
         .save-row{display:flex;justify-content:flex-end;padding-right:6px}
-        .save-btn{background:#2E59BA;color:#fff;border:none;border-radius:14px;padding:10px 26px;font-weight:900;cursor:pointer}
+        .save{background:#2E59BA;color:#fff;border:none;border-radius:14px;padding:10px 26px;font-weight:900;cursor:pointer}
       `}</style>
     </div>
   );
