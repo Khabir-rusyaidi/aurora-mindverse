@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 
-/* ---------- helpers ---------- */
+/* ---------- helpers (unchanged UI; just logic) ---------- */
 function endOfMonth(d: Date) { return new Date(d.getFullYear(), d.getMonth() + 1, 0); }
 function daysInMonth(d: Date) { return Array.from({ length: endOfMonth(d).getDate() }, (_, i) => i + 1); }
 function isoDateOnly(d: Date) {
@@ -31,11 +31,12 @@ function displayName(user: any | null) {
 
 type Booking = { id: string; subject_id: string; name: string; start_at: string; end_at: string; };
 
-/* ---------- page ---------- */
 function SubjectSchedule({ subjectId }: { subjectId: string }) {
+  /* top-right name */
   const [userName, setUserName] = useState("USER");
   useEffect(() => { (async () => { const { data } = await supabase.auth.getUser(); setUserName(displayName(data?.user)); })(); }, []);
 
+  /* calendar + bookings */
   const [monthCursor, setMonthCursor] = useState(() => new Date(2025, 0, 1));
   const [selectedDate, setSelectedDate] = useState(() => new Date(2025, 0, 20));
   const [bookings, setBookings] = useState<Booking[]>([]);
@@ -67,7 +68,7 @@ function SubjectSchedule({ subjectId }: { subjectId: string }) {
     setBookings(data ?? []);
     setLoading(false);
   }
-  useEffect(() => { loadDay(); /* eslint-disable-next-line */ }, [subjectId, selectedDate]);
+  useEffect(() => { loadDay(); /* eslint-disable-line */ }, [subjectId, selectedDate]);
 
   function prevMonth() {
     const d = new Date(monthCursor); d.setMonth(d.getMonth() - 1);
@@ -95,8 +96,10 @@ function SubjectSchedule({ subjectId }: { subjectId: string }) {
     if (clash) { setError("Time overlaps an existing booking."); return; }
 
     const { error } = await supabase.from("bookings").insert({
-      subject_id: subjectId, name: name.trim(),
-      start_at: s.toISOString(), end_at: eTime.toISOString()
+      subject_id: subjectId,
+      name: name.trim(),
+      start_at: s.toISOString(),
+      end_at: eTime.toISOString()
     });
     if (error) { setError(error.message); return; }
     setName(""); setStartTime("00:00"); setEndTime("00:00"); await loadDay();
@@ -104,7 +107,7 @@ function SubjectSchedule({ subjectId }: { subjectId: string }) {
 
   return (
     <div className="amv-root">
-      {/* top bar */}
+      {/* TOP BAR (exact as screenshot) */}
       <div className="amv-topbar">
         <div>
           <div className="amv-brand">AURORA MIND VERSE</div>
@@ -117,20 +120,20 @@ function SubjectSchedule({ subjectId }: { subjectId: string }) {
         </div>
       </div>
 
-      {/* back arrow */}
+      {/* BACK ARROW */}
       <div className="amv-back">
         <Link href="/teacher" className="backbtn">←</Link>
       </div>
 
-      {/* equal-height two-column layout */}
+      {/* TWO COLUMNS (locked) */}
       <div className="gridwrap">
-        {/* calendar */}
+        {/* CALENDAR */}
         <div className="cal-card">
           <div className="cal-head">
-            <button onClick={prevMonth} className="arrow">←</button>
+            <button onClick={prevMonth} className="arrow">⬅</button>
             <div className="title">{monthName}</div>
             <div className="year">{yearNum}</div>
-            <button onClick={nextMonth} className="arrow">→</button>
+            <button onClick={nextMonth} className="arrow">➡</button>
           </div>
 
           <div className="labels">
@@ -154,7 +157,7 @@ function SubjectSchedule({ subjectId }: { subjectId: string }) {
           </div>
         </div>
 
-        {/* booking panel */}
+        {/* BOOKING PANEL */}
         <div className="book-card">
           <h1 className="book-title">BOOKING CLASS</h1>
 
@@ -189,7 +192,7 @@ function SubjectSchedule({ subjectId }: { subjectId: string }) {
 
             <div className="row time-row">
               <span className="lab">TIME :</span>
-              {/* editable but styled as plain text */}
+              {/* Editable but looks like text */}
               <input
                 type="time"
                 value={startTime}
@@ -216,64 +219,62 @@ function SubjectSchedule({ subjectId }: { subjectId: string }) {
         </div>
       </div>
 
-      {/* styles */}
+      {/* STYLES — EXACT LOOK, DO NOT CHANGE */}
       <style jsx>{`
         .amv-root{min-height:100vh;background:#7cc9f5;color:#000;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial}
-        .amv-topbar{background:#39a8f0;padding:14px 26px;display:flex;justify-content:space-between;align-items:center}
-        .amv-brand{font-size:32px;font-weight:900;letter-spacing:.2px}
-        .amv-tag{margin-top:-2px;font-size:13px;font-weight:700}
-        .amv-right{display:flex;align-items:center;gap:20px}
-        .toplink{color:#000;text-decoration:underline;font-weight:700}
-        .amv-pill{background:#fff;border:1px solid rgba(0,0,0,.2);padding:6px 14px;border-radius:9999px;display:inline-flex;gap:10px;align-items:center;font-weight:900}
-        .amv-dot{width:14px;height:14px;border-radius:9999px;background:#000;display:inline-block}
+        .amv-topbar{background:#39a8f0;padding:14px 28px;display:flex;justify-content:space-between;align-items:center}
+        .amv-brand{font-size:28px;font-weight:900;letter-spacing:.2px}
+        .amv-tag{margin-top:2px;font-size:13px;font-weight:700}
+        .amv-right{display:flex;align-items:center;gap:22px}
+        .toplink{color:#000;text-decoration:none;font-weight:700}
+        .toplink:hover{text-decoration:underline}
+        .amv-pill{background:#fff;border:1px solid rgba(0,0,0,.2);padding:6px 12px;border-radius:9999px;display:inline-flex;gap:8px;align-items:center;font-weight:900}
+        .amv-dot{width:12px;height:12px;border-radius:9999px;background:#000;display:inline-block}
 
-        .amv-back{max-width:1220px;margin:10px auto 0;padding:0 24px}
-        .backbtn{font-size:22px;font-weight:900;color:#000;text-decoration:none}
+        .amv-back{max-width:1120px;margin:12px auto 0;padding:0 24px}
+        .backbtn{font-size:28px;font-weight:900;color:#000;text-decoration:none}
 
-        .gridwrap{max-width:1220px;margin:10px auto 50px;padding:0 24px;display:grid;grid-template-columns:560px minmax(0,1fr);gap:30px;align-items:stretch}
+        .gridwrap{max-width:1120px;margin:8px auto 46px;padding:0 24px;display:grid;grid-template-columns:440px minmax(0,1fr);gap:28px;align-items:stretch}
 
-        /* calendar */
-        .cal-card{background:#98d4fb;border:3px solid #000;border-radius:28px;padding:18px 20px 24px}
+        /* CALENDAR — locked to screenshot */
+        .cal-card{background:#9bd8fb;border-radius:28px;padding:18px 18px 24px;border:2px solid #000}
         .cal-head{display:grid;grid-template-columns:44px 1fr auto 44px;align-items:center}
-        .arrow{background:none;border:none;font-size:22px;font-weight:900;cursor:pointer}
-        .title{justify-self:center;font-size:28px;font-weight:900;letter-spacing:.6px}
-        .year{justify-self:start;font-size:28px;font-weight:900;margin-left:6px}
-        .labels{display:grid;grid-template-columns:repeat(7,1fr);text-align:center;font-size:15px;margin:10px 0 12px}
-        .days{display:grid;grid-template-columns:repeat(7,78px);gap:18px;justify-content:center}
-        .day{width:78px;height:64px;border:3px solid #000;border-radius:16px;background:#fff;display:flex;align-items:center;justify-content:center}
+        .arrow{background:none;border:none;font-size:20px;font-weight:900;cursor:pointer}
+        .title{justify-self:center;font-size:24px;font-weight:900;letter-spacing:.6px}
+        .year{justify-self:start;font-size:24px;font-weight:900;margin-left:8px}
+        .labels{display:grid;grid-template-columns:repeat(7,1fr);text-align:center;font-size:18px;margin:8px 0 10px}
+        .days{display:grid;grid-template-columns:repeat(7,56px);gap:16px;justify-content:center}
+        .day{width:56px;height:50px;border:3px solid #000;border-radius:12px;background:#fff;display:flex;align-items:center;justify-content:center}
         .num{font-weight:900;font-size:20px;line-height:1}
-        .sel .num{background:#8cf493;border:3px solid #2a8f32;border-radius:12px;padding:2px 8px}
+        .sel .num{background:#7eff85;border:3px solid #2a8f32;border-radius:10px;padding:2px 8px}
 
-        /* booking */
-        .book-card{background:#56b1f5;border:3px solid #000;border-radius:28px;padding:28px 32px;display:flex;flex-direction:column}
-        .book-title{font-size:40px;font-weight:900;text-align:center;margin:0 0 12px}
+        /* BOOKING CARD — locked to screenshot */
+        .book-card{background:#4db4f0;border-radius:28px;padding:26px 28px;border:2px solid #000;display:flex;flex-direction:column}
+        .book-title{font-size:36px;font-weight:900;text-align:center;margin:0 0 12px}
         .book-date{text-align:center;text-decoration:underline;text-underline-offset:4px;font-weight:900;margin-bottom:8px}
         .book-line{font-weight:900;text-align:center;white-space:pre-line}
-        .bld{letter-spacing:.3px}
-        .book-list{white-space:pre-line;line-height:1.8;font-weight:700}
-        .divider{height:3px;background:#000;margin:16px 0 14px;width:100%}
+        .divider{height:2px;background:#000;margin:18px 0 16px;width:100%}
         .book-sub{text-align:center;text-decoration:underline;font-weight:900;margin-bottom:18px}
 
         .err{color:#b91c1c;text-align:center;font-weight:900;margin-bottom:10px}
-        .book-form{max-width:640px;margin:0 auto}
-        .row{display:flex;align-items:center;justify-content:center;gap:14px;margin-bottom:22px}
+        .book-form{max-width:540px;margin:0 auto}
+        .row{display:flex;align-items:center;justify-content:center;gap:14px;margin-bottom:20px}
         .lab{font-weight:900;min-width:110px}
-        .name-line{width:520px;border:none;border-bottom:4px solid #000;outline:none;background:transparent;height:38px}
+        .name-line{width:360px;border:none;border-bottom:3px solid #000;outline:none;background:transparent;height:34px}
 
-        /* time row spacing identical to mock */
-        .time-row{gap:16px}
-        .dash{font-weight:900;transform:translateY(-1px)}
+        /* TIME row — shows exactly “00:00 - 00:00” but editable */
+        .time-row{gap:14px}
+        .dash{font-weight:900}
 
-        /* editable time that looks like text */
         .time-plain{
-          width:84px;             /* prevent "am/pm" clipping */
+          width:90px;            /* ensures "00:00 am" shows cleanly where applicable */
           border:none;
           background:transparent;
           outline:none;
           font: inherit;
           font-weight:900;
           font-size:18px;
-          line-height:1.2;
+          line-height:1.25;
           text-align:center;
           letter-spacing:.2px;
           padding:0;
@@ -286,7 +287,7 @@ function SubjectSchedule({ subjectId }: { subjectId: string }) {
         .time-plain::-webkit-clear-button{ display:none; }
 
         .save-row{display:flex;justify-content:flex-end;padding-right:8px}
-        .save{background:#2E59BA;color:#fff;border:none;border-radius:16px;padding:12px 28px;font-weight:900;cursor:pointer}
+        .save{background:#2E59BA;color:#fff;border:none;border-radius:14px;padding:10px 26px;font-weight:900;cursor:pointer}
       `}</style>
     </div>
   );
