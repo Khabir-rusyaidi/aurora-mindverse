@@ -38,7 +38,7 @@ function SubjectSchedule({ subjectId }: { subjectId: string }) {
   const [userName, setUserName] = useState("USER");
   useEffect(() => { (async () => { const { data } = await supabase.auth.getUser(); setUserName(displayName(data?.user)); })(); }, []);
 
-  // Default to 6 November 2025
+  // Default 6 November 2025
   const [monthCursor, setMonthCursor] = useState(() => new Date(2025, 10, 1));
   const [selectedDate, setSelectedDate] = useState(() => new Date(2025, 10, 6));
 
@@ -56,10 +56,8 @@ function SubjectSchedule({ subjectId }: { subjectId: string }) {
   async function loadDay() {
     if (!subjectId) return;
     setLoading(true);
-    const dayStart = new Date(selectedDate);
-    dayStart.setHours(0, 0, 0, 0);
-    const dayEnd = new Date(selectedDate);
-    dayEnd.setHours(23, 59, 59, 999);
+    const dayStart = new Date(selectedDate); dayStart.setHours(0, 0, 0, 0);
+    const dayEnd = new Date(selectedDate); dayEnd.setHours(23, 59, 59, 999);
     const { data, error } = await supabase
       .from("bookings")
       .select("*")
@@ -193,6 +191,7 @@ function SubjectSchedule({ subjectId }: { subjectId: string }) {
         </div>
       </div>
 
+      {/* Styling */}
       <style jsx>{`
 .amv-root{min-height:100vh;background:#7cc9f5;color:#000}
 .amv-topbar{background:#39a8f0;padding:16px 32px;display:flex;justify-content:space-between;align-items:center}
@@ -213,10 +212,18 @@ function SubjectSchedule({ subjectId }: { subjectId: string }) {
 .arrow{background:none;border:none;font-size:20px;font-weight:900;cursor:pointer}
 .title{justify-self:center;font-size:28px;font-weight:900}
 .year{justify-self:start;font-size:28px;font-weight:900;margin-left:10px}
-.days{display:grid;grid-template-columns:repeat(7,66px);gap:18px;justify-content:center;margin-top:8px;padding-bottom:10px;}
-.day{width:66px;height:58px;border:3px solid #000;border-radius:14px;background:#fff;display:flex;align-items:center;justify-content:center}
-.num{font-weight:800;font-size:17px;line-height:1;} /* smaller numbers fit perfectly */
-.sel .num{background:#7eff85;border:3px solid #2a8f32;border-radius:8px;padding:1px 6px}
+.days{display:grid;grid-template-columns:repeat(7,60px);gap:18px;justify-content:center;margin-top:8px;padding-bottom:10px;}
+.day{
+  width:60px;height:52px;
+  border:3px solid #000;border-radius:12px;
+  background:#fff;
+  display:flex;align-items:center;justify-content:center;
+  transform:scale(0.9); /* ✅ shrink all date squares slightly */
+  transition:transform .15s;
+}
+.day:hover{transform:scale(0.95);}
+.num{font-weight:800;font-size:18px;line-height:1;}
+.sel .num{background:#7eff85;border:3px solid #2a8f32;border-radius:8px;padding:2px 6px;}
 
 /* Booking */
 .book-card{background:#4fb4f0;border-radius:28px;padding:28px;display:flex;flex-direction:column}
