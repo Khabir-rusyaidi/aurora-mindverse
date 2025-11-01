@@ -205,8 +205,22 @@ function SubjectSchedule({ subjectId }: { subjectId: string }) {
 .gridwrap{max-width:1120px;margin:10px auto 56px;padding:0 24px;display:grid;grid-template-columns:520px minmax(0,1fr);gap:36px;align-items:stretch}
 
 /* Calendar */
-.cal-wrap{position:relative;padding-left:60px;}
-.outside-back{position:absolute;left:0;top:14px;width:48px;height:48px;display:flex;align-items:center;justify-content:center;font-size:42px;font-weight:900;text-decoration:none;color:#000;cursor:pointer;}
+.cal-wrap{position:relative;padding-left:80px;}
+.outside-back{
+  position:absolute;
+  left:0;
+  top:12px;
+  width:60px;
+  height:60px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:54px;
+  font-weight:900;
+  color:#000; /* ✅ make black */
+  cursor:pointer;
+  text-decoration:none;
+}
 .cal-card{background:#fff;border-radius:28px;padding:22px 26px 28px;overflow:hidden}
 .cal-head{display:grid;grid-template-columns:44px 1fr auto 44px;align-items:center}
 .arrow{background:none;border:none;font-size:20px;font-weight:900;cursor:pointer}
@@ -214,8 +228,8 @@ function SubjectSchedule({ subjectId }: { subjectId: string }) {
 .year{justify-self:start;font-size:28px;font-weight:900;margin-left:10px}
 .days{
   display:grid;
-  grid-template-columns:repeat(7,55px); /* ✅ smaller squares */
-  gap:10px; /* ✅ tighter spacing */
+  grid-template-columns:repeat(7,55px);
+  gap:10px;
   justify-content:center;
   margin-top:8px;
   padding-bottom:10px;
