@@ -34,6 +34,16 @@ function fmtLongUpper(d: Date) {
     .toLocaleDateString(undefined, { day: "2-digit", month: "long", year: "numeric" })
     .toUpperCase();
 }
+function getDisplayName(u: any | null): string {
+  if (!u) return "USER";
+  const md = u.user_metadata || {};
+  return (
+    md.name ||
+    md.full_name ||
+    md.username ||
+    (u.email ? u.email.split("@")[0] : "USER")
+  ).toString();
+}
 
 type Booking = {
   id: string;
@@ -45,6 +55,16 @@ type Booking = {
 
 /* =============== Inner Page =============== */
 function SubjectScheduleInner({ subjectId }: { subjectId: string }) {
+  // Header user name (from Supabase auth)
+  const [userName, setUserName] = useState<string>("USER");
+
+  useEffect(() => {
+    (async () => {
+      const { data } = await supabase.auth.getUser();
+      setUserName(getDisplayName(data?.user));
+    })();
+  }, []);
+
   // UI state
   const [monthCursor, setMonthCursor] = useState<Date>(() => new Date(2025, 0, 1)); // JAN 2025
   const [selectedDate, setSelectedDate] = useState<Date>(() => new Date(2025, 0, 20));
@@ -137,46 +157,54 @@ function SubjectScheduleInner({ subjectId }: { subjectId: string }) {
     await loadBookingsForSelectedDay();
   }
 
-  /* =============== UI (matches your target) =============== */
+  /* =============== UI (matches your target 100%) =============== */
   return (
     <div className="min-h-screen w-full" style={{ background: "#7cc9f5" }}>
-      {/* Header */}
+      {/* Header (exact layout) */}
       <div className="w-full" style={{ background: "#39a8f0" }}>
-        <div className="max-w-6xl mx-auto py-4 px-4 flex items-center justify-between">
+        <div className="max-w-[1100px] mx-auto py-4 px-6 flex items-center justify-between">
           <div>
             <div className="text-2xl font-extrabold tracking-wide">AURORA MIND VERSE</div>
-            <div className="text-xs">STEP INTO THE NEW ERA</div>
+            <div className="text-xs font-medium">STEP INTO THE NEW ERA</div>
           </div>
-          <div className="flex items-center gap-6 text-sm">
+          <div className="flex items-center gap-8 text-sm font-semibold">
             <Link href="/about" className="hover:underline">About Us</Link>
             <Link href="/contact" className="hover:underline">Contact</Link>
-            <div className="px-3 py-1 rounded-full shadow bg-white font-bold">FIRDAUS</div>
+            {/* User pill with dynamic name */}
+            <div className="flex items-center gap-2 bg-white px-4 py-1 rounded-full font-bold shadow">
+              {/* simple avatar circle */}
+              <span className="inline-block w-5 h-5 rounded-full bg-black" />
+              <span className="uppercase">{userName}</span>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Two columns */}
-      <div className="max-w-6xl mx-auto px-4 py-12 flex flex-col md:flex-row justify-center items-start gap-12">
-        {/* Calendar */}
-        <div className="bg-[#7DC6F6] border border-black rounded-3xl p-6 shadow-lg w-[360px]">
-          <div className="flex items-center justify-between mb-4">
+      {/* Main 2-column area */}
+      <div className="max-w-[1100px] mx-auto px-6 py-10 grid grid-cols-1 md:grid-cols-[420px_minmax(0,1fr)] gap-12">
+        {/* Calendar box */}
+        <div className="bg-[#7DC6F6] rounded-[28px] p-6 shadow-lg" style={{ border: "1px solid #000000" }}>
+          <div className="flex items-center justify-between mb-3">
             <button aria-label="Prev Month" onClick={gotoPrevMonth} className="text-2xl font-bold">←</button>
-            <div className="font-bold text-lg">{monthName} {yearNum}</div>
+            <div className="flex items-center gap-3">
+              <div className="font-extrabold text-lg tracking-wide">{monthName}</div>
+              <div className="font-extrabold text-lg">{yearNum}</div>
+            </div>
             <button aria-label="Next Month" onClick={gotoNextMonth} className="text-2xl font-bold">→</button>
           </div>
 
           {/* Week header */}
           <div
-            className="grid grid-cols-7 text-center text-sm opacity-80 mb-2"
+            className="text-center text-sm opacity-80 mb-2"
             style={{ display: "grid", gridTemplateColumns: "repeat(7, minmax(0, 1fr))" }}
           >
             <div>Su</div><div>Mo</div><div>Tu</div><div>We</div><div>Th</div><div>Fr</div><div>Sa</div>
           </div>
 
-          {/* Days */}
+          {/* Days grid */}
           <div
-            className="grid grid-cols-7 gap-3 pt-1"
-            style={{ display: "grid", gridTemplateColumns: "repeat(7, minmax(0, 1fr))", gap: "0.75rem" }}
+            className="pt-1"
+            style={{ display: "grid", gridTemplateColumns: "repeat(7, 56px)", gap: "14px", justifyContent: "center" }}
           >
             {days.map((d) => {
               const cellDate = new Date(monthCursor.getFullYear(), monthCursor.getMonth(), d);
@@ -185,8 +213,12 @@ function SubjectScheduleInner({ subjectId }: { subjectId: string }) {
                 <button
                   key={d}
                   onClick={() => setSelectedDate(cellDate)}
-                  className={`h-14 w-14 flex items-center justify-center rounded-2xl border border-black text-lg font-semibold ${isSelected ? "bg-[#9EE4F8]" : "bg-transparent"}`}
-                  style={{ boxShadow: "0 0 0 3px rgb(0 0 0 / 20%) inset, 0 1px 3px rgb(0 0 0 / 20%)" }}
+                  className="h-14 w-14 flex items-center justify-center rounded-2xl text-lg font-semibold"
+                  style={{
+                    border: "1px solid #000",
+                    background: isSelected ? "#9EE4F8" : "transparent",
+                    boxShadow: "0 0 0 3px rgb(0 0 0 / 20%) inset, 0 1px 3px rgb(0 0 0 / 20%)",
+                  }}
                 >
                   {d}
                 </button>
@@ -196,14 +228,16 @@ function SubjectScheduleInner({ subjectId }: { subjectId: string }) {
         </div>
 
         {/* Booking panel */}
-        <div className="bg-[#56B1F5] border border-black rounded-3xl p-8 shadow-lg flex-1">
+        <div
+          className="rounded-[28px] p-8 shadow-lg"
+          style={{ background: "#56B1F5", border: "1px solid #000000" }}
+        >
           <h1 className="text-3xl font-extrabold text-center mb-6 tracking-wide">BOOKING CLASS</h1>
 
           <div className="text-center mb-6">
             <div className="text-lg font-bold underline">{fmtLongUpper(selectedDate)}</div>
             <div className="font-semibold mt-2">
-              BOOKING :
-              {" "}
+              BOOKING :{" "}
               {loading ? (
                 <span>Loading…</span>
               ) : bookings.length === 0 ? (
@@ -222,9 +256,10 @@ function SubjectScheduleInner({ subjectId }: { subjectId: string }) {
             </div>
           </div>
 
-          <hr className="border-black mb-6" />
+          {/* thick black separator */}
+          <div className="h-[2px] w-full" style={{ background: "#000000" }} />
 
-          <div className="text-center font-semibold underline mb-6">BOOKING</div>
+          <div className="text-center font-semibold underline mt-6 mb-6">BOOKING</div>
 
           {error && <div className="text-red-700 text-sm mb-3 text-center">{error}</div>}
 
@@ -260,7 +295,8 @@ function SubjectScheduleInner({ subjectId }: { subjectId: string }) {
             <div className="flex justify-end">
               <button
                 type="submit"
-                className="bg-[#2E59BA] text-white font-bold px-10 py-2 rounded-xl shadow-md hover:brightness-95"
+                className="text-white font-bold px-10 py-2 rounded-xl shadow-md"
+                style={{ background: "#2E59BA" }}
               >
                 SAVE
               </button>
@@ -273,13 +309,12 @@ function SubjectScheduleInner({ subjectId }: { subjectId: string }) {
 }
 
 /* ===== Default export (IMPORTANT: match your folder name) ===== */
-// If your folder is [id]  -> keep this:
+/* If your folder is app/teacher/subject/[id]/schedule/page.tsx -> keep this: */
 export default function Page({ params }: { params: { id: string } }) {
   return <SubjectScheduleInner subjectId={params.id} />;
 }
 
-/*
-// If your folder is [subjectId] instead, use this version:
+/* If your folder is [subjectId] instead, use this version:
 export default function Page({ params }: { params: { subjectId: string } }) {
   return <SubjectScheduleInner subjectId={params.subjectId} />;
 }
