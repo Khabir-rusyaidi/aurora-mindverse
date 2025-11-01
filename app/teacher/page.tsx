@@ -119,7 +119,7 @@ export default function TeacherDashboard() {
             <Link href="/contact">Contact</Link>
           </div>
 
-          <div className="profile-container">
+        <div className="profile-container">
             <button className="profile-pill" onClick={() => setShowLogout(v => !v)}>
               <span className="profile-icon">👤</span> {userName}
             </button>
@@ -132,7 +132,7 @@ export default function TeacherDashboard() {
 
       {/* === WELCOME === */}
       <div className="welcome-section">
-        <h2 className="welcome-title">Welcome To Our Application</h2>
+        <h2 className="welcome-title">Welcome To Our Website</h2>
         <hr className="divider" />
         <p className="welcome-text">
           Through this website platform, students will not only read or watch learning materials passively but
@@ -182,8 +182,8 @@ export default function TeacherDashboard() {
                     <span>Delete</span>
                   </button>
 
-                  {/* Updated Schedule Button */}
-                  <Link href={`/teacher/subject/${s.id}/schedule`}>
+                  {/* Schedule Button – points to /subject/[id]/schedule */}
+                  <Link href={`/subject/${s.id}/schedule`}>
                     <button className="schedule-btn">Schedule</button>
                   </Link>
                 </>
