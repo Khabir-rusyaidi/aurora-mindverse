@@ -57,7 +57,6 @@ type Booking = {
 function SubjectScheduleInner({ subjectId }: { subjectId: string }) {
   // Header user name (from Supabase auth)
   const [userName, setUserName] = useState<string>("USER");
-
   useEffect(() => {
     (async () => {
       const { data } = await supabase.auth.getUser();
@@ -172,7 +171,6 @@ function SubjectScheduleInner({ subjectId }: { subjectId: string }) {
             <Link href="/contact" className="hover:underline">Contact</Link>
             {/* User pill with dynamic name */}
             <div className="flex items-center gap-2 bg-white px-4 py-1 rounded-full font-bold shadow">
-              {/* simple avatar circle */}
               <span className="inline-block w-5 h-5 rounded-full bg-black" />
               <span className="uppercase">{userName}</span>
             </div>
