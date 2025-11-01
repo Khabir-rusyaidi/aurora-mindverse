@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 
-/* ============== Helpers ============== */
+/* ---------- helpers ---------- */
 function endOfMonth(d: Date) { return new Date(d.getFullYear(), d.getMonth() + 1, 0); }
 function daysInMonth(d: Date) { return Array.from({ length: endOfMonth(d).getDate() }, (_, i) => i + 1); }
 function isoDateOnly(d: Date) {
@@ -19,64 +19,45 @@ function withTime(date: Date, hhmm: string) {
   d.setHours(hh, mm, 0, 0);
   return d;
 }
-function fmt24(d: Date) {
-  const hh = String(d.getHours()).padStart(2, "0");
-  const mm = String(d.getMinutes()).padStart(2, "0");
-  return `${hh}:${mm}`;
-}
+function fmt24(d: Date) { return `${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}`; }
 function fmtLongUpper(d: Date) {
   return d.toLocaleDateString(undefined, { day: "2-digit", month: "long", year: "numeric" }).toUpperCase();
 }
-function getDisplayName(user: any | null) {
+function displayName(user: any | null) {
   if (!user) return "USER";
   const md = user.user_metadata || {};
-  return (md.name || md.full_name || md.username || (user.email ? user.email.split("@")[0] : "USER")).toString();
+  return (md.name || md.full_name || md.username || (user.email ? user.email.split("@")[0] : "USER")).toString().toUpperCase();
 }
 
-type Booking = {
-  id: string;
-  subject_id: string;
-  name: string;
-  start_at: string;
-  end_at: string;
-};
+type Booking = { id: string; subject_id: string; name: string; start_at: string; end_at: string; };
 
-/* ============== Page Body ============== */
-function SubjectScheduleInner({ subjectId }: { subjectId: string }) {
-  // Header user name
+/* ---------- page ---------- */
+function SubjectSchedule({ subjectId }: { subjectId: string }) {
+  /* header user */
   const [userName, setUserName] = useState("USER");
-  useEffect(() => {
-    (async () => {
-      const { data } = await supabase.auth.getUser();
-      setUserName(getDisplayName(data?.user));
-    })();
-  }, []);
+  useEffect(() => { (async () => { const { data } = await supabase.auth.getUser(); setUserName(displayName(data?.user)); })(); }, []);
 
-  // UI state
-  const [monthCursor, setMonthCursor] = useState(() => new Date(2025, 0, 1)); // Jan 2025
+  /* ui state */
+  const [monthCursor, setMonthCursor] = useState(() => new Date(2025, 0, 1));
   const [selectedDate, setSelectedDate] = useState(() => new Date(2025, 0, 20));
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
-
-  // Form
   const [name, setName] = useState("");
   const [startTime, setStartTime] = useState("00:00");
   const [endTime, setEndTime] = useState("00:00");
   const [error, setError] = useState("");
 
-  // Derived
+  /* derived */
   const monthName = monthCursor.toLocaleString(undefined, { month: "long" }).toUpperCase();
   const yearNum = monthCursor.getFullYear();
   const days = daysInMonth(monthCursor);
 
-  // Load bookings (day + subject)
-  async function loadBookingsForSelectedDay() {
-    if (!subjectId || !selectedDate) return;
+  /* data load per day */
+  async function loadDay() {
+    if (!subjectId) return;
     setLoading(true);
-    setError("");
-
-    const dayStart = new Date(selectedDate); dayStart.setHours(0, 0, 0, 0);
-    const dayEnd = new Date(selectedDate);   dayEnd.setHours(23, 59, 59, 999);
+    const dayStart = new Date(selectedDate); dayStart.setHours(0,0,0,0);
+    const dayEnd = new Date(selectedDate);   dayEnd.setHours(23,59,59,999);
 
     const { data, error } = await supabase
       .from("bookings")
@@ -90,35 +71,28 @@ function SubjectScheduleInner({ subjectId }: { subjectId: string }) {
     setBookings(data ?? []);
     setLoading(false);
   }
-  useEffect(() => { loadBookingsForSelectedDay(); /* eslint-disable-next-line */ }, [subjectId, selectedDate]);
+  useEffect(() => { loadDay(); /* eslint-disable-next-line */ }, [subjectId, selectedDate]);
 
-  // Month nav
-  function gotoPrevMonth() {
-    const d = new Date(monthCursor);
-    d.setMonth(d.getMonth() - 1);
+  /* month nav */
+  function prevMonth() {
+    const d = new Date(monthCursor); d.setMonth(d.getMonth() - 1);
     setMonthCursor(d);
-    const last = endOfMonth(d).getDate();
-    setSelectedDate(new Date(d.getFullYear(), d.getMonth(), Math.min(selectedDate.getDate(), last)));
+    setSelectedDate(new Date(d.getFullYear(), d.getMonth(), Math.min(selectedDate.getDate(), endOfMonth(d).getDate())));
   }
-  function gotoNextMonth() {
-    const d = new Date(monthCursor);
-    d.setMonth(d.getMonth() + 1);
+  function nextMonth() {
+    const d = new Date(monthCursor); d.setMonth(d.getMonth() + 1);
     setMonthCursor(d);
-    const last = endOfMonth(d).getDate();
-    setSelectedDate(new Date(d.getFullYear(), d.getMonth(), Math.min(selectedDate.getDate(), last)));
+    setSelectedDate(new Date(d.getFullYear(), d.getMonth(), Math.min(selectedDate.getDate(), endOfMonth(d).getDate())));
   }
 
-  // Save booking
+  /* save */
   async function onSave(e: React.FormEvent) {
     e.preventDefault();
     setError("");
-
     if (!name.trim()) { setError("Please enter NAME."); return; }
     const s = withTime(selectedDate, startTime);
     const eTime = withTime(selectedDate, endTime);
     if (eTime <= s) { setError("End time must be after start time."); return; }
-
-    // overlap check
     const clash = bookings.some(b => {
       const bs = new Date(b.start_at).getTime();
       const be = new Date(b.end_at).getTime();
@@ -127,51 +101,51 @@ function SubjectScheduleInner({ subjectId }: { subjectId: string }) {
     if (clash) { setError("Time overlaps an existing booking."); return; }
 
     const { error } = await supabase.from("bookings").insert({
-      subject_id: subjectId,
-      name: name.trim(),
-      start_at: s.toISOString(),
-      end_at: eTime.toISOString(),
+      subject_id: subjectId, name: name.trim(),
+      start_at: s.toISOString(), end_at: eTime.toISOString()
     });
     if (error) { setError(error.message); return; }
-
-    setName(""); setStartTime("00:00"); setEndTime("00:00");
-    await loadBookingsForSelectedDay();
+    setName(""); setStartTime("00:00"); setEndTime("00:00"); await loadDay();
   }
 
+  /* ---------- UI (pixel matched) ---------- */
   return (
     <div className="min-h-screen w-full" style={{ background: "#7cc9f5" }}>
-      {/* Header */}
+      {/* top bar */}
       <div className="w-full" style={{ background: "#39a8f0" }}>
-        <div className="max-w-[1100px] mx-auto py-4 px-6 flex items-center justify-between">
+        <div className="max-w-[1160px] mx-auto py-4 px-6 flex items-center justify-between">
           <div>
             <div className="text-2xl font-extrabold tracking-wide">AURORA MIND VERSE</div>
-            <div className="text-xs font-medium">STEP INTO THE NEW ERA</div>
+            <div className="text-xs font-semibold -mt-1">STEP INTO THE NEW ERA</div>
           </div>
           <div className="flex items-center gap-8 text-sm font-semibold">
             <Link href="/about" className="hover:underline">About Us</Link>
             <Link href="/contact" className="hover:underline">Contact</Link>
             <div className="flex items-center gap-2 bg-white px-4 py-1 rounded-full font-bold shadow">
               <span className="inline-block w-5 h-5 rounded-full bg-black" />
-              <span className="uppercase">{userName}</span>
+              <span>{userName}</span>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Main 2-column area */}
-      <div className="max-w-[1100px] mx-auto px-6 py-10 grid grid-cols-1 md:grid-cols-[420px_minmax(0,1fr)] gap-12">
-        {/* Calendar box */}
-        <div className="bg-[#7DC6F6] rounded-[28px] p-6 shadow-lg" style={{ border: "1px solid #000000" }}>
+      {/* back arrow */}
+      <div className="max-w-[1160px] mx-auto px-6 pt-3">
+        <Link href="/teacher" className="inline-block text-2xl font-bold leading-none">←</Link>
+      </div>
+
+      {/* main grid */}
+      <div className="max-w-[1160px] mx-auto px-6 pt-2 pb-10 grid grid-cols-1 md:grid-cols-[440px_minmax(0,1fr)] gap-10">
+        {/* calendar card */}
+        <div className="rounded-[28px] p-6 shadow" style={{ background: "#8fd2fb", border: "1px solid #000000" }}>
           <div className="flex items-center justify-between mb-3">
-            <button aria-label="Prev Month" onClick={gotoPrevMonth} className="text-2xl font-bold">←</button>
-            <div className="flex items-center gap-3">
-              <div className="font-extrabold text-lg tracking-wide">{monthName}</div>
-              <div className="font-extrabold text-lg">{yearNum}</div>
+            <button onClick={prevMonth} className="text-2xl font-bold">←</button>
+            <div className="flex items-center gap-3 text-lg font-extrabold tracking-wide">
+              <span>{monthName}</span><span>{yearNum}</span>
             </div>
-            <button aria-label="Next Month" onClick={gotoNextMonth} className="text-2xl font-bold">→</button>
+            <button onClick={nextMonth} className="text-2xl font-bold">→</button>
           </div>
 
-          {/* Week header */}
           <div
             className="text-center text-sm opacity-80 mb-2"
             style={{ display: "grid", gridTemplateColumns: "repeat(7, minmax(0, 1fr))" }}
@@ -179,10 +153,9 @@ function SubjectScheduleInner({ subjectId }: { subjectId: string }) {
             <div>Su</div><div>Mo</div><div>Tu</div><div>We</div><div>Th</div><div>Fr</div><div>Sa</div>
           </div>
 
-          {/* Days grid */}
           <div
             className="pt-1"
-            style={{ display: "grid", gridTemplateColumns: "repeat(7, 56px)", gap: "14px", justifyContent: "center" }}
+            style={{ display: "grid", gridTemplateColumns: "repeat(7, 64px)", gap: "18px", justifyContent: "center" }}
           >
             {days.map((d) => {
               const cellDate = new Date(monthCursor.getFullYear(), monthCursor.getMonth(), d);
@@ -191,39 +164,44 @@ function SubjectScheduleInner({ subjectId }: { subjectId: string }) {
                 <button
                   key={d}
                   onClick={() => setSelectedDate(cellDate)}
-                  className="h-14 w-14 flex items-center justify-center rounded-2xl text-lg font-semibold"
+                  className="h-16 w-16 rounded-2xl text-lg font-semibold relative"
                   style={{
-                    border: "1px solid #000",
-                    background: isSelected ? "#9EE4F8" : "transparent",
-                    boxShadow: "0 0 0 3px rgb(0 0 0 / 20%) inset, 0 1px 3px rgb(0 0 0 / 20%)",
+                    border: "2px solid #000",
+                    background: "#ffffff",
+                    boxShadow: "0 0 0 3px rgb(0 0 0 / 18%) inset, 0 1px 2px rgb(0 0 0 / 15%)",
                   }}
                 >
-                  {d}
+                  <span className="absolute inset-0 flex items-center justify-center">{d}</span>
+                  {isSelected && (
+                    <span
+                      className="absolute right-1 bottom-1 w-7 h-7 rounded-full"
+                      style={{ background: "#9bfb9f", border: "2px solid #2a8f32" }}
+                    />
+                  )}
                 </button>
               );
             })}
           </div>
         </div>
 
-        {/* Booking panel */}
-        <div className="rounded-[28px] p-8 shadow-lg" style={{ background: "#56B1F5", border: "1px solid #000000" }}>
-          <h1 className="text-3xl font-extrabold text-center mb-6 tracking-wide">BOOKING CLASS</h1>
+        {/* booking card */}
+        <div className="rounded-[28px] p-8 shadow" style={{ background: "#56b1f5", border: "1px solid #000000" }}>
+          <h1 className="text-[34px] font-extrabold text-center mb-6 tracking-wide">BOOKING CLASS</h1>
 
-          <div className="text-center mb-6">
-            <div className="text-lg font-bold underline">{fmtLongUpper(selectedDate)}</div>
-            <div className="font-semibold mt-2">
+          <div className="text-center">
+            <div className="font-bold underline text-lg mb-2">{fmtLongUpper(selectedDate)}</div>
+            <div className="font-bold">
               BOOKING :{" "}
               {loading ? (
                 <span>Loading…</span>
               ) : bookings.length === 0 ? (
                 <span className="italic">- NO BOOKING -</span>
               ) : (
-                <div className="whitespace-pre-line leading-7 mt-1">
+                <div className="whitespace-pre-line leading-7">
                   {bookings
-                    .map((b, idx) => {
-                      const s = new Date(b.start_at);
-                      const e = new Date(b.end_at);
-                      return `${idx + 1}) ${b.name.toUpperCase()} (${fmt24(s)} - ${fmt24(e)})`;
+                    .map((b, i) => {
+                      const s = new Date(b.start_at), e = new Date(b.end_at);
+                      return `${i + 1}) ${b.name.toUpperCase()} (${fmt24(s)} - ${fmt24(e)})`;
                     })
                     .join("\n")}
                 </div>
@@ -231,46 +209,45 @@ function SubjectScheduleInner({ subjectId }: { subjectId: string }) {
             </div>
           </div>
 
-          {/* thick black separator */}
-          <div className="h-[2px] w-full" style={{ background: "#000000" }} />
+          {/* thick divider */}
+          <div className="mt-6 mb-6 h-[2px] w-full" style={{ background: "#000000" }} />
 
-          <div className="text-center font-semibold underline mt-6 mb-6">BOOKING</div>
+          <div className="text-center font-semibold underline mb-5">BOOKING</div>
+          {error && <div className="text-red-700 text-sm text-center mb-3">{error}</div>}
 
-          {error && <div className="text-red-700 text-sm mb-3 text-center">{error}</div>}
-
-          <form onSubmit={onSave} className="space-y-6 text-base font-semibold max-w-md mx-auto">
+          <form onSubmit={onSave} className="max-w-[520px] mx-auto space-y-6">
             <div className="flex items-center justify-center gap-4">
-              <label className="min-w-[80px]">NAME :</label>
+              <span className="font-semibold min-w-[86px]">NAME :</span>
               <input
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="border-b-2 border-black bg-transparent focus:outline-none w-56 text-center"
+                className="w-[300px] bg-transparent outline-none border-b-2 border-black py-1 text-center"
               />
             </div>
 
             <div className="flex items-center justify-center gap-4">
-              <label className="min-w-[80px]">TIME :</label>
+              <span className="font-semibold min-w-[86px]">TIME :</span>
               <input
                 type="time"
                 value={startTime}
                 onChange={(e) => setStartTime(e.target.value)}
                 step={60}
-                className="border border-black rounded-lg p-1 text-sm"
+                className="border border-black rounded-lg px-3 py-1 text-sm"
               />
-              <span> - </span>
+              <span>-</span>
               <input
                 type="time"
                 value={endTime}
                 onChange={(e) => setEndTime(e.target.value)}
                 step={60}
-                className="border border-black rounded-lg p-1 text-sm"
+                className="border border-black rounded-lg px-3 py-1 text-sm"
               />
             </div>
 
             <div className="flex justify-end">
               <button
                 type="submit"
-                className="text-white font-bold px-10 py-2 rounded-xl shadow-md"
+                className="text-white font-extrabold px-10 py-2 rounded-xl"
                 style={{ background: "#2E59BA" }}
               >
                 SAVE
@@ -283,14 +260,7 @@ function SubjectScheduleInner({ subjectId }: { subjectId: string }) {
   );
 }
 
-/* ===== Default export — match your folder name ===== */
-/* If your folder is [id] (as in your screenshot), keep this: */
+/* default export (adjust param key if your folder name differs) */
 export default function Page({ params }: { params: { id: string } }) {
-  return <SubjectScheduleInner subjectId={params.id} />;
+  return <SubjectSchedule subjectId={params.id} />;
 }
-
-/* If your folder is [subjectId], use this instead:
-export default function Page({ params }: { params: { subjectId: string } }) {
-  return <SubjectScheduleInner subjectId={params.subjectId} />;
-}
-*/
