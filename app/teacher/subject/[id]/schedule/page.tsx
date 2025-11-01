@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 
-/** —— Helpers —— */
+/* ================= Helpers ================= */
 function endOfMonth(d: Date) {
   return new Date(d.getFullYear(), d.getMonth() + 1, 0);
 }
@@ -43,23 +43,26 @@ type Booking = {
   end_at: string;   // ISO
 };
 
+/* =============== Inner Page =============== */
 function SubjectScheduleInner({ subjectId }: { subjectId: string }) {
-  /** —— State —— */
+  // UI state
   const [monthCursor, setMonthCursor] = useState<Date>(() => new Date(2025, 0, 1)); // JAN 2025
   const [selectedDate, setSelectedDate] = useState<Date>(() => new Date(2025, 0, 20));
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+
+  // Form state
   const [name, setName] = useState<string>("");
-  const [startTime, setStartTime] = useState<string>("00:00"); // 24h
-  const [endTime, setEndTime]   = useState<string>("00:00");   // 24h
+  const [startTime, setStartTime] = useState<string>("00:00");
+  const [endTime, setEndTime] = useState<string>("00:00");
   const [error, setError] = useState<string>("");
 
-  /** —— Derived —— */
+  // Derived
   const monthName = monthCursor.toLocaleString(undefined, { month: "long" }).toUpperCase();
   const yearNum = monthCursor.getFullYear();
   const days = daysInMonth(monthCursor);
 
-  /** —— Fetch bookings for the selected day —— */
+  // Load bookings for the selected day (subject-scoped)
   async function loadBookingsForSelectedDay() {
     if (!subjectId || !selectedDate) return;
     setLoading(true);
@@ -81,24 +84,25 @@ function SubjectScheduleInner({ subjectId }: { subjectId: string }) {
     setLoading(false);
   }
 
-  useEffect(() => { loadBookingsForSelectedDay(); /* eslint-disable-line react-hooks/exhaustive-deps */ }, [subjectId, selectedDate]);
+  useEffect(() => {
+    loadBookingsForSelectedDay();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [subjectId, selectedDate]);
 
-  /** —— Actions —— */
+  // Actions
   function gotoPrevMonth() {
     const d = new Date(monthCursor);
     d.setMonth(d.getMonth() - 1);
     setMonthCursor(d);
     const last = endOfMonth(d).getDate();
-    const sameDay = Math.min(selectedDate.getDate(), last);
-    setSelectedDate(new Date(d.getFullYear(), d.getMonth(), sameDay));
+    setSelectedDate(new Date(d.getFullYear(), d.getMonth(), Math.min(selectedDate.getDate(), last)));
   }
   function gotoNextMonth() {
     const d = new Date(monthCursor);
     d.setMonth(d.getMonth() + 1);
     setMonthCursor(d);
     const last = endOfMonth(d).getDate();
-    const sameDay = Math.min(selectedDate.getDate(), last);
-    setSelectedDate(new Date(d.getFullYear(), d.getMonth(), sameDay));
+    setSelectedDate(new Date(d.getFullYear(), d.getMonth(), Math.min(selectedDate.getDate(), last)));
   }
 
   async function onSave(e: React.FormEvent) {
@@ -133,10 +137,10 @@ function SubjectScheduleInner({ subjectId }: { subjectId: string }) {
     await loadBookingsForSelectedDay();
   }
 
-  /** —— UI (kept 100% like yours) —— */
+  /* =============== UI (matches your target) =============== */
   return (
     <div className="min-h-screen w-full" style={{ background: "#7cc9f5" }}>
-      {/* Header bar */}
+      {/* Header */}
       <div className="w-full" style={{ background: "#39a8f0" }}>
         <div className="max-w-6xl mx-auto py-4 px-4 flex items-center justify-between">
           <div>
@@ -146,38 +150,34 @@ function SubjectScheduleInner({ subjectId }: { subjectId: string }) {
           <div className="flex items-center gap-6 text-sm">
             <Link href="/about" className="hover:underline">About Us</Link>
             <Link href="/contact" className="hover:underline">Contact</Link>
-            <div className="px-3 py-1 rounded-full shadow bg-white flex items-center gap-2">
-              <span className="inline-block w-2.5 h-2.5 rounded-full bg-black" />
-              <span>FIRDAUS</span>
-            </div>
+            <div className="px-3 py-1 rounded-full shadow bg-white font-bold">FIRDAUS</div>
           </div>
         </div>
       </div>
 
       {/* Two columns */}
-      <div className="max-w-6xl mx-auto px-4 py-8 grid grid-cols-1 md:grid-cols-2 gap-8">
+      <div className="max-w-6xl mx-auto px-4 py-12 flex flex-col md:flex-row justify-center items-start gap-12">
         {/* Calendar */}
-        <div className="bg-white/90 rounded-3xl p-6 shadow relative">
-          <Link href="/teacher" className="absolute -top-8 left-0 text-2xl">&larr;</Link>
-
-          <div className="flex items-center justify-between mb-3">
-            <button aria-label="Prev Month" onClick={gotoPrevMonth} className="text-2xl leading-none">
-              &larr;
-            </button>
-            <div className="flex items-center gap-3">
-              <div className="text-xl font-semibold">{monthName}</div>
-              <div className="text-xl font-semibold">{yearNum}</div>
-            </div>
-            <button aria-label="Next Month" onClick={gotoNextMonth} className="text-2xl leading-none">
-              &rarr;
-            </button>
+        <div className="bg-[#7DC6F6] border border-black rounded-3xl p-6 shadow-lg w-[360px]">
+          <div className="flex items-center justify-between mb-4">
+            <button aria-label="Prev Month" onClick={gotoPrevMonth} className="text-2xl font-bold">←</button>
+            <div className="font-bold text-lg">{monthName} {yearNum}</div>
+            <button aria-label="Next Month" onClick={gotoNextMonth} className="text-2xl font-bold">→</button>
           </div>
 
-          <div className="grid grid-cols-7 text-center text-sm opacity-80 mb-2">
+          {/* Week header */}
+          <div
+            className="grid grid-cols-7 text-center text-sm opacity-80 mb-2"
+            style={{ display: "grid", gridTemplateColumns: "repeat(7, minmax(0, 1fr))" }}
+          >
             <div>Su</div><div>Mo</div><div>Tu</div><div>We</div><div>Th</div><div>Fr</div><div>Sa</div>
           </div>
 
-          <div className="grid grid-cols-7 gap-3 pt-1">
+          {/* Days */}
+          <div
+            className="grid grid-cols-7 gap-3 pt-1"
+            style={{ display: "grid", gridTemplateColumns: "repeat(7, minmax(0, 1fr))", gap: "0.75rem" }}
+          >
             {days.map((d) => {
               const cellDate = new Date(monthCursor.getFullYear(), monthCursor.getMonth(), d);
               const isSelected = isoDateOnly(cellDate) === isoDateOnly(selectedDate);
@@ -185,19 +185,10 @@ function SubjectScheduleInner({ subjectId }: { subjectId: string }) {
                 <button
                   key={d}
                   onClick={() => setSelectedDate(cellDate)}
-                  className="h-14 rounded-2xl border border-black/60 relative"
+                  className={`h-14 w-14 flex items-center justify-center rounded-2xl border border-black text-lg font-semibold ${isSelected ? "bg-[#9EE4F8]" : "bg-transparent"}`}
                   style={{ boxShadow: "0 0 0 3px rgb(0 0 0 / 20%) inset, 0 1px 3px rgb(0 0 0 / 20%)" }}
                 >
-                  <span className="absolute inset-0 flex items-center justify-center text-lg font-semibold">
-                    {d}
-                  </span>
-                  {isSelected && (
-                    <span
-                      className="absolute right-1 bottom-1 w-6 h-6 rounded-full"
-                      style={{ background: "#7eff85", border: "2px solid #2a8f32" }}
-                      aria-hidden
-                    />
-                  )}
+                  {d}
                 </button>
               );
             })}
@@ -205,74 +196,71 @@ function SubjectScheduleInner({ subjectId }: { subjectId: string }) {
         </div>
 
         {/* Booking panel */}
-        <div className="rounded-3xl p-8 shadow" style={{ background: "#4db4f0" }}>
-          <h1 className="text-3xl font-extrabold text-center tracking-wide mb-6">
-            BOOKING CLASS
-          </h1>
+        <div className="bg-[#56B1F5] border border-black rounded-3xl p-8 shadow-lg flex-1">
+          <h1 className="text-3xl font-extrabold text-center mb-6 tracking-wide">BOOKING CLASS</h1>
 
-          <div className="text-center font-semibold underline mb-3">
-            {fmtLongUpper(selectedDate)}
+          <div className="text-center mb-6">
+            <div className="text-lg font-bold underline">{fmtLongUpper(selectedDate)}</div>
+            <div className="font-semibold mt-2">
+              BOOKING :
+              {" "}
+              {loading ? (
+                <span>Loading…</span>
+              ) : bookings.length === 0 ? (
+                <span className="italic">- NO BOOKING -</span>
+              ) : (
+                <div className="whitespace-pre-line leading-7 mt-1">
+                  {bookings
+                    .map((b, idx) => {
+                      const s = new Date(b.start_at);
+                      const e = new Date(b.end_at);
+                      return `${idx + 1}) ${b.name.toUpperCase()} (${fmt24(s)} - ${fmt24(e)})`;
+                    })
+                    .join("\n")}
+                </div>
+              )}
+            </div>
           </div>
 
-          <div className="text-lg mb-4">
-            <span className="font-bold">BOOKING :</span>{" "}
-            {loading ? (
-              <span>Loading…</span>
-            ) : bookings.length === 0 ? (
-              <span className="italic">- NO BOOKING -</span>
-            ) : (
-              <div className="whitespace-pre-line leading-7">
-                {bookings.map((b, idx) => {
-                  const s = new Date(b.start_at);
-                  const e = new Date(b.end_at);
-                  return `${idx + 1}) ${b.name.toUpperCase()} (${fmt24(s)} - ${fmt24(e)})`;
-                }).join("\n")}
-              </div>
-            )}
-          </div>
+          <hr className="border-black mb-6" />
 
-          <div className="border-t border-black my-4" />
+          <div className="text-center font-semibold underline mb-6">BOOKING</div>
 
-          <div className="text-center font-semibold underline mb-4">BOOKING</div>
+          {error && <div className="text-red-700 text-sm mb-3 text-center">{error}</div>}
 
-          {error && <div className="text-red-700 text-sm mb-3">{error}</div>}
-
-          <form onSubmit={onSave} className="grid gap-5 max-w-md">
-            <label className="grid grid-cols-[80px_1fr] items-center gap-4">
-              <span className="justify-self-start font-semibold">NAME :</span>
+          <form onSubmit={onSave} className="space-y-6 text-base font-semibold max-w-md mx-auto">
+            <div className="flex items-center justify-center gap-4">
+              <label className="min-w-[80px]">NAME :</label>
               <input
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="border-b-2 border-black bg-transparent outline-none py-1"
+                className="border-b-2 border-black bg-transparent focus:outline-none w-56 text-center"
               />
-            </label>
+            </div>
 
-            <label className="grid grid-cols-[80px_1fr] items-center gap-4">
-              <span className="justify-self-start font-semibold">TIME :</span>
-              <div className="flex items-center gap-2">
-                <input
-                  type="time"
-                  value={startTime}
-                  onChange={(e) => setStartTime(e.target.value)}
-                  step={60}
-                  className="border px-3 py-1 rounded-md"
-                />
-                <span>-</span>
-                <input
-                  type="time"
-                  value={endTime}
-                  onChange={(e) => setEndTime(e.target.value)}
-                  step={60}
-                  className="border px-3 py-1 rounded-md"
-                />
-              </div>
-            </label>
+            <div className="flex items-center justify-center gap-4">
+              <label className="min-w-[80px]">TIME :</label>
+              <input
+                type="time"
+                value={startTime}
+                onChange={(e) => setStartTime(e.target.value)}
+                step={60}
+                className="border border-black rounded-lg p-1 text-sm"
+              />
+              <span> - </span>
+              <input
+                type="time"
+                value={endTime}
+                onChange={(e) => setEndTime(e.target.value)}
+                step={60}
+                className="border border-black rounded-lg p-1 text-sm"
+              />
+            </div>
 
             <div className="flex justify-end">
               <button
                 type="submit"
-                className="px-8 py-2 rounded-xl text-white font-bold"
-                style={{ background: "#3a57c8" }}
+                className="bg-[#2E59BA] text-white font-bold px-10 py-2 rounded-xl shadow-md hover:brightness-95"
               >
                 SAVE
               </button>
@@ -284,7 +272,15 @@ function SubjectScheduleInner({ subjectId }: { subjectId: string }) {
   );
 }
 
-/** ✅ Default export using Next.js page props */
+/* ===== Default export (IMPORTANT: match your folder name) ===== */
+// If your folder is [id]  -> keep this:
 export default function Page({ params }: { params: { id: string } }) {
   return <SubjectScheduleInner subjectId={params.id} />;
 }
+
+/*
+// If your folder is [subjectId] instead, use this version:
+export default function Page({ params }: { params: { subjectId: string } }) {
+  return <SubjectScheduleInner subjectId={params.subjectId} />;
+}
+*/
