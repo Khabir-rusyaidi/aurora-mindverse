@@ -20,7 +20,7 @@ type Subject = {
 /** Simple trash outline icon */
 function TrashIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
-    <svg viewBox="0 0 24 24" width="22" height="22" {...props}>
+    <svg viewBox="0 0 24 24" width="18" height="18" {...props}>
       <path
         d="M3 6h18M9 6V4h6v2M7 6l1 14a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2L17 6M10 11v6M14 11v6"
         stroke="currentColor"
@@ -186,27 +186,29 @@ export default function TeacherDashboard() {
               <p style={{ opacity: 0.9 }}>{s.description}</p>
             </div>
 
+            {/* ==== ONLY THIS COLUMN IS CHANGED TO MATCH YOUR IMAGE ==== */}
             <div className="subject-actions">
+              {/* "Schedule" looks like a heading but is clickable */}
+              <Link href={`/teacher/subject/${s.id}/schedule`} className="schedule-title">
+                Schedule
+              </Link>
+
               {s.teacher_id === myId ? (
                 <>
-                  <Link className="edit-link" href={`/teacher/subject/${s.id}/edit`}>
-                    <span style={{ marginRight: 6 }}>✎</span> Edit
+                  <Link className="edit-row" href={`/teacher/subject/${s.id}/edit`}>
+                    <span className="edit-icon">✎</span>
+                    <span>Edit</span>
                   </Link>
 
                   <button
                     type="button"
-                    className="delete-link"
+                    className="delete-row"
                     onClick={() => handleDelete(s)}
                     aria-label={`Delete ${s.title}`}
                   >
                     <TrashIcon className="trash-svg" />
                     <span>Delete</span>
                   </button>
-
-                  {/* ✅ Schedule Button – points to /teacher/subject/[id]/schedule */}
-                  <Link href={`/teacher/subject/${s.id}/schedule`}>
-                    <button className="schedule-btn">Schedule</button>
-                  </Link>
                 </>
               ) : (
                 <span style={{ opacity: 0.7, fontSize: 12 }}>by another teacher</span>
@@ -226,6 +228,98 @@ export default function TeacherDashboard() {
           </div>
         ))}
       </div>
+
+      {/* Scoped styles so we don't touch your global CSS */}
+      <style jsx>{`
+        .subject-row {
+          display: grid;
+          grid-template-columns: 160px 1fr 220px;
+          gap: 16px;
+          background: #e6e6e6;
+          border-radius: 16px;
+          padding: 22px;
+        }
+        .subject-thumb {
+          width: 160px;
+          height: 160px;
+          background: #36b0ff;
+          color: #fff;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border-radius: 28px;
+          font-weight: 600;
+        }
+        .subject-thumb img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          border-radius: 28px;
+        }
+        .subject-actions {
+          display: flex;
+          flex-direction: column;
+          align-items: flex-end;
+          gap: 10px;
+        }
+        .schedule-title {
+          font-weight: 700;
+          font-size: 20px;
+          color: #000;
+          text-decoration: none;
+          cursor: pointer;
+          margin-bottom: 6px;
+        }
+        .edit-row,
+        .delete-row {
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          background: transparent;
+          border: none;
+          padding: 0;
+          font-size: 16px;
+          cursor: pointer;
+          text-decoration: none;
+        }
+        .edit-row {
+          color: #000;
+        }
+        .edit-icon {
+          display: inline-block;
+          transform: translateY(-1px);
+        }
+        .delete-row {
+          color: #e04545;
+        }
+        .trash-svg {
+          margin-right: 4px;
+        }
+        .enter-btn {
+          margin-top: 8px;
+          background: #1ea7ff;
+          color: #fff;
+          border: none;
+          border-radius: 10px;
+          padding: 10px 14px;
+          font-weight: 600;
+          cursor: pointer;
+        }
+        .enter-btn:active {
+          transform: translateY(1px);
+        }
+
+        /* Keep your header/buttons feel consistent on narrow screens */
+        @media (max-width: 900px) {
+          .subject-row {
+            grid-template-columns: 120px 1fr;
+          }
+          .subject-actions {
+            grid-column: 1 / -1;
+            align-items: flex-start;
+          }
+        }
+      `}</style>
     </div>
   );
 }
