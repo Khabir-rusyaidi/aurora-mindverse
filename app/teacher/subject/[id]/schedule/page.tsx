@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 
-/* ---------- helpers (unchanged UI; just logic) ---------- */
+/* ---------- helpers ---------- */
 function endOfMonth(d: Date) { return new Date(d.getFullYear(), d.getMonth() + 1, 0); }
 function daysInMonth(d: Date) { return Array.from({ length: endOfMonth(d).getDate() }, (_, i) => i + 1); }
 function isoDateOnly(d: Date) {
@@ -107,7 +107,7 @@ function SubjectSchedule({ subjectId }: { subjectId: string }) {
 
   return (
     <div className="amv-root">
-      {/* TOP BAR (exact as screenshot) */}
+      {/* TOP BAR */}
       <div className="amv-topbar">
         <div>
           <div className="amv-brand">AURORA MIND VERSE</div>
@@ -125,7 +125,7 @@ function SubjectSchedule({ subjectId }: { subjectId: string }) {
         <Link href="/teacher" className="backbtn">←</Link>
       </div>
 
-      {/* TWO COLUMNS (locked) */}
+      {/* LAYOUT */}
       <div className="gridwrap">
         {/* CALENDAR */}
         <div className="cal-card">
@@ -163,25 +163,24 @@ function SubjectSchedule({ subjectId }: { subjectId: string }) {
 
           <div className="book-date">{fmtLongUpper(selectedDate)}</div>
 
-          <div className="book-line">
-            <span className="bld">BOOKING :</span>
-            {loading ? (
-              <span>  Loading…</span>
-            ) : bookings.length === 0 ? (
-              <span>  - NO BOOKING -</span>
-            ) : (
-              <div className="book-list">
-                {bookings.map((b, i) => {
-                  const s = new Date(b.start_at), e = new Date(b.end_at);
-                  return `${i + 1}) ${b.name.toUpperCase()} (${fmt24(s)} - ${fmt24(e)})`;
-                }).join("\n")}
-              </div>
-            )}
-          </div>
-
-          <div className="divider" />
+          <div className="rule" />
 
           <div className="book-sub">BOOKING</div>
+          {loading ? null : (
+            <div className="book-line">
+              <span className="bld">BOOKING : </span>
+              {bookings.length === 0 ? <span> - NO BOOKING -</span> : null}
+              {bookings.length > 0 && (
+                <div className="book-list">
+                  {bookings.map((b, i) => {
+                    const s = new Date(b.start_at), e = new Date(b.end_at);
+                    return `${i + 1}) ${b.name.toUpperCase()} (${fmt24(s)} - ${fmt24(e)})`;
+                  }).join("\n")}
+                </div>
+              )}
+            </div>
+          )}
+
           {error && <div className="err">{error}</div>}
 
           <form onSubmit={onSave} className="book-form">
@@ -192,7 +191,6 @@ function SubjectSchedule({ subjectId }: { subjectId: string }) {
 
             <div className="row time-row">
               <span className="lab">TIME :</span>
-              {/* Editable but looks like text */}
               <input
                 type="time"
                 value={startTime}
@@ -219,75 +217,63 @@ function SubjectSchedule({ subjectId }: { subjectId: string }) {
         </div>
       </div>
 
-      {/* STYLES — EXACT LOOK, DO NOT CHANGE */}
+      {/* STYLES tuned to your image */}
       <style jsx>{`
         .amv-root{min-height:100vh;background:#7cc9f5;color:#000;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial}
-        .amv-topbar{background:#39a8f0;padding:14px 28px;display:flex;justify-content:space-between;align-items:center}
-        .amv-brand{font-size:28px;font-weight:900;letter-spacing:.2px}
+        .amv-topbar{background:#39a8f0;padding:16px 32px;display:flex;justify-content:space-between;align-items:center}
+        .amv-brand{font-size:30px;font-weight:900}
         .amv-tag{margin-top:2px;font-size:13px;font-weight:700}
-        .amv-right{display:flex;align-items:center;gap:22px}
+        .amv-right{display:flex;align-items:center;gap:24px}
         .toplink{color:#000;text-decoration:none;font-weight:700}
         .toplink:hover{text-decoration:underline}
-        .amv-pill{background:#fff;border:1px solid rgba(0,0,0,.2);padding:6px 12px;border-radius:9999px;display:inline-flex;gap:8px;align-items:center;font-weight:900}
+        .amv-pill{background:#fff;border:1px solid rgba(0,0,0,.25);padding:8px 14px;border-radius:9999px;display:inline-flex;gap:8px;align-items:center;font-weight:900}
         .amv-dot{width:12px;height:12px;border-radius:9999px;background:#000;display:inline-block}
 
-        .amv-back{max-width:1120px;margin:12px auto 0;padding:0 24px}
+        .amv-back{max-width:1200px;margin:12px auto 0;padding:0 24px}
         .backbtn{font-size:28px;font-weight:900;color:#000;text-decoration:none}
 
-        .gridwrap{max-width:1120px;margin:8px auto 46px;padding:0 24px;display:grid;grid-template-columns:440px minmax(0,1fr);gap:28px;align-items:stretch}
+        .gridwrap{max-width:1200px;margin:10px auto 56px;padding:0 24px;display:grid;grid-template-columns:520px minmax(0,1fr);gap:36px;align-items:stretch}
 
-        /* CALENDAR — locked to screenshot */
-        .cal-card{background:#9bd8fb;border-radius:28px;padding:18px 18px 24px;border:2px solid #000}
+        /* CALENDAR */
+        .cal-card{background:#9bd8fb;border-radius:34px;padding:18px 22px 26px;border:3px solid #000}
         .cal-head{display:grid;grid-template-columns:44px 1fr auto 44px;align-items:center}
         .arrow{background:none;border:none;font-size:20px;font-weight:900;cursor:pointer}
-        .title{justify-self:center;font-size:24px;font-weight:900;letter-spacing:.6px}
-        .year{justify-self:start;font-size:24px;font-weight:900;margin-left:8px}
-        .labels{display:grid;grid-template-columns:repeat(7,1fr);text-align:center;font-size:18px;margin:8px 0 10px}
-        .days{display:grid;grid-template-columns:repeat(7,56px);gap:16px;justify-content:center}
-        .day{width:56px;height:50px;border:3px solid #000;border-radius:12px;background:#fff;display:flex;align-items:center;justify-content:center}
-        .num{font-weight:900;font-size:20px;line-height:1}
+        .title{justify-self:center;font-size:28px;font-weight:900;letter-spacing:.6px}
+        .year{justify-self:start;font-size:28px;font-weight:900;margin-left:10px}
+        .labels{display:grid;grid-template-columns:repeat(7,1fr);text-align:center;font-size:18px;margin:10px 0 12px}
+        .days{display:grid;grid-template-columns:repeat(7,64px);gap:20px;justify-content:center}
+        .day{width:64px;height:56px;border:4px solid #000;border-radius:14px;background:#fff;display:flex;align-items:center;justify-content:center}
+        .num{font-weight:900;font-size:22px;line-height:1}
         .sel .num{background:#7eff85;border:3px solid #2a8f32;border-radius:10px;padding:2px 8px}
 
-        /* BOOKING CARD — locked to screenshot */
-        .book-card{background:#4db4f0;border-radius:28px;padding:26px 28px;border:2px solid #000;display:flex;flex-direction:column}
-        .book-title{font-size:36px;font-weight:900;text-align:center;margin:0 0 12px}
-        .book-date{text-align:center;text-decoration:underline;text-underline-offset:4px;font-weight:900;margin-bottom:8px}
-        .book-line{font-weight:900;text-align:center;white-space:pre-line}
-        .divider{height:2px;background:#000;margin:18px 0 16px;width:100%}
+        /* BOOKING CARD */
+        .book-card{background:#4fb4f0;border-radius:28px;padding:28px;border:3px solid #000;display:flex;flex-direction:column}
+        .book-title{font-size:42px;font-weight:900;text-align:center;margin:0 0 12px}
+        .book-date{text-align:center;text-decoration:underline;text-underline-offset:4px;font-weight:900;margin-top:2px;margin-bottom:8px}
+        .rule{height:3px;background:#000;width:640px;max-width:90%;margin:14px auto 10px}
         .book-sub{text-align:center;text-decoration:underline;font-weight:900;margin-bottom:18px}
-
+        .book-line{font-weight:900;text-align:center;white-space:pre-line;margin-top:-6px;margin-bottom:8px}
         .err{color:#b91c1c;text-align:center;font-weight:900;margin-bottom:10px}
-        .book-form{max-width:540px;margin:0 auto}
-        .row{display:flex;align-items:center;justify-content:center;gap:14px;margin-bottom:20px}
+
+        .book-form{max-width:700px;margin:0 auto}
+        .row{display:flex;align-items:center;justify-content:center;gap:16px;margin-bottom:22px}
         .lab{font-weight:900;min-width:110px}
-        .name-line{width:360px;border:none;border-bottom:3px solid #000;outline:none;background:transparent;height:34px}
+        .name-line{width:520px;border:none;border-bottom:4px solid #000;outline:none;background:transparent;height:34px}
 
-        /* TIME row — shows exactly “00:00 - 00:00” but editable */
-        .time-row{gap:14px}
+        /* time look like plain text but editable */
+        .time-row{gap:16px}
         .dash{font-weight:900}
-
         .time-plain{
-          width:90px;            /* ensures "00:00 am" shows cleanly where applicable */
-          border:none;
-          background:transparent;
-          outline:none;
-          font: inherit;
-          font-weight:900;
-          font-size:18px;
-          line-height:1.25;
-          text-align:center;
-          letter-spacing:.2px;
-          padding:0;
-          -webkit-appearance: none;
-          appearance: textfield;
+          width:110px;
+          border:none;background:transparent;outline:none;
+          font: inherit;font-weight:900;font-size:20px;line-height:1.25;text-align:center;letter-spacing:.2px;padding:0;
+          -webkit-appearance: none;appearance: textfield;
         }
-        .time-plain::-webkit-calendar-picker-indicator{ opacity:0; display:none; -webkit-appearance:none; }
-        .time-plain::-moz-focus-outer{ border:0; }
-        .time-plain::-ms-clear{ display:none; }
-        .time-plain::-webkit-clear-button{ display:none; }
+        .time-plain::-webkit-calendar-picker-indicator{opacity:0;display:none}
+        .time-plain::-webkit-clear-button{display:none}
 
-        .save-row{display:flex;justify-content:flex-end;padding-right:8px}
-        .save{background:#2E59BA;color:#fff;border:none;border-radius:14px;padding:10px 26px;font-weight:900;cursor:pointer}
+        .save-row{display:flex;justify-content:flex-end;padding-right:24px;margin-top:2px}
+        .save{background:#2E59BA;color:#fff;border:none;border-radius:16px;padding:12px 28px;font-weight:900;cursor:pointer}
       `}</style>
     </div>
   );
