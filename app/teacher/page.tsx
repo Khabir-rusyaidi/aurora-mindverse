@@ -23,8 +23,11 @@ function TrashIcon(props: React.SVGProps<SVGSVGElement>) {
     <svg viewBox="0 0 24 24" width="22" height="22" {...props}>
       <path
         d="M3 6h18M9 6V4h6v2M7 6l1 14a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2L17 6M10 11v6M14 11v6"
-        stroke="currentColor" strokeWidth={2} fill="none"
-        strokeLinecap="round" strokeLinejoin="round"
+        stroke="currentColor"
+        strokeWidth={2}
+        fill="none"
+        strokeLinecap="round"
+        strokeLinejoin="round"
       />
     </svg>
   );
@@ -32,8 +35,8 @@ function TrashIcon(props: React.SVGProps<SVGSVGElement>) {
 
 export default function TeacherDashboard() {
   const router = useRouter();
-  const userName = useCurrentUser();                   // 👈 shows FIRDAUS/TAY etc.
-  const [showLogout, setShowLogout] = useState(false); // 👈 toggle dropdown
+  const userName = useCurrentUser();
+  const [showLogout, setShowLogout] = useState(false);
 
   async function handleLogout() {
     await supabase.auth.signOut();
@@ -49,10 +52,16 @@ export default function TeacherDashboard() {
     (async () => {
       const { data: userRes, error: userErr } = await supabase.auth.getUser();
       const u = userRes?.user;
-      if (userErr || !u) { router.replace("/"); return; }
+      if (userErr || !u) {
+        router.replace("/");
+        return;
+      }
 
       const role = (u.user_metadata as UserMeta)?.role;
-      if (role !== "teacher") { router.replace("/"); return; }
+      if (role !== "teacher") {
+        router.replace("/");
+        return;
+      }
 
       setMyId(u.id);
 
@@ -78,8 +87,11 @@ export default function TeacherDashboard() {
       .eq("id", subject.id)
       .eq("teacher_id", myId);
 
-    if (error) { alert(error.message); return; }
-    setSubjects(prev => prev.filter(s => s.id !== subject.id));
+    if (error) {
+      alert(error.message);
+      return;
+    }
+    setSubjects((prev) => prev.filter((s) => s.id !== subject.id));
     alert("Subject deleted.");
   };
 
@@ -92,13 +104,20 @@ export default function TeacherDashboard() {
             <p className="amv-subtitle">STEP INTO THE NEW ERA</p>
           </div>
           <div className="nav-right">
-            <div className="nav-links"><Link href="/about">About Us</Link>&nbsp;&nbsp;<Link href="/contact">Contact</Link></div>
+            <div className="nav-links">
+              <Link href="/about">About Us</Link>&nbsp;&nbsp;
+              <Link href="/contact">Contact</Link>
+            </div>
             <div className="profile-container">
-              <button className="profile-pill"><span className="profile-icon">👤</span> {userName}</button>
+              <button className="profile-pill">
+                <span className="profile-icon">👤</span> {userName}
+              </button>
             </div>
           </div>
         </div>
-        <p className="welcome-text" style={{ marginTop: 24 }}>Loading…</p>
+        <p className="welcome-text" style={{ marginTop: 24 }}>
+          Loading…
+        </p>
       </div>
     );
   }
@@ -119,12 +138,14 @@ export default function TeacherDashboard() {
             <Link href="/contact">Contact</Link>
           </div>
 
-        <div className="profile-container">
-            <button className="profile-pill" onClick={() => setShowLogout(v => !v)}>
+          <div className="profile-container">
+            <button className="profile-pill" onClick={() => setShowLogout((v) => !v)}>
               <span className="profile-icon">👤</span> {userName}
             </button>
             {showLogout && (
-              <button className="logout-btn" onClick={handleLogout}>LOG OUT</button>
+              <button className="logout-btn" onClick={handleLogout}>
+                LOG OUT
+              </button>
             )}
           </div>
         </div>
@@ -152,7 +173,7 @@ export default function TeacherDashboard() {
       {/* === SUBJECTS === */}
       <div style={{ width: "90%", margin: "18px auto 0 auto" }}>
         <h2 style={{ margin: "12px 0 16px 0" }}>My Subject</h2>
-        {!subjects.length && (<p style={{ opacity: 0.8 }}>No subjects yet.</p>)}
+        {!subjects.length && <p style={{ opacity: 0.8 }}>No subjects yet.</p>}
 
         {subjects.map((s) => (
           <div key={s.id} className="subject-row" style={{ marginBottom: 16 }}>
@@ -182,8 +203,8 @@ export default function TeacherDashboard() {
                     <span>Delete</span>
                   </button>
 
-                  {/* Schedule Button – points to /subject/[id]/schedule */}
-                  <Link href={`/subject/${s.id}/schedule`}>
+                  {/* ✅ Schedule Button – points to /teacher/subject/[id]/schedule */}
+                  <Link href={`/teacher/subject/${s.id}/schedule`}>
                     <button className="schedule-btn">Schedule</button>
                   </Link>
                 </>
