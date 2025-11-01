@@ -127,10 +127,10 @@ function SubjectSchedule({ subjectId }: { subjectId: string }) {
         {/* calendar */}
         <div className="cal-card">
           <div className="cal-head">
-            <button onClick={prevMonth} className="arrow">&larr;</button>
+            <button onClick={prevMonth} className="arrow">←</button>
             <div className="title">{monthName}</div>
             <div className="year">{yearNum}</div>
-            <button onClick={nextMonth} className="arrow">&rarr;</button>
+            <button onClick={nextMonth} className="arrow">→</button>
           </div>
 
           <div className="labels">
@@ -187,9 +187,9 @@ function SubjectSchedule({ subjectId }: { subjectId: string }) {
               <input value={name} onChange={(e) => setName(e.target.value)} className="name-line" />
             </div>
 
-            <div className="row">
+            <div className="row time-row">
               <span className="lab">TIME :</span>
-              {/* visually “text”, but actually inputs */}
+              {/* editable but styled as plain text */}
               <input
                 type="time"
                 value={startTime}
@@ -198,7 +198,7 @@ function SubjectSchedule({ subjectId }: { subjectId: string }) {
                 className="time-plain"
                 aria-label="Start time"
               />
-              <span> - </span>
+              <span className="dash"> - </span>
               <input
                 type="time"
                 value={endTime}
@@ -216,79 +216,77 @@ function SubjectSchedule({ subjectId }: { subjectId: string }) {
         </div>
       </div>
 
-      {/* styles to match your mock exactly, with flat UI and editable “text-like” times */}
+      {/* styles */}
       <style jsx>{`
         .amv-root{min-height:100vh;background:#7cc9f5;color:#000;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial}
-        .amv-topbar{background:#39a8f0;padding:12px 24px;display:flex;justify-content:space-between;align-items:center}
-        .amv-brand{font-size:28px;font-weight:900;letter-spacing:.2px}
-        .amv-tag{margin-top:-2px;font-size:12px;font-weight:700}
-        .amv-right{display:flex;align-items:center;gap:18px}
-        .toplink{color:#000;text-decoration:none;font-weight:700}
-        .toplink:hover{text-decoration:underline}
-        .amv-pill{background:#fff;border:1px solid rgba(0,0,0,.2);padding:6px 12px;border-radius:9999px;display:inline-flex;gap:8px;align-items:center;font-weight:900}
+        .amv-topbar{background:#39a8f0;padding:14px 26px;display:flex;justify-content:space-between;align-items:center}
+        .amv-brand{font-size:32px;font-weight:900;letter-spacing:.2px}
+        .amv-tag{margin-top:-2px;font-size:13px;font-weight:700}
+        .amv-right{display:flex;align-items:center;gap:20px}
+        .toplink{color:#000;text-decoration:underline;font-weight:700}
+        .amv-pill{background:#fff;border:1px solid rgba(0,0,0,.2);padding:6px 14px;border-radius:9999px;display:inline-flex;gap:10px;align-items:center;font-weight:900}
         .amv-dot{width:14px;height:14px;border-radius:9999px;background:#000;display:inline-block}
 
-        .amv-back{max-width:1160px;margin:10px auto 0;padding:0 24px}
-        .backbtn{font-size:26px;font-weight:900;color:#000;text-decoration:none}
+        .amv-back{max-width:1220px;margin:10px auto 0;padding:0 24px}
+        .backbtn{font-size:22px;font-weight:900;color:#000;text-decoration:none}
 
-        .gridwrap{max-width:1160px;margin:8px auto 40px;padding:0 24px;display:grid;grid-template-columns:520px minmax(0,1fr);gap:24px;align-items:stretch}
+        .gridwrap{max-width:1220px;margin:10px auto 50px;padding:0 24px;display:grid;grid-template-columns:560px minmax(0,1fr);gap:30px;align-items:stretch}
 
         /* calendar */
-        .cal-card{background:#9bd8fb;border:2px solid #000;border-radius:28px;padding:18px 18px 22px}
+        .cal-card{background:#98d4fb;border:3px solid #000;border-radius:28px;padding:18px 20px 24px}
         .cal-head{display:grid;grid-template-columns:44px 1fr auto 44px;align-items:center}
-        .arrow{background:none;border:none;font-size:24px;font-weight:900;cursor:pointer}
-        .title{justify-self:center;font-size:22px;font-weight:900;letter-spacing:.5px}
-        .year{justify-self:start;font-size:22px;font-weight:900;margin-left:8px}
-        .labels{display:grid;grid-template-columns:repeat(7,1fr);text-align:center;font-size:14px;margin:8px 0 10px}
-        .days{display:grid;grid-template-columns:repeat(7,66px);gap:16px;justify-content:center}
-        .day{width:66px;height:58px;border:3px solid #000;border-radius:14px;background:#fff;display:flex;align-items:center;justify-content:center}
-        .num{font-weight:900;font-size:18px;line-height:1}
-        /* selected day looks like green bubble behind number (not a corner dot) */
+        .arrow{background:none;border:none;font-size:22px;font-weight:900;cursor:pointer}
+        .title{justify-self:center;font-size:28px;font-weight:900;letter-spacing:.6px}
+        .year{justify-self:start;font-size:28px;font-weight:900;margin-left:6px}
+        .labels{display:grid;grid-template-columns:repeat(7,1fr);text-align:center;font-size:15px;margin:10px 0 12px}
+        .days{display:grid;grid-template-columns:repeat(7,78px);gap:18px;justify-content:center}
+        .day{width:78px;height:64px;border:3px solid #000;border-radius:16px;background:#fff;display:flex;align-items:center;justify-content:center}
+        .num{font-weight:900;font-size:20px;line-height:1}
         .sel .num{background:#8cf493;border:3px solid #2a8f32;border-radius:12px;padding:2px 8px}
 
         /* booking */
-        .book-card{background:#56b1f5;border:2px solid #000;border-radius:28px;padding:26px 28px;display:flex;flex-direction:column}
-        .book-title{font-size:36px;font-weight:900;text-align:center;margin:0 0 10px}
-        .book-date{text-align:center;text-decoration:underline;text-underline-offset:3px;font-weight:900;margin-bottom:6px}
+        .book-card{background:#56b1f5;border:3px solid #000;border-radius:28px;padding:28px 32px;display:flex;flex-direction:column}
+        .book-title{font-size:40px;font-weight:900;text-align:center;margin:0 0 12px}
+        .book-date{text-align:center;text-decoration:underline;text-underline-offset:4px;font-weight:900;margin-bottom:8px}
         .book-line{font-weight:900;text-align:center;white-space:pre-line}
         .bld{letter-spacing:.3px}
         .book-list{white-space:pre-line;line-height:1.8;font-weight:700}
-        .divider{height:2px;background:#000;margin:16px 0 12px}
-        .book-sub{text-align:center;text-decoration:underline;font-weight:900;margin-bottom:14px}
+        .divider{height:3px;background:#000;margin:16px 0 14px;width:100%}
+        .book-sub{text-align:center;text-decoration:underline;font-weight:900;margin-bottom:18px}
 
         .err{color:#b91c1c;text-align:center;font-weight:900;margin-bottom:10px}
-        .book-form{max-width:560px;margin:0 auto}
-        .row{display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:18px}
-        .lab{font-weight:900;min-width:92px}
-        .name-line{width:360px;border:none;border-bottom:3px solid #000;outline:none;background:transparent;height:34px}
+        .book-form{max-width:640px;margin:0 auto}
+        .row{display:flex;align-items:center;justify-content:center;gap:14px;margin-bottom:22px}
+        .lab{font-weight:900;min-width:110px}
+        .name-line{width:520px;border:none;border-bottom:4px solid #000;outline:none;background:transparent;height:38px}
 
-        /* time inputs styled as plain text */
+        /* time row spacing identical to mock */
+        .time-row{gap:16px}
+        .dash{font-weight:900;transform:translateY(-1px)}
+
+        /* editable time that looks like text */
         .time-plain{
-          width:66px;       /* enough for 00:00 */
+          width:84px;             /* prevent "am/pm" clipping */
           border:none;
           background:transparent;
           outline:none;
           font: inherit;
           font-weight:900;
+          font-size:18px;
+          line-height:1.2;
           text-align:center;
-          height:28px;
+          letter-spacing:.2px;
           padding:0;
           -webkit-appearance: none;
           appearance: textfield;
         }
-        /* hide the time picker icon on WebKit */
-        .time-plain::-webkit-calendar-picker-indicator{
-          opacity:0;
-          display:none;
-          -webkit-appearance:none;
-        }
-        /* hide spinners in Firefox */
+        .time-plain::-webkit-calendar-picker-indicator{ opacity:0; display:none; -webkit-appearance:none; }
         .time-plain::-moz-focus-outer{ border:0; }
         .time-plain::-ms-clear{ display:none; }
         .time-plain::-webkit-clear-button{ display:none; }
 
-        .save-row{display:flex;justify-content:flex-end;padding-right:6px}
-        .save{background:#2E59BA;color:#fff;border:none;border-radius:14px;padding:10px 26px;font-weight:900;cursor:pointer}
+        .save-row{display:flex;justify-content:flex-end;padding-right:8px}
+        .save{background:#2E59BA;color:#fff;border:none;border-radius:16px;padding:12px 28px;font-weight:900;cursor:pointer}
       `}</style>
     </div>
   );
