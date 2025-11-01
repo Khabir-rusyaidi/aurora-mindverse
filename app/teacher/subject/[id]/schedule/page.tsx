@@ -36,17 +36,17 @@ function SubjectSchedule({ subjectId }: { subjectId: string }) {
   const [userName, setUserName] = useState("USER");
   useEffect(() => { (async () => { const { data } = await supabase.auth.getUser(); setUserName(displayName(data?.user)); })(); }, []);
 
-  /* calendar + bookings (fixed to Jan 2025 like reference) */
+  /* calendar + bookings (fixed to Jan 2025 to mirror your screenshot) */
   const [monthCursor, setMonthCursor] = useState(() => new Date(2025, 0, 1));
   const [selectedDate, setSelectedDate] = useState(() => new Date(2025, 0, 20));
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading,   setLoading]   = useState(true);
   const [error,     setError]     = useState("");
 
-  /* form state – 24h text to avoid am/pm rendering */
-  const [name, setName] = useState("");
+  /* form state – force 24h visual */
+  const [name, setName]       = useState("");
   const [startTime, setStartTime] = useState("00:00");
-  const [endTime, setEndTime]     = useState("00:00");
+  const [endTime,   setEndTime]   = useState("00:00");
 
   const monthName = monthCursor.toLocaleString(undefined, { month: "long" }).toUpperCase();
   const yearNum   = monthCursor.getFullYear();
@@ -110,7 +110,7 @@ function SubjectSchedule({ subjectId }: { subjectId: string }) {
   }
 
   return (
-    <div className="amv-root">
+    <div id="amv-schedule-scope" className="amv-root">
       {/* TOP BAR */}
       <div className="amv-topbar">
         <div>
@@ -168,7 +168,7 @@ function SubjectSchedule({ subjectId }: { subjectId: string }) {
           {/* date – underline only */}
           <div className="book-date">{fmtLongUpper(selectedDate)}</div>
 
-          {/* single centered line: BOOKING : ... (NO extra lines anywhere) */}
+          {/* BOOKING : ... */}
           {!loading && (
             <div className="book-line">
               <span className="bld">BOOKING :</span>
@@ -185,7 +185,7 @@ function SubjectSchedule({ subjectId }: { subjectId: string }) {
             </div>
           )}
 
-          {/* exactly ONE rule between the lines above and the “BOOKING” subheading */}
+          {/* single thick rule */}
           <div className="rule" />
 
           {/* subheading – underline only */}
@@ -210,7 +210,7 @@ function SubjectSchedule({ subjectId }: { subjectId: string }) {
               <input
                 type="text"
                 inputMode="numeric"
-                pattern="^\d{2}:\d{2}$"
+                pattern="^\\d{2}:\\d{2}$"
                 value={startTime}
                 onChange={(e) => setStartTime(e.target.value)}
                 className="time-plain"
@@ -221,7 +221,7 @@ function SubjectSchedule({ subjectId }: { subjectId: string }) {
               <input
                 type="text"
                 inputMode="numeric"
-                pattern="^\d{2}:\d{2}$"
+                pattern="^\\d{2}:\\d{2}$"
                 value={endTime}
                 onChange={(e) => setEndTime(e.target.value)}
                 className="time-plain"
@@ -238,71 +238,92 @@ function SubjectSchedule({ subjectId }: { subjectId: string }) {
       </div>
 
       <style jsx>{`
-        /* page base – keep your Poppins; exact colors from your reference */
-        .amv-root{min-height:100vh;background:#7cc9f5;color:#000}
+/* ======== PAGE-SCOPED RESET to stop global.css from leaking ======== */
+#amv-schedule-scope *::before,
+#amv-schedule-scope *::after { content: none !important; }
 
-        /* header bar */
-        .amv-topbar{background:#39a8f0;padding:18px 32px;display:flex;justify-content:space-between;align-items:center}
-        .amv-brand{font-size:30px;font-weight:900;letter-spacing:.2px}
-        .amv-tag{margin-top:2px;font-size:13px;font-weight:700}
-        .amv-right{display:flex;align-items:center;gap:28px}
-        .toplink{color:#000;text-decoration:none;font-weight:700}
-        .toplink:hover{text-decoration:underline}
-        .amv-pill{background:#fff;border:1px solid rgba(0,0,0,.25);padding:8px 16px;border-radius:9999px;display:inline-flex;gap:8px;align-items:center;font-weight:900}
-        .amv-dot{width:12px;height:12px;border-radius:9999px;background:#000;display:inline-block}
+#amv-schedule-scope .book-line,
+#amv-schedule-scope .book-date,
+#amv-schedule-scope .book-sub {
+  border: none !important;
+  box-shadow: none !important;
+  background: transparent !important;
+}
 
-        /* back arrow */
-        .amv-back{max-width:1200px;margin:12px auto 0;padding:0 24px}
-        .backbtn{font-size:28px;font-weight:900;color:#000;text-decoration:none}
+#amv-schedule-scope .rule {
+  height: 3px;
+  background: #000;
+  border: 0 !important;
+  box-shadow: none !important;
+}
 
-        /* two-column layout */
-        .gridwrap{max-width:1200px;margin:14px auto 56px;padding:0 24px;display:grid;grid-template-columns:520px minmax(0,1fr);gap:32px;align-items:stretch}
+#amv-schedule-scope input {
+  text-transform: none !important;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
 
-        /* calendar card */
-        .cal-card{background:#ffffff;border:none;border-radius:28px;padding:20px 24px 26px}
-        .cal-head{display:grid;grid-template-columns:44px 1fr auto 44px;align-items:center}
-        .arrow{background:none;border:none;font-size:22px;font-weight:900;cursor:pointer}
-        .title{justify-self:center;font-size:28px;font-weight:900;letter-spacing:.6px}
-        .year{justify-self:start;font-size:28px;font-weight:900;margin-left:10px}
-        .labels{display:grid;grid-template-columns:repeat(7,1fr);text-align:center;font-size:18px;margin:12px 0}
-        .days{display:grid;grid-template-columns:repeat(7,64px);gap:18px;justify-content:center}
-        .day{width:64px;height:56px;background:#fff;border:4px solid #000;border-radius:14px;display:flex;align-items:center;justify-content:center}
-        .num{font-weight:900;font-size:22px;line-height:1}
-        .sel .num{background:#7EFF85;border:3px solid #2A8F32;border-radius:10px;padding:2px 8px}
+/* ======== Page styles (exact to your screenshot) ======== */
+.amv-root{min-height:100vh;background:#7cc9f5;color:#000}
 
-        /* booking card */
-        .book-card{background:#4fb4f0;border:none;border-radius:28px;padding:32px 30px 28px;display:flex;flex-direction:column}
-        .book-title{font-size:42px;font-weight:900;text-align:center;margin:0 0 12px}
+.amv-topbar{background:#39a8f0;padding:18px 32px;display:flex;justify-content:space-between;align-items:center}
+.amv-brand{font-size:30px;font-weight:900;letter-spacing:.2px}
+.amv-tag{margin-top:2px;font-size:13px;font-weight:700}
+.amv-right{display:flex;align-items:center;gap:28px}
+.toplink{color:#000;text-decoration:none;font-weight:700}
+.toplink:hover{text-decoration:underline}
+.amv-pill{background:#fff;border:1px solid rgba(0,0,0,.25);padding:8px 16px;border-radius:9999px;display:inline-flex;gap:8px;align-items:center;font-weight:900}
+.amv-dot{width:12px;height:12px;border-radius:9999px;background:#000;display:inline-block}
 
-        /* underline ONLY on date + word BOOKING */
-        .book-date{text-align:center;font-weight:900;margin-top:4px;margin-bottom:10px;text-decoration:underline;text-underline-offset:4px}
-        .book-line{font-weight:900;text-align:center;margin:8px 0 10px}
-        .bld{margin-right:6px}
+.amv-back{max-width:1200px;margin:12px auto 0;padding:0 24px}
+.backbtn{font-size:28px;font-weight:900;color:#000;text-decoration:none}
 
-        /* single thick rule (no other lines) */
-        .rule{height:3px;background:#000;width:100%;margin:12px 0 16px}
+.gridwrap{max-width:1200px;margin:14px auto 56px;padding:0 24px;display:grid;grid-template-columns:520px minmax(0,1fr);gap:32px;align-items:stretch}
 
-        .book-sub{text-align:center;text-decoration:underline;font-weight:900;margin-bottom:18px}
+/* calendar card */
+.cal-card{background:#ffffff;border:none;border-radius:28px;padding:20px 24px 26px}
+.cal-head{display:grid;grid-template-columns:44px 1fr auto 44px;align-items:center}
+.arrow{background:none;border:none;font-size:22px;font-weight:900;cursor:pointer}
+.title{justify-self:center;font-size:28px;font-weight:900;letter-spacing:.6px}
+.year{justify-self:start;font-size:28px;font-weight:900;margin-left:10px}
+.labels{display:grid;grid-template-columns:repeat(7,1fr);text-align:center;font-size:18px;margin:12px 0}
+.days{display:grid;grid-template-columns:repeat(7,64px);gap:18px;justify-content:center}
+.day{width:64px;height:56px;background:#fff;border:4px solid #000;border-radius:14px;display:flex;align-items:center;justify-content:center}
+.num{font-weight:900;font-size:22px;line-height:1}
+.sel .num{background:#7EFF85;border:3px solid #2A8F32;border-radius:10px;padding:2px 8px}
 
-        .err{color:#b91c1c;text-align:center;font-weight:900;margin-bottom:10px}
+/* booking card */
+.book-card{background:#4fb4f0;border:none;border-radius:28px;padding:32px 30px 28px;display:flex;flex-direction:column}
+.book-title{font-size:42px;font-weight:900;text-align:center;margin:0 0 12px}
 
-        .book-form{max-width:760px;margin:0 auto}
-        .row{display:flex;align-items:center;justify-content:center;gap:16px;margin-bottom:22px}
-        .lab{font-weight:900;min-width:120px}
+.book-date{text-align:center;font-weight:900;margin-top:4px;margin-bottom:10px;text-decoration:underline;text-underline-offset:4px}
+.book-line{font-weight:900;text-align:center;margin:8px 0 10px}
+.bld{margin-right:6px}
 
-        /* single underline line for NAME input, nothing else */
-        .name-line{width:430px;border:none;border-bottom:4px solid #000;outline:none;background:transparent;height:36px}
+.rule{margin:12px 0 16px}
 
-        /* time shown as text (24h) */
-        .time-row{gap:14px}
-        .dash{font-weight:900}
-        .time-plain{
-          width:128px;border:none;background:transparent;outline:none;
-          font: inherit;font-weight:900;font-size:20px;line-height:1.25;text-align:center;letter-spacing:.2px;padding:0;
-        }
+.book-sub{text-align:center;text-decoration:underline;font-weight:900;margin-bottom:18px}
 
-        .save-row{display:flex;justify-content:flex-end;padding-right:10px;margin-top:4px}
-        .save{background:#2E59BA;color:#fff;border:none;border-radius:16px;padding:12px 28px;font-weight:900;cursor:pointer}
+.err{color:#b91c1c;text-align:center;font-weight:900;margin-bottom:10px}
+
+.book-form{max-width:760px;margin:0 auto}
+.row{display:flex;align-items:center;justify-content:center;gap:16px;margin-bottom:22px}
+.lab{font-weight:900;min-width:120px}
+
+/* single underline for NAME */
+.name-line{width:430px;border:none;border-bottom:4px solid #000 !important;outline:none;background:transparent;height:36px}
+
+/* 24h time text inputs */
+.time-row{gap:14px}
+.dash{font-weight:900}
+.time-plain{
+  width:128px;border:none;background:transparent;outline:none;
+  font: inherit;font-weight:900;font-size:20px;line-height:1.25;text-align:center;letter-spacing:.2px;padding:0;
+}
+
+.save-row{display:flex;justify-content:flex-end;padding-right:10px;margin-top:4px}
+.save{background:#2E59BA;color:#fff;border:none;border-radius:16px;padding:12px 28px;font-weight:900;cursor:pointer}
       `}</style>
     </div>
   );
