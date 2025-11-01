@@ -35,29 +35,29 @@ function displayName(user: any | null) {
 type Booking = { id: string; subject_id: string; name: string; start_at: string; end_at: string };
 
 function SubjectSchedule({ subjectId }: { subjectId: string }) {
+  /* top-right name */
   const [userName, setUserName] = useState("USER");
   useEffect(() => { (async () => { const { data } = await supabase.auth.getUser(); setUserName(displayName(data?.user)); })(); }, []);
 
-  // Fixed to JAN 2025 (20th selected) – like your mock
+  /* calendar + bookings */
   const [monthCursor, setMonthCursor] = useState(() => new Date(2025, 0, 1));
   const [selectedDate, setSelectedDate] = useState(() => new Date(2025, 0, 20));
   const [bookings, setBookings] = useState<Booking[]>([]);
-  const [loading,   setLoading]   = useState(true);
-  const [error,     setError]     = useState("");
-
-  const [name, setName]           = useState("");
+  const [loading, setLoading] = useState(true);
+  const [name, setName] = useState("");
   const [startTime, setStartTime] = useState("00:00");
-  const [endTime,   setEndTime]   = useState("00:00");
+  const [endTime, setEndTime] = useState("00:00");
+  const [error, setError] = useState("");
 
   const monthName = monthCursor.toLocaleString("en-US", { month: "long" }).toUpperCase();
-  const yearNum   = monthCursor.getFullYear();
-  const days      = daysInMonth(monthCursor);
+  const yearNum = monthCursor.getFullYear();
+  const days = daysInMonth(monthCursor);
 
   async function loadDay() {
     if (!subjectId) return;
     setLoading(true);
     const dayStart = new Date(selectedDate); dayStart.setHours(0,0,0,0);
-    const dayEnd   = new Date(selectedDate); dayEnd.setHours(23,59,59,999);
+    const dayEnd = new Date(selectedDate);   dayEnd.setHours(23,59,59,999);
     const { data, error } = await supabase
       .from("bookings")
       .select("*")
@@ -82,16 +82,10 @@ function SubjectSchedule({ subjectId }: { subjectId: string }) {
     setSelectedDate(new Date(d.getFullYear(), d.getMonth(), Math.min(selectedDate.getDate(), endOfMonth(d).getDate())));
   }
 
-  function validHHMM(v: string) {
-    return /^\d{2}:\d{2}$/.test(v) && Number(v.slice(0,2)) < 24 && Number(v.slice(3,5)) < 60;
-  }
-
   async function onSave(e: React.FormEvent) {
     e.preventDefault();
     setError("");
     if (!name.trim()) { setError("Please enter NAME."); return; }
-    if (!validHHMM(startTime) || !validHHMM(endTime)) { setError("Time must be HH:MM (24h)."); return; }
-
     const s = withTime(selectedDate, startTime);
     const eTime = withTime(selectedDate, endTime);
     if (eTime <= s) { setError("End time must be after start time."); return; }
@@ -101,7 +95,6 @@ function SubjectSchedule({ subjectId }: { subjectId: string }) {
       return s.getTime() < be && eTime.getTime() > bs;
     });
     if (clash) { setError("Time overlaps an existing booking."); return; }
-
     const { error } = await supabase.from("bookings").insert({
       subject_id: subjectId, name: name.trim(),
       start_at: s.toISOString(), end_at: eTime.toISOString()
@@ -125,44 +118,45 @@ function SubjectSchedule({ subjectId }: { subjectId: string }) {
         </div>
       </div>
 
-      {/* BACK ARROW */}
-      <div className="amv-back">
-        <Link href={`/teacher/subject/${subjectId}`} className="backbtn">←</Link>
-      </div>
-
       {/* MAIN LAYOUT */}
       <div className="gridwrap">
-        {/* CALENDAR CARD (left) */}
-        <div className="cal-card">
-          <div className="cal-head">
-            <button onClick={prevMonth} className="arrow">⬅</button>
-            <div className="title">{monthName}</div>
-            <div className="year">{yearNum}</div>
-            <button onClick={nextMonth} className="arrow">➡</button>
-          </div>
+        {/* LEFT COLUMN: calendar wrapper with OUTSIDE back arrow */}
+        <div className="cal-wrap">
+          {/* outside back arrow (go back to Teacher UI) */}
+          <Link href="/teacher" aria-label="Back to Teacher" className="outside-back">←</Link>
 
-          <div className="labels">
-            <div>Su</div><div>Mo</div><div>Tu</div><div>We</div><div>Th</div><div>Fr</div><div>Sa</div>
-          </div>
+          {/* calendar card */}
+          <div className="cal-card">
+            <div className="cal-head">
+              <button onClick={prevMonth} className="arrow" aria-label="Previous month">⬅</button>
+              <div className="title">{monthName}</div>
+              <div className="year">{yearNum}</div>
+              <button onClick={nextMonth} className="arrow" aria-label="Next month">➡</button>
+            </div>
 
-          <div className="days">
-            {days.map((d) => {
-              const cellDate = new Date(monthCursor.getFullYear(), monthCursor.getMonth(), d);
-              const isSelected = isoDateOnly(cellDate) === isoDateOnly(selectedDate);
-              return (
-                <button
-                  key={d}
-                  onClick={() => setSelectedDate(cellDate)}
-                  className={"day" + (isSelected ? " sel" : "")}
-                >
-                  <span className="num">{d}</span>
-                </button>
-              );
-            })}
+            <div className="labels">
+              <div>Su</div><div>Mo</div><div>Tu</div><div>We</div><div>Th</div><div>Fr</div><div>Sa</div>
+            </div>
+
+            <div className="days">
+              {days.map((d) => {
+                const cellDate = new Date(monthCursor.getFullYear(), monthCursor.getMonth(), d);
+                const isSelected = isoDateOnly(cellDate) === isoDateOnly(selectedDate);
+                return (
+                  <button
+                    key={d}
+                    onClick={() => setSelectedDate(cellDate)}
+                    className={"day" + (isSelected ? " sel" : "")}
+                  >
+                    <span className="num">{d}</span>
+                  </button>
+                );
+              })}
+            </div>
           </div>
         </div>
 
-        {/* BOOKING CARD (right) */}
+        {/* RIGHT COLUMN: booking card */}
         <div className="book-card">
           <h1 className="book-title">BOOKING CLASS</h1>
 
@@ -192,15 +186,12 @@ function SubjectSchedule({ subjectId }: { subjectId: string }) {
           <form onSubmit={onSave} className="book-form">
             <div className="row">
               <span className="lab">NAME :</span>
-              <span className="name-wrap">
-                <input
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  className="name-input"
-                  aria-label="Name"
-                  placeholder=""
-                />
-              </span>
+              <input
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="name-line"
+                aria-label="Name"
+              />
             </div>
 
             <div className="row time-row">
@@ -235,18 +226,15 @@ function SubjectSchedule({ subjectId }: { subjectId: string }) {
         </div>
       </div>
 
+      {/* ===== styles ===== */}
       <style jsx>{`
-/* ======== page-scoped hard reset (blocks global.css bleed) ======== */
+/* stop global bleed */
 #amv-schedule-scope *::before,
-#amv-schedule-scope *::after { content: none !important; display: none !important; }
-#amv-schedule-scope .book-date,
-#amv-schedule-scope .book-line,
-#amv-schedule-scope .book-sub { border: none !important; box-shadow: none !important; background: transparent !important; }
-#amv-schedule-scope input { border: none !important; box-shadow: none !important; background: transparent !important; text-transform: none !important; }
+#amv-schedule-scope *::after { content: none !important; }
+#amv-schedule-scope input { border: none !important; background: transparent !important; text-transform: none !important; }
 
-/* ======== page visuals ======== */
+/* page */
 .amv-root{min-height:100vh;background:#7cc9f5;color:#000}
-
 .amv-topbar{background:#39a8f0;padding:16px 32px;display:flex;justify-content:space-between;align-items:center}
 .amv-brand{font-size:32px;font-weight:900}
 .amv-tag{margin-top:2px;font-size:14px;font-weight:700}
@@ -256,73 +244,53 @@ function SubjectSchedule({ subjectId }: { subjectId: string }) {
 .amv-pill{background:#fff;border:1px solid rgba(0,0,0,.25);padding:8px 16px;border-radius:9999px;display:inline-flex;gap:8px;align-items:center;font-weight:900}
 .amv-dot{width:12px;height:12px;border-radius:9999px;background:#000;display:inline-block}
 
-.amv-back{max-width:1120px;margin:12px auto 0;padding:0 24px}
-.backbtn{font-size:28px;font-weight:900;color:#000;text-decoration:none}
+.gridwrap{max-width:1120px;margin:10px auto 56px;padding:0 24px;display:grid;grid-template-columns:520px minmax(0,1fr);gap:36px;align-items:stretch}
 
-.gridwrap{max-width:1120px;margin:12px auto 56px;padding:0 24px;display:grid;grid-template-columns:560px minmax(0,1fr);gap:28px;align-items:stretch}
+/* left area wrapper so we can place the OUTSIDE back arrow */
+.cal-wrap{position:relative;padding-left:32px;} /* room for outside arrow */
 
-/* CALENDAR CARD */
-.cal-card{background:#ffffff;border:none;border-radius:28px;padding:22px 26px 28px}
+/* outside back arrow */
+.outside-back{
+  position:absolute; left:0; top:12px;
+  width:36px; height:36px; line-height:36px;
+  display:inline-flex; align-items:center; justify-content:center;
+  border-radius:8px; background:transparent; color:#000; text-decoration:none;
+  font-weight:900; font-size:28px; cursor:pointer;
+}
+
+/* calendar card */
+.cal-card{background:#ffffff;border:none;border-radius:28px;padding:18px 22px 26px}
 .cal-head{display:grid;grid-template-columns:44px 1fr auto 44px;align-items:center}
-.arrow{background:none;border:none;font-size:22px;font-weight:900;cursor:pointer}
-.title{justify-self:center;font-size:30px;font-weight:900}
-.year{justify-self:start;font-size:30px;font-weight:900;margin-left:10px}
-.labels{display:grid;grid-template-columns:repeat(7,1fr);text-align:center;font-size:18px;margin:14px 0}
+.arrow{background:none;border:none;font-size:20px;font-weight:900;cursor:pointer}
+.title{justify-self:center;font-size:28px;font-weight:900;letter-spacing:.6px}
+.year{justify-self:start;font-size:28px;font-weight:900;margin-left:10px}
+.labels{display:grid;grid-template-columns:repeat(7,1fr);text-align:center;font-size:18px;margin:10px 0 12px}
+.days{display:grid;grid-template-columns:repeat(7,64px);gap:20px;justify-content:center}
+.day{width:64px;height:56px;border:4px solid #000;border-radius:14px;background:#fff;display:flex;align-items:center;justify-content:center}
+.num{font-weight:900;font-size:22px;line-height:1}
+.sel .num{background:#7eff85;border:3px solid #2a8f32;border-radius:10px;padding:2px 8px}
 
-/* ---- DAY GRID (adjusted to keep digits fully inside tiles) ---- */
-.days{
-  display:grid;
-  grid-template-columns:repeat(7, 84px); /* tile width */
-  gap:24px;
-  justify-content:center;
-}
-.day{
-  width:84px;
-  height:68px;                /* shorter to center optically */
-  background:#fff;
-  border:4px solid #000;
-  border-radius:16px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-}
-.num{
-  font-weight:900;
-  font-size:24px;            /* reduced so "29", "13" sit comfortably */
-  line-height:1;
-}
-.sel .num{
-  background:#7EFF85;
-  border:3px solid #2A8F32;
-  border-radius:10px;
-  padding:3px 8px;           /* scaled to fit inside 84x68 tile */
-}
-
-/* BOOKING CARD */
-.book-card{
-  background:#4fb4f0;border:none;border-radius:28px;
-  padding:26px 30px 26px;display:flex;flex-direction:column
-}
-.book-title{font-size:40px;font-weight:900;text-align:center;margin:0 0 8px}
-.book-date{text-align:center;font-weight:900;margin-top:4px;margin-bottom:12px;text-decoration:underline;text-underline-offset:4px;text-decoration-thickness:2px}
-.book-line{font-weight:900;text-align:center;margin:8px 0 10px}
-.rule{height:3px;background:#000;width:100%;margin:12px 0 16px;border-radius:2px}
-.book-sub{text-align:center;text-decoration:underline;text-underline-offset:4px;text-decoration-thickness:2px;font-weight:900;margin-bottom:18px}
-
+/* booking card */
+.book-card{background:#4fb4f0;border:none;border-radius:28px;padding:28px;display:flex;flex-direction:column}
+.book-title{font-size:42px;font-weight:900;text-align:center;margin:0 0 12px}
+.book-date{text-align:center;text-decoration:underline;text-underline-offset:4px;font-weight:900;margin-top:2px;margin-bottom:8px}
+.book-line{font-weight:900;text-align:center;margin:6px 0 10px}
+.rule{height:3px;background:#000;width:100%;margin:12px 0 14px}
+.book-sub{text-align:center;text-decoration:underline;font-weight:900;margin-bottom:18px}
 .err{color:#b91c1c;text-align:center;font-weight:900;margin-bottom:10px}
 
-.book-form{max-width:720px;margin:0 auto}
+.book-form{max-width:700px;margin:0 auto}
 .row{display:flex;align-items:center;justify-content:center;gap:16px;margin-bottom:22px}
 .lab{font-weight:900;min-width:110px}
-
-.name-wrap{display:inline-block;width:360px;border-bottom:4px solid #000;height:36px}
-.name-input{width:100%;height:100%;outline:none;background:transparent}
+.name-line{width:400px;border:none;border-bottom:4px solid #000;outline:none;background:transparent;height:34px}
 
 .time-row{gap:16px}
 .dash{font-weight:900}
-.time-plain{width:120px;font:inherit;font-weight:900;font-size:18px;line-height:1.25;text-align:center;letter-spacing:.2px;padding:0;outline:none}
+.time-plain{
+  width:120px; font:inherit; font-weight:900; font-size:20px; line-height:1.25; text-align:center; letter-spacing:.2px; padding:0; outline:none;
+}
 
-.save-row{display:flex;justify-content:flex-end;padding-right:6px;margin-top:4px}
+.save-row{display:flex;justify-content:flex-end;padding-right:8px;margin-top:4px}
 .save{background:#2E59BA;color:#fff;border:none;border-radius:16px;padding:12px 28px;font-weight:900;cursor:pointer}
       `}</style>
     </div>
