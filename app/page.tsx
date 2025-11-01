@@ -79,7 +79,7 @@ export default function LoginPage() {
       <p className="amv-subtitle">STEP INTO THE NEW ERA</p>
 
       <div className="welcome-section">
-        <h2 className="welcome-title">Welcome To Our Application</h2>
+        <h2 className="welcome-title">Welcome To Our Website</h2>
         <hr className="divider" />
         <p className="welcome-text">
           Through this website platform, students will not only read or watch learning materials passively
