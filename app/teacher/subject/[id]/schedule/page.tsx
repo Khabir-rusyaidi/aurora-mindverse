@@ -21,7 +21,6 @@ function withTime(date: Date, hhmm: string) {
 }
 function fmt24(d: Date) { return `${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}`; }
 function fmtLongUpper(d: Date) {
-  // EXACT format: 20 JANUARY 2025
   const day = String(d.getDate()).padStart(2, "0");
   const month = d.toLocaleString("en-US", { month: "long" }).toUpperCase();
   const year = d.getFullYear();
@@ -36,19 +35,17 @@ function displayName(user: any | null) {
 type Booking = { id: string; subject_id: string; name: string; start_at: string; end_at: string };
 
 function SubjectSchedule({ subjectId }: { subjectId: string }) {
-  /* top-right name */
   const [userName, setUserName] = useState("USER");
   useEffect(() => { (async () => { const { data } = await supabase.auth.getUser(); setUserName(displayName(data?.user)); })(); }, []);
 
-  /* calendar + bookings (JAN 2025; 20th selected as in screenshot) */
+  // Fixed to JAN 2025 like your reference
   const [monthCursor, setMonthCursor] = useState(() => new Date(2025, 0, 1));
   const [selectedDate, setSelectedDate] = useState(() => new Date(2025, 0, 20));
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading,   setLoading]   = useState(true);
   const [error,     setError]     = useState("");
 
-  /* form state – force 24h visual */
-  const [name, setName]         = useState("");
+  const [name, setName]           = useState("");
   const [startTime, setStartTime] = useState("00:00");
   const [endTime,   setEndTime]   = useState("00:00");
 
@@ -198,12 +195,15 @@ function SubjectSchedule({ subjectId }: { subjectId: string }) {
           <form onSubmit={onSave} className="book-form">
             <div className="row">
               <span className="lab">NAME :</span>
-              <input
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className="name-line"
-                aria-label="Name"
-              />
+              <span className="name-wrap">
+                <input
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className="name-input"
+                  aria-label="Name"
+                  placeholder=""
+                />
+              </span>
             </div>
 
             <div className="row time-row">
@@ -241,13 +241,17 @@ function SubjectSchedule({ subjectId }: { subjectId: string }) {
       <style jsx>{`
 /* ======== page-scoped hard reset (blocks global.css bleed) ======== */
 #amv-schedule-scope *::before,
-#amv-schedule-scope *::after { content: none !important; }
+#amv-schedule-scope *::after { content: none !important; display: none !important; }
 #amv-schedule-scope .book-date,
 #amv-schedule-scope .book-line,
 #amv-schedule-scope .book-sub { border: none !important; box-shadow: none !important; background: transparent !important; }
+#amv-schedule-scope .book-line::before,
+#amv-schedule-scope .book-line::after,
+#amv-schedule-scope .book-sub::before,
+#amv-schedule-scope .book-sub::after { content: none !important; display: none !important; border: 0 !important; }
 #amv-schedule-scope input { border: none !important; box-shadow: none !important; background: transparent !important; text-transform: none !important; }
 
-/* ======== exact visual from your screenshot ======== */
+/* ======== exact visual (with BIGGER date squares) ======== */
 .amv-root{min-height:100vh;background:#7cc9f5;color:#000}
 
 .amv-topbar{background:#39a8f0;padding:16px 32px;display:flex;justify-content:space-between;align-items:center}
@@ -262,25 +266,50 @@ function SubjectSchedule({ subjectId }: { subjectId: string }) {
 .amv-back{max-width:1120px;margin:12px auto 0;padding:0 24px}
 .backbtn{font-size:28px;font-weight:900;color:#000;text-decoration:none}
 
-.gridwrap{max-width:1120px;margin:12px auto 56px;padding:0 24px;display:grid;grid-template-columns:520px minmax(0,1fr);gap:28px;align-items:stretch}
+.gridwrap{max-width:1120px;margin:12px auto 56px;padding:0 24px;display:grid;grid-template-columns:560px minmax(0,1fr);gap:28px;align-items:stretch}
 
 /* CALENDAR CARD */
-.cal-card{background:#ffffff;border:none;border-radius:28px;padding:20px 24px 26px}
+.cal-card{background:#ffffff;border:none;border-radius:28px;padding:22px 26px 28px}
 .cal-head{display:grid;grid-template-columns:44px 1fr auto 44px;align-items:center}
 .arrow{background:none;border:none;font-size:22px;font-weight:900;cursor:pointer}
-.title{justify-self:center;font-size:28px;font-weight:900;letter-spacing:.6px}
-.year{justify-self:start;font-size:28px;font-weight:900;margin-left:10px}
-.labels{display:grid;grid-template-columns:repeat(7,1fr);text-align:center;font-size:18px;margin:12px 0}
-.days{display:grid;grid-template-columns:repeat(7,64px);gap:20px;justify-content:center}
-.day{width:64px;height:56px;background:#fff;border:4px solid #000;border-radius:14px;display:flex;align-items:center;justify-content:center}
-.num{font-weight:900;font-size:22px;line-height:1}
-.sel .num{background:#7EFF85;border:3px solid #2A8F32;border-radius:10px;padding:2px 8px}
+.title{justify-self:center;font-size:30px;font-weight:900;letter-spacing:.6px}
+.year{justify-self:start;font-size:30px;font-weight:900;margin-left:10px}
+.labels{display:grid;grid-template-columns:repeat(7,1fr);text-align:center;font-size:18px;margin:14px 0}
+
+/* >>> Bigger squares & tighter centering <<< */
+.days{
+  display:grid;
+  grid-template-columns:repeat(7, 86px); /* was 64px */
+  gap:24px;                               /* a bit more breathing room */
+  justify-content:center;
+}
+.day{
+  width:86px;               /* was 64px */
+  height:72px;              /* was 56px */
+  background:#fff;
+  border:4px solid #000;
+  border-radius:18px;       /* slightly larger radius to match bigger tile */
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.num{
+  font-weight:900;
+  font-size:28px;          /* was 22px */
+  line-height:1;
+}
+/* selected day badge unchanged, but scaled for bigger tile */
+.sel .num{
+  background:#7EFF85;
+  border:3px solid #2A8F32;
+  border-radius:10px;
+  padding:4px 10px;        /* was 2px 8px */
+}
 
 /* BOOKING CARD */
 .book-card{
   background:#4fb4f0;border:none;border-radius:28px;
-  padding:26px 30px 26px;
-  display:flex;flex-direction:column
+  padding:26px 30px 26px;display:flex;flex-direction:column
 }
 .book-title{font-size:40px;font-weight:900;text-align:center;margin:0 0 8px}
 
@@ -288,30 +317,23 @@ function SubjectSchedule({ subjectId }: { subjectId: string }) {
   text-align:center;font-weight:900;margin-top:4px;margin-bottom:12px;
   text-decoration:underline;text-underline-offset:4px;text-decoration-thickness:2px
 }
-/* BOOKING : - NO BOOKING - line (centered text only) */
 .book-line{font-weight:900;text-align:center;margin:8px 0 10px}
-/* ONE thick full-width rule, positioned exactly below the line above */
 .rule{height:3px;background:#000;width:100%;margin:12px 0 16px;border-radius:2px}
-
-/* word BOOKING underlined, centered */
 .book-sub{text-align:center;text-decoration:underline;text-underline-offset:4px;text-decoration-thickness:2px;font-weight:900;margin-bottom:18px}
 
-/* form rows */
+.err{color:#b91c1c;text-align:center;font-weight:900;margin-bottom:10px}
+
 .book-form{max-width:720px;margin:0 auto}
 .row{display:flex;align-items:center;justify-content:center;gap:16px;margin-bottom:22px}
 .lab{font-weight:900;min-width:110px}
 
-/* the NAME underline width matches screenshot */
-.name-line{width:360px;border-bottom:4px solid #000 !important;height:34px;outline:none}
+.name-wrap{display:inline-block;width:360px;border-bottom:4px solid #000;height:36px}
+.name-input{width:100%;height:100%;outline:none;background:transparent}
 
-/* TIME 00:00 - 00:00 (24h text) */
 .time-row{gap:16px}
 .dash{font-weight:900}
-.time-plain{
-  width:120px;font:inherit;font-weight:900;font-size:18px;line-height:1.25;text-align:center;letter-spacing:.2px;padding:0;outline:none;
-}
+.time-plain{width:120px;font:inherit;font-weight:900;font-size:18px;line-height:1.25;text-align:center;letter-spacing:.2px;padding:0;outline:none}
 
-/* SAVE button: pill, bottom-right */
 .save-row{display:flex;justify-content:flex-end;padding-right:6px;margin-top:4px}
 .save{background:#2E59BA;color:#fff;border:none;border-radius:16px;padding:12px 28px;font-weight:900;cursor:pointer}
       `}</style>
