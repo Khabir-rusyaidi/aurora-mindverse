@@ -39,3 +39,29 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# large files - ZIP/RAR/compressed files
+*.zip
+*.rar
+*.7z
+*.tar
+*.tar.gz
+*.iso
+
+# large media files
+*.mp4
+*.mov
+*.avi
+*.mkv
+*.flv
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+Thumbs.db
+.DS_Store
