@@ -212,13 +212,19 @@ function SubjectSchedule({ subjectId }: { subjectId: string }) {
 .arrow{background:none;border:none;font-size:20px;font-weight:900;cursor:pointer}
 .title{justify-self:center;font-size:28px;font-weight:900}
 .year{justify-self:start;font-size:28px;font-weight:900;margin-left:10px}
-.days{display:grid;grid-template-columns:repeat(7,60px);gap:18px;justify-content:center;margin-top:8px;padding-bottom:10px;}
+.days{
+  display:grid;
+  grid-template-columns:repeat(7,55px); /* ✅ smaller squares */
+  gap:10px; /* ✅ tighter spacing */
+  justify-content:center;
+  margin-top:8px;
+  padding-bottom:10px;
+}
 .day{
-  width:60px;height:52px;
+  width:55px;height:48px;
   border:3px solid #000;border-radius:12px;
   background:#fff;
   display:flex;align-items:center;justify-content:center;
-  transform:scale(0.9); /* ✅ shrink all date squares slightly */
   transition:transform .15s;
 }
 .day:hover{transform:scale(0.95);}
