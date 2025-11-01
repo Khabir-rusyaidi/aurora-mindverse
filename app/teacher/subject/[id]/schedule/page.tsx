@@ -134,9 +134,7 @@ function SubjectSchedule({ subjectId }: { subjectId: string }) {
               <button onClick={nextMonth} className="arrow" aria-label="Next month">➡</button>
             </div>
 
-            <div className="labels">
-              <div>Su</div><div>Mo</div><div>Tu</div><div>We</div><div>Th</div><div>Fr</div><div>Sa</div>
-            </div>
+            {/* weekday labels removed */}
 
             <div className="days">
               {days.map((d) => {
@@ -249,7 +247,7 @@ function SubjectSchedule({ subjectId }: { subjectId: string }) {
 /* left area wrapper so we can place the OUTSIDE back arrow */
 .cal-wrap{position:relative;padding-left:32px;} /* room for outside arrow */
 
-/* outside back arrow */
+/* outside back arrow (back to Teacher UI) */
 .outside-back{
   position:absolute; left:0; top:12px;
   width:36px; height:36px; line-height:36px;
@@ -264,8 +262,11 @@ function SubjectSchedule({ subjectId }: { subjectId: string }) {
 .arrow{background:none;border:none;font-size:20px;font-weight:900;cursor:pointer}
 .title{justify-self:center;font-size:28px;font-weight:900;letter-spacing:.6px}
 .year{justify-self:start;font-size:28px;font-weight:900;margin-left:10px}
-.labels{display:grid;grid-template-columns:repeat(7,1fr);text-align:center;font-size:18px;margin:10px 0 12px}
-.days{display:grid;grid-template-columns:repeat(7,64px);gap:20px;justify-content:center}
+
+/* weekday labels removed */
+
+/* day grid */
+.days{display:grid;grid-template-columns:repeat(7,64px);gap:20px;justify-content:center;margin-top:8px}
 .day{width:64px;height:56px;border:4px solid #000;border-radius:14px;background:#fff;display:flex;align-items:center;justify-content:center}
 .num{font-weight:900;font-size:22px;line-height:1}
 .sel .num{background:#7eff85;border:3px solid #2a8f32;border-radius:10px;padding:2px 8px}
