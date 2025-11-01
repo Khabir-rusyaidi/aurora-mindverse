@@ -220,21 +220,57 @@ export default function AboutPage() {
             boxShadow: "0 1px 2px rgba(0,0,0,0.06)",
           }}
         >
+          {/* === YOUR IMAGE TEXT CONTENT STARTS HERE === */}
           <h2
             style={{
               textAlign: "center",
-              fontSize: 24,
-              fontWeight: 800,
+              fontSize: 56,           // big like your screenshot
+              fontWeight: 900,
               letterSpacing: "0.02em",
               color: "#000",
               textTransform: "uppercase",
+              marginBottom: 12,
             }}
           >
-            About Us
+            ABOUT US
           </h2>
 
-          {/* keep empty to match visual height */}
-          <div style={{ height: 300 }} />
+          <div
+            style={{
+              maxWidth: 860,
+              margin: "0 auto",
+              padding: "6px 24px 0 24px",
+              color: "#000",
+            }}
+          >
+            <p
+              style={{
+                fontSize: 24,
+                lineHeight: 1.45,
+                fontWeight: 700,
+                marginBottom: 26,
+              }}
+            >
+              This project is designed to provide students with a more interactive and effective
+              learning experience in the field of Information Technology (IT). Through this website
+              platform, students will not only read or watch learning materials passively, but they
+              will also be able to walk inside a virtual world like a video game to explore the topics
+              provided.
+            </p>
+
+            <p
+              style={{
+                fontSize: 24,
+                lineHeight: 1.45,
+                fontWeight: 700,
+              }}
+            >
+              The approach aims to capture students’ interest by combining digital learning elements
+              with interactive features. This way, students can gain a deeper understanding of IT
+              concepts while experiencing a creative and immersive learning environment.
+            </p>
+          </div>
+          {/* === YOUR IMAGE TEXT CONTENT ENDS HERE === */}
         </section>
 
         <div style={{ height: 120 }} />
