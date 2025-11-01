@@ -21,7 +21,11 @@ function withTime(date: Date, hhmm: string) {
 }
 function fmt24(d: Date) { return `${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}`; }
 function fmtLongUpper(d: Date) {
-  return d.toLocaleDateString(undefined, { day: "2-digit", month: "long", year: "numeric" }).toUpperCase();
+  // EXACT format: 20 JANUARY 2025
+  const day = String(d.getDate()).padStart(2, "0");
+  const month = d.toLocaleString("en-US", { month: "long" }).toUpperCase();
+  const year = d.getFullYear();
+  return `${day} ${month} ${year}`;
 }
 function displayName(user: any | null) {
   if (!user) return "USER";
@@ -36,7 +40,7 @@ function SubjectSchedule({ subjectId }: { subjectId: string }) {
   const [userName, setUserName] = useState("USER");
   useEffect(() => { (async () => { const { data } = await supabase.auth.getUser(); setUserName(displayName(data?.user)); })(); }, []);
 
-  /* calendar + bookings (fixed to Jan 2025 to mirror your screenshot) */
+  /* calendar + bookings (JAN 2025; 20th selected as in screenshot) */
   const [monthCursor, setMonthCursor] = useState(() => new Date(2025, 0, 1));
   const [selectedDate, setSelectedDate] = useState(() => new Date(2025, 0, 20));
   const [bookings, setBookings] = useState<Booking[]>([]);
@@ -44,11 +48,11 @@ function SubjectSchedule({ subjectId }: { subjectId: string }) {
   const [error,     setError]     = useState("");
 
   /* form state – force 24h visual */
-  const [name, setName]       = useState("");
+  const [name, setName]         = useState("");
   const [startTime, setStartTime] = useState("00:00");
   const [endTime,   setEndTime]   = useState("00:00");
 
-  const monthName = monthCursor.toLocaleString(undefined, { month: "long" }).toUpperCase();
+  const monthName = monthCursor.toLocaleString("en-US", { month: "long" }).toUpperCase();
   const yearNum   = monthCursor.getFullYear();
   const days      = daysInMonth(monthCursor);
 
@@ -126,12 +130,12 @@ function SubjectSchedule({ subjectId }: { subjectId: string }) {
 
       {/* BACK ARROW */}
       <div className="amv-back">
-        <Link href="/teacher" className="backbtn">←</Link>
+        <Link href={`/teacher/subject/${subjectId}`} className="backbtn">←</Link>
       </div>
 
       {/* MAIN LAYOUT */}
       <div className="gridwrap">
-        {/* CALENDAR CARD */}
+        {/* CALENDAR CARD (left) */}
         <div className="cal-card">
           <div className="cal-head">
             <button onClick={prevMonth} className="arrow">⬅</button>
@@ -161,14 +165,12 @@ function SubjectSchedule({ subjectId }: { subjectId: string }) {
           </div>
         </div>
 
-        {/* BOOKING CARD */}
+        {/* BOOKING CARD (right) */}
         <div className="book-card">
           <h1 className="book-title">BOOKING CLASS</h1>
 
-          {/* date – underline only */}
           <div className="book-date">{fmtLongUpper(selectedDate)}</div>
 
-          {/* BOOKING : ... */}
           {!loading && (
             <div className="book-line">
               <span className="bld">BOOKING :</span>
@@ -185,10 +187,10 @@ function SubjectSchedule({ subjectId }: { subjectId: string }) {
             </div>
           )}
 
-          {/* single thick rule */}
+          {/* EXACTLY one thick rule (full width inside card) */}
           <div className="rule" />
 
-          {/* subheading – underline only */}
+          {/* The word BOOKING, underlined and centered */}
           <div className="book-sub">BOOKING</div>
 
           {error && <div className="err">{error}</div>}
@@ -200,13 +202,12 @@ function SubjectSchedule({ subjectId }: { subjectId: string }) {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 className="name-line"
-                placeholder=""
+                aria-label="Name"
               />
             </div>
 
             <div className="row time-row">
               <span className="lab">TIME :</span>
-              {/* text inputs to force 24h look */}
               <input
                 type="text"
                 inputMode="numeric"
@@ -238,91 +239,80 @@ function SubjectSchedule({ subjectId }: { subjectId: string }) {
       </div>
 
       <style jsx>{`
-/* ======== PAGE-SCOPED RESET to stop global.css from leaking ======== */
+/* ======== page-scoped hard reset (blocks global.css bleed) ======== */
 #amv-schedule-scope *::before,
 #amv-schedule-scope *::after { content: none !important; }
-
-#amv-schedule-scope .book-line,
 #amv-schedule-scope .book-date,
-#amv-schedule-scope .book-sub {
-  border: none !important;
-  box-shadow: none !important;
-  background: transparent !important;
-}
+#amv-schedule-scope .book-line,
+#amv-schedule-scope .book-sub { border: none !important; box-shadow: none !important; background: transparent !important; }
+#amv-schedule-scope input { border: none !important; box-shadow: none !important; background: transparent !important; text-transform: none !important; }
 
-#amv-schedule-scope .rule {
-  height: 3px;
-  background: #000;
-  border: 0 !important;
-  box-shadow: none !important;
-}
-
-#amv-schedule-scope input {
-  text-transform: none !important;
-  background: transparent !important;
-  border: none !important;
-  box-shadow: none !important;
-}
-
-/* ======== Page styles (exact to your screenshot) ======== */
+/* ======== exact visual from your screenshot ======== */
 .amv-root{min-height:100vh;background:#7cc9f5;color:#000}
 
-.amv-topbar{background:#39a8f0;padding:18px 32px;display:flex;justify-content:space-between;align-items:center}
-.amv-brand{font-size:30px;font-weight:900;letter-spacing:.2px}
-.amv-tag{margin-top:2px;font-size:13px;font-weight:700}
-.amv-right{display:flex;align-items:center;gap:28px}
+.amv-topbar{background:#39a8f0;padding:16px 32px;display:flex;justify-content:space-between;align-items:center}
+.amv-brand{font-size:32px;font-weight:900;letter-spacing:.2px}
+.amv-tag{margin-top:2px;font-size:14px;font-weight:700}
+.amv-right{display:flex;align-items:center;gap:24px}
 .toplink{color:#000;text-decoration:none;font-weight:700}
 .toplink:hover{text-decoration:underline}
 .amv-pill{background:#fff;border:1px solid rgba(0,0,0,.25);padding:8px 16px;border-radius:9999px;display:inline-flex;gap:8px;align-items:center;font-weight:900}
 .amv-dot{width:12px;height:12px;border-radius:9999px;background:#000;display:inline-block}
 
-.amv-back{max-width:1200px;margin:12px auto 0;padding:0 24px}
+.amv-back{max-width:1120px;margin:12px auto 0;padding:0 24px}
 .backbtn{font-size:28px;font-weight:900;color:#000;text-decoration:none}
 
-.gridwrap{max-width:1200px;margin:14px auto 56px;padding:0 24px;display:grid;grid-template-columns:520px minmax(0,1fr);gap:32px;align-items:stretch}
+.gridwrap{max-width:1120px;margin:12px auto 56px;padding:0 24px;display:grid;grid-template-columns:520px minmax(0,1fr);gap:28px;align-items:stretch}
 
-/* calendar card */
+/* CALENDAR CARD */
 .cal-card{background:#ffffff;border:none;border-radius:28px;padding:20px 24px 26px}
 .cal-head{display:grid;grid-template-columns:44px 1fr auto 44px;align-items:center}
 .arrow{background:none;border:none;font-size:22px;font-weight:900;cursor:pointer}
 .title{justify-self:center;font-size:28px;font-weight:900;letter-spacing:.6px}
 .year{justify-self:start;font-size:28px;font-weight:900;margin-left:10px}
 .labels{display:grid;grid-template-columns:repeat(7,1fr);text-align:center;font-size:18px;margin:12px 0}
-.days{display:grid;grid-template-columns:repeat(7,64px);gap:18px;justify-content:center}
+.days{display:grid;grid-template-columns:repeat(7,64px);gap:20px;justify-content:center}
 .day{width:64px;height:56px;background:#fff;border:4px solid #000;border-radius:14px;display:flex;align-items:center;justify-content:center}
 .num{font-weight:900;font-size:22px;line-height:1}
 .sel .num{background:#7EFF85;border:3px solid #2A8F32;border-radius:10px;padding:2px 8px}
 
-/* booking card */
-.book-card{background:#4fb4f0;border:none;border-radius:28px;padding:32px 30px 28px;display:flex;flex-direction:column}
-.book-title{font-size:42px;font-weight:900;text-align:center;margin:0 0 12px}
+/* BOOKING CARD */
+.book-card{
+  background:#4fb4f0;border:none;border-radius:28px;
+  padding:26px 30px 26px;
+  display:flex;flex-direction:column
+}
+.book-title{font-size:40px;font-weight:900;text-align:center;margin:0 0 8px}
 
-.book-date{text-align:center;font-weight:900;margin-top:4px;margin-bottom:10px;text-decoration:underline;text-underline-offset:4px}
+.book-date{
+  text-align:center;font-weight:900;margin-top:4px;margin-bottom:12px;
+  text-decoration:underline;text-underline-offset:4px;text-decoration-thickness:2px
+}
+/* BOOKING : - NO BOOKING - line (centered text only) */
 .book-line{font-weight:900;text-align:center;margin:8px 0 10px}
-.bld{margin-right:6px}
+/* ONE thick full-width rule, positioned exactly below the line above */
+.rule{height:3px;background:#000;width:100%;margin:12px 0 16px;border-radius:2px}
 
-.rule{margin:12px 0 16px}
+/* word BOOKING underlined, centered */
+.book-sub{text-align:center;text-decoration:underline;text-underline-offset:4px;text-decoration-thickness:2px;font-weight:900;margin-bottom:18px}
 
-.book-sub{text-align:center;text-decoration:underline;font-weight:900;margin-bottom:18px}
-
-.err{color:#b91c1c;text-align:center;font-weight:900;margin-bottom:10px}
-
-.book-form{max-width:760px;margin:0 auto}
+/* form rows */
+.book-form{max-width:720px;margin:0 auto}
 .row{display:flex;align-items:center;justify-content:center;gap:16px;margin-bottom:22px}
-.lab{font-weight:900;min-width:120px}
+.lab{font-weight:900;min-width:110px}
 
-/* single underline for NAME */
-.name-line{width:430px;border:none;border-bottom:4px solid #000 !important;outline:none;background:transparent;height:36px}
+/* the NAME underline width matches screenshot */
+.name-line{width:360px;border-bottom:4px solid #000 !important;height:34px;outline:none}
 
-/* 24h time text inputs */
-.time-row{gap:14px}
+/* TIME 00:00 - 00:00 (24h text) */
+.time-row{gap:16px}
 .dash{font-weight:900}
 .time-plain{
-  width:128px;border:none;background:transparent;outline:none;
-  font: inherit;font-weight:900;font-size:20px;line-height:1.25;text-align:center;letter-spacing:.2px;padding:0;
+  width:120px;font:inherit;font-weight:900;font-size:18px;line-height:1.25;text-align:center;letter-spacing:.2px;padding:0;outline:none;
 }
 
-.save-row{display:flex;justify-content:flex-end;padding-right:10px;margin-top:4px}
+/* SAVE button: pill, bottom-right */
+.save-row{display:flex;justify-content:flex-end;padding-right:6px;margin-top:4px}
 .save{background:#2E59BA;color:#fff;border:none;border-radius:16px;padding:12px 28px;font-weight:900;cursor:pointer}
       `}</style>
     </div>
