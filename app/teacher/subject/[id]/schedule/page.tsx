@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 
-/* ---------- helpers ---------- */
+/* ---------------- helpers ---------------- */
 function endOfMonth(d: Date) { return new Date(d.getFullYear(), d.getMonth() + 1, 0); }
 function daysInMonth(d: Date) { return Array.from({ length: endOfMonth(d).getDate() }, (_, i) => i + 1); }
 function isoDateOnly(d: Date) {
@@ -31,13 +31,11 @@ function displayName(user: any | null) {
 
 type Booking = { id: string; subject_id: string; name: string; start_at: string; end_at: string; };
 
-/* ---------- component ---------- */
+/* ---------------- page ---------------- */
 function SubjectSchedule({ subjectId }: { subjectId: string }) {
-  // header name
   const [userName, setUserName] = useState("USER");
   useEffect(() => { (async () => { const { data } = await supabase.auth.getUser(); setUserName(displayName(data?.user)); })(); }, []);
 
-  // state
   const [monthCursor, setMonthCursor] = useState(() => new Date(2025, 0, 1));
   const [selectedDate, setSelectedDate] = useState(() => new Date(2025, 0, 20));
   const [bookings, setBookings] = useState<Booking[]>([]);
@@ -47,12 +45,10 @@ function SubjectSchedule({ subjectId }: { subjectId: string }) {
   const [endTime, setEndTime] = useState("00:00");
   const [error, setError] = useState("");
 
-  // derived
   const monthName = monthCursor.toLocaleString(undefined, { month: "long" }).toUpperCase();
   const yearNum = monthCursor.getFullYear();
   const days = daysInMonth(monthCursor);
 
-  // load day bookings
   async function loadDay() {
     if (!subjectId) return;
     setLoading(true);
@@ -73,7 +69,6 @@ function SubjectSchedule({ subjectId }: { subjectId: string }) {
   }
   useEffect(() => { loadDay(); /* eslint-disable-next-line */ }, [subjectId, selectedDate]);
 
-  // month nav
   function prevMonth() {
     const d = new Date(monthCursor); d.setMonth(d.getMonth() - 1);
     setMonthCursor(d);
@@ -85,7 +80,6 @@ function SubjectSchedule({ subjectId }: { subjectId: string }) {
     setSelectedDate(new Date(d.getFullYear(), d.getMonth(), Math.min(selectedDate.getDate(), endOfMonth(d).getDate())));
   }
 
-  // save
   async function onSave(e: React.FormEvent) {
     e.preventDefault();
     setError("");
@@ -119,10 +113,7 @@ function SubjectSchedule({ subjectId }: { subjectId: string }) {
         <div className="amv-right">
           <Link href="/about" className="amv-link">About Us</Link>
           <Link href="/contact" className="amv-link">Contact</Link>
-          <div className="amv-pill">
-            <span className="amv-dot" />
-            <span>{userName}</span>
-          </div>
+          <div className="amv-pill"><span className="amv-dot" /><span>{userName}</span></div>
         </div>
       </div>
 
@@ -131,14 +122,14 @@ function SubjectSchedule({ subjectId }: { subjectId: string }) {
         <Link href="/teacher" className="amv-backbtn">←</Link>
       </div>
 
-      {/* main two-column layout */}
+      {/* main two columns */}
       <div className="amv-grid">
         {/* calendar */}
         <div className="cal-card">
           <div className="cal-head">
             <button onClick={prevMonth} className="cal-arrow">←</button>
-            <div className="cal-month">{monthName}</div>
-            <div className="cal-year">{yearNum}</div>
+            <div className="cal-month">JANUARY</div>
+            <div className="cal-year">2025</div>
             <button onClick={nextMonth} className="cal-arrow">→</button>
           </div>
 
@@ -155,7 +146,6 @@ function SubjectSchedule({ subjectId }: { subjectId: string }) {
                   key={d}
                   onClick={() => setSelectedDate(cellDate)}
                   className={"day-btn" + (isSelected ? " sel" : "")}
-                  aria-label={`Day ${d}`}
                 >
                   <span>{d}</span>
                 </button>
@@ -173,7 +163,7 @@ function SubjectSchedule({ subjectId }: { subjectId: string }) {
           <div className="book-line">
             <span className="book-label">BOOKING :</span>
             {loading ? (
-              <span> Loading…</span>
+              <span>  Loading…</span>
             ) : bookings.length === 0 ? (
               <span>  - NO BOOKING -</span>
             ) : (
@@ -211,56 +201,58 @@ function SubjectSchedule({ subjectId }: { subjectId: string }) {
         </div>
       </div>
 
-      {/* page-scoped CSS to pixel-match your mock */}
+      {/* page-scoped CSS */}
       <style jsx>{`
-        /* background */
-        .amv-root{min-height:100vh;background:#7cc9f5;color:#000}
-        /* header */
-        .amv-topbar{background:#39a8f0;padding:12px 24px;display:flex;justify-content:space-between;align-items:center}
-        .amv-brand{font-size:24px;font-weight:900;letter-spacing:.2px}
+        /* base */
+        .amv-root{min-height:100vh;background:#7cc9f5;color:#000;font-family:system-ui, -apple-system, Segoe UI, Roboto, Arial}
+        /* top bar */
+        .amv-topbar{background:#39a8f0;padding:14px 26px;display:flex;justify-content:space-between;align-items:center}
+        .amv-brand{font-size:28px;font-weight:900;letter-spacing:.3px}
         .amv-tag{margin-top:-2px;font-size:12px;font-weight:700}
-        .amv-right{display:flex;align-items:center;gap:24px}
-        .amv-link{color:#000;text-decoration:none;font-weight:700}
-        .amv-link:hover{text-decoration:underline}
-        .amv-pill{background:#fff;border:1px solid rgba(0,0,0,.15);padding:6px 12px;border-radius:9999px;display:inline-flex;gap:8px;align-items:center;font-weight:900}
-        .amv-dot{width:18px;height:18px;border-radius:9999px;background:#000;display:inline-block}
+        .amv-right{display:flex;align-items:center;gap:22px}
+        .amv-link{color:#3b3bbf;text-decoration:underline;font-weight:700}
+        .amv-pill{background:#fff;border:1px solid rgba(0,0,0,.2);padding:6px 14px;border-radius:9999px;display:inline-flex;gap:10px;align-items:center;font-weight:900}
+        .amv-dot{width:16px;height:16px;border-radius:9999px;background:#000;display:inline-block}
 
-        /* back */
-        .amv-back{max-width:1160px;margin:8px auto 0;padding:0 24px}
-        .amv-backbtn{display:inline-block;font-size:28px;font-weight:900;line-height:1;text-decoration:none;color:#000}
+        /* back arrow */
+        .amv-back{max-width:1160px;margin:6px auto 0;padding:0 20px}
+        .amv-backbtn{display:inline-block;font-size:24px;font-weight:900;line-height:1;color:#000;text-decoration:none}
 
-        /* grid */
-        .amv-grid{max-width:1160px;margin:8px auto 40px;padding:0 24px;display:grid;grid-template-columns:440px minmax(0,1fr);gap:40px}
+        /* main grid */
+        .amv-grid{max-width:1160px;margin:8px auto 40px;padding:0 20px;display:grid;grid-template-columns:548px minmax(0,1fr);gap:26px}
 
         /* calendar card */
-        .cal-card{background:#8fd2fb;border:1px solid #000;border-radius:28px;padding:24px}
-        .cal-head{display:grid;grid-template-columns:40px 1fr auto 40px;align-items:center;gap:10px;margin-bottom:10px}
-        .cal-arrow{font-size:24px;font-weight:900;background:transparent;border:none;cursor:pointer}
-        .cal-month{justify-self:center;font-size:20px;font-weight:900;letter-spacing:.5px}
-        .cal-year{justify-self:start;font-size:20px;font-weight:900}
-        .cal-days-labels{display:grid;grid-template-columns:repeat(7,1fr);text-align:center;font-size:14px;opacity:.85;margin:8px 0 10px}
-        .cal-grid{display:grid;grid-template-columns:repeat(7,64px);gap:18px;justify-content:center;padding-top:4px}
-        .day-btn{position:relative;width:64px;height:64px;border:2px solid #000;border-radius:14px;background:#fff;font-weight:700}
-        .day-btn>span{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
-        .day-btn.sel::after{content:"";position:absolute;right:6px;bottom:6px;width:22px;height:22px;border:2px solid #2a8f32;background:#9bfb9f;border-radius:9999px}
+        .cal-card{background:#8fd2fb;border:2px solid #000;border-radius:28px;padding:18px 22px}
+        .cal-head{display:grid;grid-template-columns:40px 1fr auto 40px;align-items:center;gap:8px;margin-bottom:8px}
+        .cal-arrow{font-size:22px;font-weight:900;background:transparent;border:1px solid #000;border-radius:6px;width:36px;height:24px;line-height:20px;cursor:pointer}
+        .cal-month{justify-self:center;font-size:22px;font-weight:900;letter-spacing:.5px}
+        .cal-year{justify-self:start;font-size:22px;font-weight:900;margin-left:8px}
+        .cal-days-labels{display:grid;grid-template-columns:repeat(7,1fr);text-align:center;font-size:14px;opacity:.9;margin:4px 0 8px}
+        .cal-grid{display:grid;grid-template-columns:repeat(7,76px);gap:18px;justify-content:center;padding:6px 0 8px}
+        .day-btn{position:relative;width:76px;height:64px;border:3px solid #000;border-radius:16px;background:#fff;font-weight:800;box-shadow:0 1px 0 rgba(0,0,0,.15)}
+        .day-btn>span{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:18px}
+        .day-btn.sel::after{content:"";position:absolute;right:7px;bottom:6px;width:22px;height:22px;border:3px solid #2a8f32;background:#8cf493;border-radius:9999px}
 
         /* booking card */
-        .book-card{background:#56b1f5;border:1px solid #000;border-radius:28px;padding:28px 32px}
-        .book-title{font-size:34px;font-weight:900;text-align:center;margin:0 0 14px}
-        .book-date{text-align:center;text-decoration:underline;font-weight:800;margin-bottom:6px}
-        .book-line{font-weight:800;text-align:center;white-space:pre-line}
-        .book-list{white-space:pre-line;line-height:1.8;font-weight:600}
-        .divider{height:2px;background:#000;margin:18px 0}
-        .book-sub{text-align:center;text-decoration:underline;font-weight:800;margin-bottom:14px}
-        .err{color:#b91c1c;text-align:center;font-weight:800;margin-bottom:10px}
+        .book-card{background:#56b1f5;border:2px solid #000;border-radius:28px;padding:26px 28px}
+        .book-title{font-size:38px;font-weight:900;text-align:center;margin:0 0 12px}
+        .book-date{text-align:center;text-decoration:underline;text-underline-offset:3px;font-weight:900;margin-bottom:10px}
+        .book-line{font-weight:900;text-align:center;white-space:pre-line}
+        .book-label{letter-spacing:.3px}
+        .book-list{white-space:pre-line;line-height:1.8;font-weight:700}
+        .divider{height:3px;background:#000;margin:16px 0 12px}
+        .book-sub{text-align:center;text-decoration:underline;font-weight:900;margin-bottom:16px}
 
-        .book-form{max-width:520px;margin:0 auto}
-        .form-row{display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:16px}
-        .lab{font-weight:800;min-width:86px}
-        .name-inp{width:320px;border:none;border-bottom:2px solid #000;outline:none;background:transparent;height:36px}
-        .time-inp{border:1px solid #000;border-radius:10px;padding:6px 10px;height:36px}
-        .save-row{display:flex;justify-content:flex-end}
-        .save-btn{background:#2E59BA;color:#fff;border:none;border-radius:14px;padding:10px 28px;font-weight:900;cursor:pointer}
+        .err{color:#b91c1c;text-align:center;font-weight:900;margin-bottom:10px}
+
+        .book-form{max-width:540px;margin:0 auto}
+        .form-row{display:flex;align-items:center;justify-content:center;gap:14px;margin-bottom:18px}
+        .lab{font-weight:900;min-width:92px}
+        .name-inp{width:360px;border:none;border-bottom:3px solid #000;outline:none;background:transparent;height:36px}
+        .time-inp{border:2px solid #000;border-radius:10px;padding:8px 12px;height:40px}
+
+        .save-row{display:flex;justify-content:flex-end;padding-right:6px}
+        .save-btn{background:#2E59BA;color:#fff;border:none;border-radius:14px;padding:10px 26px;font-weight:900;cursor:pointer}
       `}</style>
     </div>
   );
