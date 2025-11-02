@@ -19,7 +19,7 @@ function withTime(date: Date, hhmm: string) {
   d.setHours(hh, mm, 0, 0);
   return d;
 }
-function fmt24(d: Date) { return `${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}`; }
+function fmt24(d: Date) { return `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`; }
 function fmtLongUpper(d: Date) {
   const day = String(d.getDate());
   const month = d.toLocaleString("en-US", { month: "long" }).toUpperCase();
@@ -122,7 +122,7 @@ function SubjectSchedule({ subjectId }: { subjectId: string }) {
           <Link href="/about" className="toplink">About Us</Link>
           <Link href="/contact" className="toplink">Contact</Link>
           <div className="amv-pill">
-            <svg className="avatar" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-3.866 3.134-6 8-6s8 2.134 8 6v1H4v-1z"/></svg>
+            <svg className="avatar" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4" /><path d="M4 20c0-3.866 3.134-6 8-6s8 2.134 8 6v1H4v-1z" /></svg>
             <span>{userName}</span>
           </div>
         </div>
@@ -130,7 +130,7 @@ function SubjectSchedule({ subjectId }: { subjectId: string }) {
 
       <div className="gridwrap">
         <div className="cal-wrap">
-          {/* back arrow pushed further left */}
+          {/* Back arrow adjusted further left */}
           <Link href="/teacher" className="outside-back" aria-label="Back to Teacher">⬅</Link>
 
           <div className="cal-card">
@@ -146,11 +146,7 @@ function SubjectSchedule({ subjectId }: { subjectId: string }) {
                 const cellDate = new Date(monthCursor.getFullYear(), monthCursor.getMonth(), d);
                 const isSelected = isoDateOnly(cellDate) === isoDateOnly(selectedDate);
                 return (
-                  <button
-                    key={d}
-                    onClick={() => setSelectedDate(cellDate)}
-                    className={"day" + (isSelected ? " sel" : "")}
-                  >
+                  <button key={d} onClick={() => setSelectedDate(cellDate)} className={"day" + (isSelected ? " sel" : "")}>
                     <span className="num">{d}</span>
                   </button>
                 );
@@ -190,7 +186,6 @@ function SubjectSchedule({ subjectId }: { subjectId: string }) {
               <span className="lab">NAME :</span>
               <input value={name} onChange={(e) => setName(e.target.value)} className="name-line" />
             </div>
-
             <div className="row">
               <span className="lab">TIME :</span>
               <div className="time-field">
@@ -199,7 +194,6 @@ function SubjectSchedule({ subjectId }: { subjectId: string }) {
                 <input type="text" value={endTime} onChange={(e) => setEndTime(e.target.value)} className="time-plain" />
               </div>
             </div>
-
             <div className="save-row">
               <button type="submit" className="save">SAVE</button>
             </div>
@@ -217,12 +211,13 @@ function SubjectSchedule({ subjectId }: { subjectId: string }) {
 .toplink:hover{text-decoration:underline}
 .amv-pill{background:#fff;border:1px solid rgba(0,0,0,.25);padding:8px 16px;border-radius:9999px;display:flex;align-items:center;gap:10px;font-weight:900}
 .avatar{width:18px;height:18px;color:#6b46c1;fill:currentColor}
-.gridwrap{max-width:1120px;margin:10px auto 56px;padding:0 24px;display:grid;grid-template-columns:560px minmax(0,1fr);gap:36px;align-items:start}
-.cal-wrap{position:relative;padding-left:84px;}
-/* moved arrow further left */
+
+/* Layout fix for arrow */
+.gridwrap{max-width:1120px;margin:10px auto 56px;padding:0 24px;display:grid;grid-template-columns:560px minmax(0,1fr);gap:36px;align-items:start;}
+.cal-wrap{position:relative;padding-left:48px;}
 .outside-back{
   position:absolute;
-  left:-8px;   /* more left */
+  left:8px;
   top:10px;
   font-size:56px;
   font-weight:900;
@@ -233,6 +228,7 @@ function SubjectSchedule({ subjectId }: { subjectId: string }) {
   cursor:pointer;
 }
 .outside-back:hover{transform:scale(0.98);}
+
 .cal-card{background:#fff;border-radius:28px;padding:26px 30px 32px}
 .cal-head{display:grid;grid-template-columns:44px 1fr auto 44px;align-items:center}
 .arrow{background:none;border:none;font-size:20px;font-weight:900;cursor:pointer}
@@ -242,6 +238,7 @@ function SubjectSchedule({ subjectId }: { subjectId: string }) {
 .day{width:55px;height:48px;border:3px solid #000;border-radius:12px;display:flex;align-items:center;justify-content:center;}
 .num{font-weight:800;font-size:18px;line-height:1;}
 .sel .num{background:#7eff85;border:3px solid #2a8f32;border-radius:8px;padding:2px 6px;}
+
 .book-card{background:#4fb4f0;border-radius:28px;padding:28px;}
 .book-title{font-size:42px;font-weight:900;text-align:center;margin-bottom:12px}
 .book-date{text-align:center;text-decoration:underline;font-weight:900;margin-bottom:8px}
