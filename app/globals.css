@@ -17,17 +17,13 @@
   --amv-primary: #315edb;
 }
 
-html, body {
-  margin: 0;
-  padding: 0;
-}
+html, body { margin: 0; padding: 0; }
 
 body {
   min-height: 100vh;
   background-color: var(--amv-sky);
   color: var(--amv-text);
   font-family: "Poppins", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-  /* ❌ DO NOT center everything globally; let each page control its own layout */
 }
 
 /* If you need a centered page for login/register, add class="amv-centered" on a page wrapper */
@@ -42,22 +38,8 @@ body {
 /* =========================
    Shared: Titles / Subtitles
    ========================= */
-.amv-title {
-  color: var(--amv-text);
-  font-weight: 700;
-  text-align: center;
-  margin-top: 40px;
-  font-size: 2rem;
-  letter-spacing: 0.02em;
-}
-
-.amv-subtitle {
-  color: var(--amv-text);
-  text-align: center;
-  margin-top: -10px;
-  font-size: 1rem;
-  font-weight: 500;
-}
+.amv-title { color: var(--amv-text); font-weight: 700; text-align: center; margin-top: 40px; font-size: 2rem; letter-spacing: .02em; }
+.amv-subtitle { color: var(--amv-text); text-align: center; margin-top: -10px; font-size: 1rem; font-weight: 500; }
 
 /* =========================
    Welcome section
@@ -70,199 +52,80 @@ body {
 /* =========================
    Login
    ========================= */
-.login-box {
-  background-color: var(--amv-sky-card);
-  padding: 40px;
-  border-radius: 25px;
-  box-shadow: 0 8px 18px rgba(0,0,0,.2);
-  width: 90%;
-  max-width: 600px;
-  margin: 40px auto;
-}
+.login-box { background-color: var(--amv-sky-card); padding: 40px; border-radius: 25px; box-shadow: 0 8px 18px rgba(0,0,0,.2); width: 90%; max-width: 600px; margin: 40px auto; }
 .login-box form { display: flex; flex-direction: column; gap: 15px; }
-
-input, select {
-  padding: 10px;
-  border: 1px solid #000;
-  border-radius: 5px;
-  font-size: 1rem;
-  background: #fff;
-}
-
+input, select { padding: 10px; border: 1px solid #000; border-radius: 5px; font-size: 1rem; background: #fff; }
 .links { display: flex; justify-content: space-between; font-weight: 600; }
 .links a { color: var(--amv-link); text-decoration: none; }
 .links a:hover { text-decoration: underline; }
-
-.login-btn {
-  background-color: var(--amv-primary);
-  color: #fff;
-  font-weight: 700;
-  font-size: 1.2rem;
-  padding: 10px;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  width: 100%;
-}
+.login-btn { background-color: var(--amv-primary); color: #fff; font-weight: 700; font-size: 1.2rem; padding: 10px; border: none; border-radius: 8px; cursor: pointer; width: 100%; }
 .login-btn:hover { background-color: #274ab8; }
 
 /* =========================
    Register (shared card)
    ========================= */
-.form-card {
-  background-color: var(--amv-sky-card);
-  padding: 40px;
-  border-radius: 25px;
-  box-shadow: 0 8px 18px rgba(0,0,0,.2);
-  width: 90%;
-  max-width: 900px;
-  margin: 20px auto 60px;
-}
-.register-heading { color: #111; font-size: 2.1rem; font-weight: 800; text-align: center; letter-spacing: 0.02em; margin: 22px 0 10px; }
+.form-card { background-color: var(--amv-sky-card); padding: 40px; border-radius: 25px; box-shadow: 0 8px 18px rgba(0,0,0,.2); width: 90%; max-width: 900px; margin: 20px auto 60px; }
+.register-heading { color: #111; font-size: 2.1rem; font-weight: 800; text-align: center; letter-spacing: .02em; margin: 22px 0 10px; }
 .register-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 .register-grid .full { grid-column: 1 / -1; }
-.form-card input, .form-card select {
-  padding: 14px; border: 1px solid #000; border-radius: 8px; font-size: 1rem; background: #fff;
-}
-.primary-btn {
-  background-color: var(--amv-primary);
-  color: #fff;
-  font-weight: 800;
-  font-size: 1.05rem;
-  border: none;
-  border-radius: 10px;
-  cursor: pointer;
-  height: 48px;
-}
+.form-card input, .form-card select { padding: 14px; border: 1px solid #000; border-radius: 8px; font-size: 1rem; background: #fff; }
+.primary-btn { background-color: var(--amv-primary); color: #fff; font-weight: 800; font-size: 1.05rem; border: none; border-radius: 10px; cursor: pointer; height: 48px; }
 .primary-btn:hover { background-color: #274ab8; }
-
-@media (max-width: 760px) {
-  .register-grid { grid-template-columns: 1fr; }
-  .primary-btn { width: 100%; }
-}
+@media (max-width: 760px) { .register-grid { grid-template-columns: 1fr; } .primary-btn { width: 100%; } }
 
 /* =========================
    Topbar / Nav
    ========================= */
-.topbar {
-  width: 100%;
-  background: var(--amv-sky-deep);
-  padding: 12px 22px;
-  box-sizing: border-box;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
+.topbar { width: 100%; background: var(--amv-sky-deep); padding: 12px 22px; box-sizing: border-box; display: flex; justify-content: space-between; align-items: center; }
 .brand-block { display: flex; flex-direction: column; line-height: 1.1; }
 .brand-block .amv-title { margin: 0; font-size: 1.7rem; text-align: left; }
-.brand-block .amv-subtitle { margin: 2px 0 0; font-weight: 700; font-size: 0.95rem; text-align: left; }
-
+.brand-block .amv-subtitle { margin: 2px 0 0; font-weight: 700; font-size: .95rem; text-align: left; }
 .nav-right { display: flex; align-items: center; gap: 22px; }
-.nav-links a { color: #000; font-weight: 700; text-decoration: none; font-size: 0.95rem; }
+.nav-links a { color: #000; font-weight: 700; text-decoration: none; font-size: .95rem; }
 .nav-links a:hover { text-decoration: underline; }
-
-.profile-pill {
-  background: #fff;
-  border-radius: 12px;
-  padding: 8px 12px;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  font-weight: 800;
-  border: 1px solid rgba(0,0,0,.15);
-}
+.profile-pill { background: #fff; border-radius: 12px; padding: 8px 12px; display: inline-flex; align-items: center; gap: 8px; font-weight: 800; border: 1px solid rgba(0,0,0,.15); }
 .profile-icon { font-size: 1rem; }
 .profile-container { position: relative; display: inline-block; }
-.logout-btn {
-  position: absolute; top: 110%; right: 0;
-  background: #fff; border: 1px solid #000; border-radius: 8px;
-  padding: 8px 12px; font-weight: 700; color: red; cursor: pointer;
-}
+.logout-btn { position: absolute; top: 110%; right: 0; background: #fff; border: 1px solid #000; border-radius: 8px; padding: 8px 12px; font-weight: 700; color: red; cursor: pointer; }
 .logout-btn:hover { background: #f8d7da; }
 
 /* =========================
    Subjects list / cards
    ========================= */
 .actions-right { display: flex; flex-direction: column; gap: 14px; align-items: flex-end; }
-.pill-btn {
-  background: #e9e9e9; border-radius: 26px; padding: 10px 16px;
-  display: inline-flex; align-items: center; gap: 10px; font-weight: 800; text-decoration: none; color: #111; border: none;
-}
+.pill-btn { background: #e9e9e9; border-radius: 26px; padding: 10px 16px; display: inline-flex; align-items: center; gap: 10px; font-weight: 800; text-decoration: none; color: #111; border: none; }
 .pill-btn .plus { width: 28px; height: 28px; border-radius: 50%; border: 2px solid #000; display: inline-flex; align-items: center; justify-content: center; }
-
-.subject-row {
-  background: #e0e0e0;
-  border-radius: 28px;
-  padding: 22px;
-  display: grid;
-  grid-template-columns: 180px 1fr 220px;
-  gap: 18px;
-  align-items: center;
-}
-.subject-thumb {
-  width: 180px; height: 160px; background: var(--amv-sky-card); border-radius: 26px;
-  display: flex; align-items: center; justify-content: center; font-weight: 700; overflow: hidden;
-}
+.subject-row { background: #e0e0e0; border-radius: 28px; padding: 22px; display: grid; grid-template-columns: 180px 1fr 220px; gap: 18px; align-items: center; }
+.subject-thumb { width: 180px; height: 160px; background: var(--amv-sky-card); border-radius: 26px; display: flex; align-items: center; justify-content: center; font-weight: 700; overflow: hidden; }
 .subject-thumb img { width: 100%; height: 100%; object-fit: cover; }
 .subject-main h3 { margin: 0 0 8px; }
 .subject-actions { display: flex; align-items: center; gap: 16px; }
 .edit-link { text-decoration: none; display: inline-flex; align-items: center; gap: 6px; font-weight: 700; color: #111; background: transparent; }
 .enter-btn { background:#2d7ef3; color:#fff; border:none; border-radius:10px; height:44px; padding:0 16px; font-weight:800; }
-.delete-link {
-  display: inline-flex; align-items: center; gap: 8px; background: transparent; border: none; padding: 0; cursor: pointer;
-  font-weight: 800; font-size: 1.05rem; color: #ef4444;
-}
+.delete-link { display: inline-flex; align-items: center; gap: 8px; background: transparent; border: none; padding: 0; cursor: pointer; font-weight: 800; font-size: 1.05rem; color: #ef4444; }
 .delete-link:hover { color: #b91c1c; }
 .trash-svg { stroke: #111; width: 22px; height: 22px; }
 .delete-link:hover .trash-svg { stroke: #b91c1c; }
-
 .actions-right.below-right { margin-top: 12px; align-items: flex-end; }
 
 /* =========================
    Create / Edit subject card
    ========================= */
-.create-card {
-  background: var(--amv-sky-card);
-  max-width: 960px;
-  margin: 22px auto 60px;
-  padding: 28px;
-  border-radius: 28px;
-  box-shadow: 0 8px 18px rgba(0,0,0,.2);
-}
+.create-card { background: var(--amv-sky-card); max-width: 960px; margin: 22px auto 60px; padding: 28px; border-radius: 28px; box-shadow: 0 8px 18px rgba(0,0,0,.2); }
 .create-title { text-align: center; font-size: 1.6rem; font-weight: 900; margin-bottom: 18px; }
 .create-grid { display: grid; gap: 14px; }
-.create-grid input, .create-grid textarea {
-  padding: 14px; border: 1px solid #000; border-radius: 8px; font-size: 1rem; background: #fff;
-}
+.create-grid input, .create-grid textarea { padding: 14px; border: 1px solid #000; border-radius: 8px; font-size: 1rem; background: #fff; }
 
 /* =========================
    Contact card
    ========================= */
-.contact-card {
-  background: var(--amv-sky-card);
-  padding: 30px;
-  border-radius: 28px;
-  box-shadow: 0 8px 18px rgba(0,0,0,.2);
-  width: 80%;
-  max-width: 700px;
-  margin: 40px auto;
-  text-align: center;
-}
+.contact-card { background: var(--amv-sky-card); padding: 30px; border-radius: 28px; box-shadow: 0 8px 18px rgba(0,0,0,.2); width: 80%; max-width: 700px; margin: 40px auto; text-align: center; }
 .contact-card h2 { font-size: 1.6rem; font-weight: 900; margin-bottom: 20px; }
-.contact-row {
-  background: #5cc0fd;
-  border: 1.5px solid rgba(0, 0, 0, 0.5);
-  border-radius: 10px;
-  padding: 12px 16px;
-  margin: 14px 10px;
-  font-weight: 700;
-}
+.contact-row { background: #5cc0fd; border: 1.5px solid rgba(0, 0, 0, 0.5); border-radius: 10px; padding: 12px 16px; margin: 14px 10px; font-weight: 700; }
 
 /* =========================
    Forgot Password – variants (scoped)
    ========================= */
-
-/* --- Variant 1: .fp-page / .fp-rail --- */
 .fp-page { min-height: 100vh; background: #7bd0ff; display: grid; place-items: start center; }
 .fp-rail { position: relative; width: 820px; min-height: 100vh; background: rgba(63,180,250,.35); }
 .fp-back { position: absolute; top: 28px; left: 78px; }
@@ -279,10 +142,7 @@ input, select {
 .fp-resend, .fp-submit { height:48px; border:1px solid rgba(0,0,0,.35); border-radius:12px; font-weight:900; color:#fff; background: linear-gradient(#4a66e0,#3c45d6); box-shadow:0 10px 28px rgba(44,58,199,.35); cursor:pointer; }
 .fp-submit { margin-top:6px; height:54px; }
 .fp-resend:disabled, .fp-submit:disabled { opacity:.7; cursor:not-allowed; }
-.fp-note { text-align:center; color:#065f46; font-weight:600; }
-.fp-err { text-align:center; color:#b91c1c; font-weight:700; }
 
-/* --- Variant 2: .forgot-* --- */
 .forgot-wrapper { display:flex; flex-direction:column; align-items:center; justify-content:flex-start; min-height:100vh; padding-top:40px; }
 .forgot-arrow { align-self:flex-start; margin-left:40px; margin-bottom:10px; }
 .arrow-icon { font-size:28px; color:black; cursor:pointer; }
@@ -297,7 +157,6 @@ input, select {
 .forgot-resend:hover, .forgot-submit:hover { background:#2b44b6; }
 .forgot-submit { width:100%; }
 
-/* --- Variant 3: .fp2-* --- */
 .fp2-root { min-height:100vh; background:#80c7ff; display:grid; place-items:start center; }
 .fp2-column { width:760px; min-height:100vh; background:#6ec1f6; border-radius:12px; }
 .fp2-inner { max-width:760px; margin:36px auto 64px; padding:0 24px; position:relative; }
@@ -318,76 +177,36 @@ input, select {
 /* =========================
    Page-specific utility
    ========================= */
-body.amv-fullscreen-about {
-  display: block !important;
-  align-items: initial !important;
-  justify-content: initial !important;
-  width: 100% !important;
-  max-width: none !important;
-  margin: 0 !important;
-  overflow-x: hidden !important;
-}
+body.amv-fullscreen-about { display: block !important; align-items: initial !important; justify-content: initial !important; width: 100% !important; max-width: none !important; margin: 0 !important; overflow-x: hidden !important; }
 body.amv-fullscreen-about > * { max-width: none !important; width: 100% !important; }
 
 /* =========================
    Buttons / Misc
    ========================= */
-.schedule-btn {
-  background: transparent;
-  color: #000;
-  padding: 0;
-  border: none;
-  font-size: 16px;
-  cursor: pointer;
-  font-weight: bold;
-  text-decoration: none;
-}
+.schedule-btn { background: transparent; color: #000; padding: 0; border: none; font-size: 16px; cursor: pointer; font-weight: bold; text-decoration: none; }
 .schedule-btn:hover { color: #333; }
 
 /* Center the welcome section horizontally */
-.welcome-section {
-  text-align: center;
-  margin: 0 auto;
-  max-width: 800px;
-}
-
-/* Optional: center the divider line under title */
-.divider {
-  margin: 0.5rem auto 1rem auto;
-  width: 80%;
-}
+.welcome-section { text-align: center; margin: 0 auto; max-width: 800px; }
+.divider { margin: .5rem auto 1rem auto; width: 80%; }
 
 /* =========================
    Back arrow helpers
    ========================= */
-
-/* For pages that still use the side-of-calendar arrow */
 a.outside-back { text-decoration: none !important; color: #000 !important; }
-
-/* For the new arrow ABOVE the header bar */
 .back-top { background: var(--amv-sky-deep); padding: 8px 32px 0; }
-.back-arrow {
-  font-size: 72px;         /* big */
-  font-weight: 900;        /* bold */
-  color: #000;
-  text-decoration: none;   /* no underline */
-  line-height: 1;
-  display: inline-block;
-  cursor: pointer;
-  transition: transform .1s ease;
-}
+.back-arrow { font-size: 72px; font-weight: 900; color: #000; text-decoration: none; line-height: 1; display: inline-block; cursor: pointer; transition: transform .1s ease; }
 .back-arrow:hover { transform: scale(0.95); }
 
 /* =========================
-   SCHEDULE PAGE – ARROW FIX
-   Force the arrow to sit to the LEFT of the calendar.
+   SCHEDULE PAGE – ARROW FIX (final nudge left)
    ========================= */
-.gridwrap .cal-wrap { padding-left: 48px !important; }            /* reduce empty space on the left */
+.gridwrap .cal-wrap { padding-left: 40px !important; }
 .gridwrap .cal-wrap > a.outside-back {
   position: absolute !important;
-  left: 8px !important;                                          /* push arrow near the edge */
+  left: 0 !important;          /* a bit further left than before */
   top: 10px !important;
-  font-size: 56px !important;                                    /* a little bigger & bold */
+  font-size: 56px !important;
   font-weight: 900 !important;
   color: #000 !important;
   text-decoration: none !important;
