@@ -45,7 +45,6 @@ function SubjectSchedule({ subjectId }: { subjectId: string }) {
     })();
   }, []);
 
-  // Default (Nov 2025, select 6)
   const [monthCursor, setMonthCursor] = useState(() => new Date(2025, 10, 1));
   const [selectedDate, setSelectedDate] = useState(() => new Date(2025, 10, 6));
 
@@ -114,7 +113,6 @@ function SubjectSchedule({ subjectId }: { subjectId: string }) {
 
   return (
     <div className="amv-root">
-      {/* Top bar */}
       <div className="amv-topbar">
         <div>
           <div className="amv-brand">AURORA MIND VERSE</div>
@@ -130,11 +128,9 @@ function SubjectSchedule({ subjectId }: { subjectId: string }) {
         </div>
       </div>
 
-      {/* Main grid */}
       <div className="gridwrap">
-        {/* Calendar + back arrow */}
         <div className="cal-wrap">
-          {/* ⬅ heavy, bigger, top-aligned next to the card */}
+          {/* back arrow pushed further left */}
           <Link href="/teacher" className="outside-back" aria-label="Back to Teacher">⬅</Link>
 
           <div className="cal-card">
@@ -163,7 +159,6 @@ function SubjectSchedule({ subjectId }: { subjectId: string }) {
           </div>
         </div>
 
-        {/* Booking card */}
         <div className="book-card">
           <h1 className="book-title">BOOKING CLASS</h1>
           <div className="book-date">{fmtLongUpper(selectedDate)}</div>
@@ -213,7 +208,6 @@ function SubjectSchedule({ subjectId }: { subjectId: string }) {
       </div>
 
       <style jsx>{`
-/* ---------- Base ---------- */
 .amv-root{min-height:100vh;background:#7cc9f5;color:#000}
 .amv-topbar{background:#39a8f0;padding:16px 32px;display:flex;justify-content:space-between;align-items:center}
 .amv-brand{font-size:32px;font-weight:900}
@@ -223,18 +217,15 @@ function SubjectSchedule({ subjectId }: { subjectId: string }) {
 .toplink:hover{text-decoration:underline}
 .amv-pill{background:#fff;border:1px solid rgba(0,0,0,.25);padding:8px 16px;border-radius:9999px;display:flex;align-items:center;gap:10px;font-weight:900}
 .avatar{width:18px;height:18px;color:#6b46c1;fill:currentColor}
-
-/* ---------- Layout grid ---------- */
 .gridwrap{max-width:1120px;margin:10px auto 56px;padding:0 24px;display:grid;grid-template-columns:560px minmax(0,1fr);gap:36px;align-items:start}
-
-/* ---------- Calendar + Back ---------- */
-.cal-wrap{position:relative;padding-left:84px;} /* leave room for arrow */
+.cal-wrap{position:relative;padding-left:84px;}
+/* moved arrow further left */
 .outside-back{
   position:absolute;
-  left:18px;
-  top:10px;                /* align with the top of the white card */
-  font-size:56px;          /* a little bigger */
-  font-weight:900;         /* bold */
+  left:-8px;   /* more left */
+  top:10px;
+  font-size:56px;
+  font-weight:900;
   color:#000 !important;
   text-decoration:none !important;
   line-height:1;
@@ -242,7 +233,6 @@ function SubjectSchedule({ subjectId }: { subjectId: string }) {
   cursor:pointer;
 }
 .outside-back:hover{transform:scale(0.98);}
-
 .cal-card{background:#fff;border-radius:28px;padding:26px 30px 32px}
 .cal-head{display:grid;grid-template-columns:44px 1fr auto 44px;align-items:center}
 .arrow{background:none;border:none;font-size:20px;font-weight:900;cursor:pointer}
@@ -252,8 +242,6 @@ function SubjectSchedule({ subjectId }: { subjectId: string }) {
 .day{width:55px;height:48px;border:3px solid #000;border-radius:12px;display:flex;align-items:center;justify-content:center;}
 .num{font-weight:800;font-size:18px;line-height:1;}
 .sel .num{background:#7eff85;border:3px solid #2a8f32;border-radius:8px;padding:2px 6px;}
-
-/* ---------- Booking ---------- */
 .book-card{background:#4fb4f0;border-radius:28px;padding:28px;}
 .book-title{font-size:42px;font-weight:900;text-align:center;margin-bottom:12px}
 .book-date{text-align:center;text-decoration:underline;font-weight:900;margin-bottom:8px}
@@ -261,8 +249,6 @@ function SubjectSchedule({ subjectId }: { subjectId: string }) {
 .rule{height:3px;background:#000;width:100%;margin:12px 0}
 .book-sub{text-align:center;text-decoration:underline;font-weight:900;margin-bottom:18px}
 .err{color:#b91c1c;text-align:center;font-weight:900;margin-bottom:10px}
-
-/* ---------- Form ---------- */
 .book-form{max-width:700px;margin:0 auto;padding-left:40px;}
 .row{display:flex;align-items:center;gap:12px;margin-bottom:22px;}
 .lab{font-weight:900;min-width:100px;text-align:left;}
