@@ -259,12 +259,10 @@ input, select {
 }
 
 /* =========================
-   Forgot Password – (your multiple variants kept)
-   NOTE: These ONLY style their own class namespaces (.fp-*, .fp2-*)
-         so they no longer conflict with the schedule page layout.
+   Forgot Password – variants (scoped)
    ========================= */
 
-/* --- Variant 1: .fp-page / .fp-rail (kept as-is but scoped) --- */
+/* --- Variant 1: .fp-page / .fp-rail --- */
 .fp-page { min-height: 100vh; background: #7bd0ff; display: grid; place-items: start center; }
 .fp-rail { position: relative; width: 820px; min-height: 100vh; background: rgba(63,180,250,.35); }
 .fp-back { position: absolute; top: 28px; left: 78px; }
@@ -284,7 +282,7 @@ input, select {
 .fp-note { text-align:center; color:#065f46; font-weight:600; }
 .fp-err { text-align:center; color:#b91c1c; font-weight:700; }
 
-/* --- Variant 2: .forgot-* (kept but scoped) --- */
+/* --- Variant 2: .forgot-* --- */
 .forgot-wrapper { display:flex; flex-direction:column; align-items:center; justify-content:flex-start; min-height:100vh; padding-top:40px; }
 .forgot-arrow { align-self:flex-start; margin-left:40px; margin-bottom:10px; }
 .arrow-icon { font-size:28px; color:black; cursor:pointer; }
@@ -299,7 +297,7 @@ input, select {
 .forgot-resend:hover, .forgot-submit:hover { background:#2b44b6; }
 .forgot-submit { width:100%; }
 
-/* --- Variant 3: .fp2-* (kept but scoped) --- */
+/* --- Variant 3: .fp2-* --- */
 .fp2-root { min-height:100vh; background:#80c7ff; display:grid; place-items:start center; }
 .fp2-column { width:760px; min-height:100vh; background:#6ec1f6; border-radius:12px; }
 .fp2-inner { max-width:760px; margin:36px auto 64px; padding:0 24px; position:relative; }
@@ -348,16 +346,34 @@ body.amv-fullscreen-about > * { max-width: none !important; width: 100% !importa
 
 /* Center the welcome section horizontally */
 .welcome-section {
-  text-align: center;           /* center all text inside */
-  margin: 0 auto;               /* center the whole block */
-  max-width: 800px;             /* optional: keep nice readable width */
+  text-align: center;
+  margin: 0 auto;
+  max-width: 800px;
 }
 
 /* Optional: center the divider line under title */
 .divider {
-  margin: 0.5rem auto 1rem auto;  /* top/bottom spacing */
-  width: 80%;                     /* reduce line width a bit */
+  margin: 0.5rem auto 1rem auto;
+  width: 80%;
 }
 
-/* global.css */
+/* =========================
+   Back arrow helpers
+   ========================= */
+
+/* For pages that still use the side-of-calendar arrow */
 a.outside-back { text-decoration: none !important; color: #000 !important; }
+
+/* For the new arrow ABOVE the header bar */
+.back-top { background: var(--amv-sky-deep); padding: 8px 32px 0; }
+.back-arrow {
+  font-size: 72px;         /* big */
+  font-weight: 900;        /* bold */
+  color: #000;
+  text-decoration: none;   /* no underline */
+  line-height: 1;
+  display: inline-block;
+  cursor: pointer;
+  transition: transform .1s ease;
+}
+.back-arrow:hover { transform: scale(0.95); }
