@@ -144,3 +144,20 @@ a.outside-back{ text-decoration:none!important; color:#000!important; }
 .back-arrow:hover {
   transform: scale(0.95);
 }
+
+/* ===== Overrides for schedule header links & back arrow ===== */
+.navlink,
+.navlink:visited,
+.navlink:hover,
+.navlink:active {
+  color: #000 !important;
+  text-decoration: none !important;
+  font-weight: 700 !important;
+}
+
+/* Make the page back arrow a bit thinner (lighter weight) */
+.back-arrow.thin {
+  font-weight: 600 !important;
+  font-size: 56px !important;
+  text-decoration: none !important;
+}
