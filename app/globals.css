@@ -377,3 +377,19 @@ a.outside-back { text-decoration: none !important; color: #000 !important; }
   transition: transform .1s ease;
 }
 .back-arrow:hover { transform: scale(0.95); }
+
+/* =========================
+   SCHEDULE PAGE – ARROW FIX
+   Force the arrow to sit to the LEFT of the calendar.
+   ========================= */
+.gridwrap .cal-wrap { padding-left: 48px !important; }            /* reduce empty space on the left */
+.gridwrap .cal-wrap > a.outside-back {
+  position: absolute !important;
+  left: 8px !important;                                          /* push arrow near the edge */
+  top: 10px !important;
+  font-size: 56px !important;                                    /* a little bigger & bold */
+  font-weight: 900 !important;
+  color: #000 !important;
+  text-decoration: none !important;
+  line-height: 1;
+}
