@@ -358,3 +358,6 @@ body.amv-fullscreen-about > * { max-width: none !important; width: 100% !importa
   margin: 0.5rem auto 1rem auto;  /* top/bottom spacing */
   width: 80%;                     /* reduce line width a bit */
 }
+
+/* global.css */
+a.outside-back { text-decoration: none !important; color: #000 !important; }
