@@ -193,17 +193,20 @@ function SubjectSchedule({ subjectId }: { subjectId: string }) {
           {error && <div className="err">{error}</div>}
 
           <form onSubmit={onSave} className="book-form">
-            {/* NAME (unchanged) */}
-            <div className="row">
+            {/* NAME — closer to label with a tiny gap after ":" */}
+            <div className="row name-row">
               <span className="lab">NAME :</span>
-              <input value={name} onChange={(e) => setName(e.target.value)} className="name-line" />
+              <input
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="name-line"
+              />
             </div>
 
-            {/* TIME (repositioned to match NAME layout) */}
+            {/* TIME — no underline, inputs closer to the label */}
             <div className="row time-row">
               <span className="lab">TIME :</span>
               <div className="time-field">
-                <div className="time-underline" />
                 <input
                   type="text"
                   value={startTime}
@@ -220,7 +223,7 @@ function SubjectSchedule({ subjectId }: { subjectId: string }) {
               </div>
             </div>
 
-            {/* SAVE (moved clearly inside the box) */}
+            {/* SAVE — centered and safely inside the box */}
             <div className="save-row">
               <button type="submit" className="save">SAVE</button>
             </div>
@@ -268,36 +271,33 @@ function SubjectSchedule({ subjectId }: { subjectId: string }) {
 .book-sub{text-align:center;text-decoration:underline;font-weight:900;margin-bottom:18px}
 .err{color:#b91c1c;text-align:center;font-weight:900;margin-bottom:10px}
 
-/* Form container stays centered so SAVE can't spill outside */
+/* Form */
 .book-form{max-width:700px;margin:0 auto;padding:0 8px}
 .row{display:flex;align-items:center;justify-content:center;gap:16px;margin-bottom:22px}
 .lab{font-weight:900;min-width:110px}
 
-/* NAME (unchanged) */
-.name-line{width:400px;border:none;border-bottom:4px solid #000;outline:none;background:transparent;height:34px}
+/* NAME — closer to label with a tiny gap after ":" */
+.name-row{gap:10px;}                  /* label and field closer */
+.name-line{
+  width:400px;
+  border:none;border-bottom:4px solid #000;
+  outline:none;background:transparent;height:34px;
+  margin-left:6px;                    /* tiny gap after the ":" */
+}
 
-/* TIME — align to look like NAME */
-.time-row{gap:16px}
+/* TIME — no underline, pull inputs closer to label */
+.time-row{gap:10px;}                  /* label and inputs closer */
 .time-field{
-  position:relative;
-  width:400px;              /* same visual width as NAME line */
-  height:48px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
+  display:flex;align-items:center;
+  gap:8px;                            /* inputs a little closer together */
 }
-.time-underline{
-  position:absolute;
-  left:0; right:0;
-  bottom:6px;
-  height:0;
-  border-bottom:4px solid #000;  /* same underline style */
+.time-plain{
+  width:120px;font-weight:900;font-size:20px;text-align:center;
 }
-.time-plain{width:120px;font-weight:900;font-size:20px;text-align:center;position:relative;z-index:1}
-.dash{font-weight:900;margin:0 8px}
+.dash{font-weight:900;margin:0 2px}
 
-/* SAVE — clearly inside the blue box */
-.save-row{display:flex;justify-content:center;margin-top:6px}
+/* SAVE — centered inside the blue box */
+.save-row{display:flex;justify-content:center;margin-top:8px}
 .save{background:#2E59BA;color:#fff;border:none;border-radius:16px;padding:12px 28px;font-weight:900;cursor:pointer}
       `}</style>
     </div>
