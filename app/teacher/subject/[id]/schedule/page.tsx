@@ -248,7 +248,8 @@ function SubjectSchedule({ subjectId }: { subjectId: string }) {
   fill:currentColor;
 }
 
-.gridwrap{max-width:1120px;margin:10px auto 56px;padding:0 24px;display:grid;grid-template-columns:520px minmax(0,1fr);gap:36px;align-items:stretch}
+/* >>> CHANGED: make calendar card a bit wider (520px → 560px) */
+.gridwrap{max-width:1120px;margin:10px auto 56px;padding:0 24px;display:grid;grid-template-columns:560px minmax(0,1fr);gap:36px;align-items:stretch}
 
 /* ---------- Calendar ---------- */
 .cal-wrap{position:relative;padding-left:80px;}
@@ -257,7 +258,10 @@ function SubjectSchedule({ subjectId }: { subjectId: string }) {
   width:60px;height:60px;display:flex;align-items:center;justify-content:center;
   font-size:54px;font-weight:900;color:#000;cursor:pointer;text-decoration:none;
 }
-.cal-card{background:#fff;border-radius:28px;padding:22px 26px 28px;overflow:hidden}
+
+/* >>> CHANGED: slightly larger padding on the white card */
+.cal-card{background:#fff;border-radius:28px;padding:26px 30px 32px;overflow:hidden}
+
 .cal-head{display:grid;grid-template-columns:44px 1fr auto 44px;align-items:center}
 .arrow{background:none;border:none;font-size:20px;font-weight:900;cursor:pointer}
 .title{justify-self:center;font-size:28px;font-weight:900}
