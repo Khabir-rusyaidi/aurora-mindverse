@@ -113,7 +113,7 @@ function SubjectSchedule({ subjectId }: { subjectId: string }) {
 
   return (
     <div className="amv-root">
-      {/* Top bar */}
+      {/* Header */}
       <div className="amv-topbar">
         <div>
           <div className="amv-brand">AURORA MIND VERSE</div>
@@ -129,10 +129,11 @@ function SubjectSchedule({ subjectId }: { subjectId: string }) {
         </div>
       </div>
 
-      {/* Body */}
+      {/* Content */}
       <div className="gridwrap">
-        {/* Calendar + Back arrow */}
+        {/* Calendar column */}
         <div className="cal-wrap">
+          {/* Back arrow (now closer to the calendar) */}
           <Link href="/teacher" className="outside-back" aria-label="Back to Teacher">⬅</Link>
 
           <div className="cal-card">
@@ -207,9 +208,9 @@ function SubjectSchedule({ subjectId }: { subjectId: string }) {
         </div>
       </div>
 
-      {/* Page-scoped CSS */}
+      {/* Scoped styles */}
       <style jsx>{`
-/* ---------- Base ---------- */
+/* Base */
 .amv-root{min-height:100vh;background:#7cc9f5;color:#000}
 .amv-topbar{background:#39a8f0;padding:16px 32px;display:flex;justify-content:space-between;align-items:center}
 .amv-brand{font-size:32px;font-weight:900}
@@ -220,14 +221,14 @@ function SubjectSchedule({ subjectId }: { subjectId: string }) {
 .amv-pill{background:#fff;border:1px solid rgba(0,0,0,.25);padding:8px 16px;border-radius:9999px;display:flex;align-items:center;gap:10px;font-weight:900}
 .avatar{width:18px;height:18px;color:#6b46c1;fill:currentColor}
 
-/* Layout with calendar column + booking column */
+/* Layout */
 .gridwrap{max-width:1120px;margin:10px auto 56px;padding:0 24px;display:grid;grid-template-columns:560px minmax(0,1fr);gap:36px;align-items:start}
 
-/* Calendar container and back arrow */
-.cal-wrap{position:relative;padding-left:40px;}          /* smaller left padding so the arrow can sit closer */
+/* Calendar + back arrow (moved LEFT by reducing padding-left) */
+.cal-wrap{position:relative;padding-left:8px;}  /* was 40px — smaller gap */
 .outside-back{
   position:absolute;
-  left:0;                                                /* nudge a bit further left */
+  left:0;                 /* hug the left edge of cal-wrap */
   top:10px;
   font-size:56px;
   font-weight:900;
@@ -237,7 +238,6 @@ function SubjectSchedule({ subjectId }: { subjectId: string }) {
   user-select:none;
   cursor:pointer;
 }
-.outside-back:hover{transform:scale(0.98);}
 
 /* Calendar card */
 .cal-card{background:#fff;border-radius:28px;padding:26px 30px 32px}
