@@ -193,7 +193,7 @@ function SubjectSchedule({ subjectId }: { subjectId: string }) {
           {error && <div className="err">{error}</div>}
 
           <form onSubmit={onSave} className="book-form">
-            {/* NAME — underline closer to label with tiny gap */}
+            {/* NAME — move left a bit */}
             <div className="row name-row">
               <span className="lab">NAME :</span>
               <div className="gap" />
@@ -204,7 +204,7 @@ function SubjectSchedule({ subjectId }: { subjectId: string }) {
               />
             </div>
 
-            {/* TIME — aligned exactly the same, no underline */}
+            {/* TIME — same left alignment as NAME */}
             <div className="row time-row">
               <span className="lab">TIME :</span>
               <div className="gap" />
@@ -225,7 +225,7 @@ function SubjectSchedule({ subjectId }: { subjectId: string }) {
               </div>
             </div>
 
-            {/* SAVE — perfectly centered */}
+            {/* SAVE — right corner inside the blue box */}
             <div className="save-row">
               <button type="submit" className="save">SAVE</button>
             </div>
@@ -273,41 +273,45 @@ function SubjectSchedule({ subjectId }: { subjectId: string }) {
 .book-sub{text-align:center;text-decoration:underline;font-weight:900;margin-bottom:18px}
 .err{color:#b91c1c;text-align:center;font-weight:900;margin-bottom:10px}
 
-/* ---------- Form (precise alignment) ---------- */
-/* Make every row a 3-column grid:
-   [label 110px] [tiny gap 6px] [field 400px]
-   -> TIME will match NAME perfectly. */
-.book-form{max-width:700px;margin:0 auto;padding:0 8px}
+/* ---------- Form (aligned left) ---------- */
+/* Use a fixed grid (label, tiny gap, field) and shift the whole
+   form slightly LEFT using margin-left */
+.book-form{
+  max-width:700px;
+  margin:0 0 0 24px;   /* <<< shift everything left a bit */
+  padding:0 8px;
+}
 .row{
   display:grid;
   grid-template-columns:110px 6px 400px;
   align-items:center;
-  justify-content:center;  /* centers the whole 516px block */
+  justify-content:flex-start;   /* <<< align block to the left */
   margin-bottom:22px;
 }
-.lab{font-weight:900;text-align:right;}   /* right-align the label */
-.gap{width:6px;height:1px}                 /* tiny space after ":" */
+.lab{font-weight:900;text-align:right;}
+.gap{width:6px;height:1px}
 
-/* NAME — underline closer to label */
+/* NAME — underline */
 .name-line{
   width:400px;
   border:none;border-bottom:4px solid #000;
   outline:none;background:transparent;height:34px;
 }
 
-/* TIME — no underline; boxes closer to label */
+/* TIME — same left start, no underline */
 .time-field{
   width:400px;
   display:flex;align-items:center;justify-content:flex-start;
-  gap:6px;                 /* closer together than before */
+  gap:6px;
 }
 .time-plain{width:120px;font-weight:900;font-size:20px;text-align:center}
 .dash{font-weight:900;margin:0 2px}
 
-/* SAVE — perfectly centered in form width */
+/* SAVE — right corner inside the blue card */
 .save-row{
   display:flex;
-  justify-content:center;
+  justify-content:flex-end;  /* <<< push to the right */
+  padding-right:28px;        /* <<< a little breathing room from edge */
   margin-top:8px;
 }
 .save{background:#2E59BA;color:#fff;border:none;border-radius:16px;padding:12px 28px;font-weight:900;cursor:pointer}
