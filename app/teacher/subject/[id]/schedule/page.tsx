@@ -45,6 +45,7 @@ function SubjectSchedule({ subjectId }: { subjectId: string }) {
     })();
   }, []);
 
+  // Default 6 November 2025
   const [monthCursor, setMonthCursor] = useState(() => new Date(2025, 10, 1));
   const [selectedDate, setSelectedDate] = useState(() => new Date(2025, 10, 6));
 
@@ -75,7 +76,7 @@ function SubjectSchedule({ subjectId }: { subjectId: string }) {
     setBookings(data ?? []);
     setLoading(false);
   }
-  useEffect(() => { loadDay(); }, [subjectId, selectedDate]);
+  useEffect(() => { loadDay(); /* eslint-disable-line */ }, [subjectId, selectedDate]);
 
   function prevMonth() {
     const d = new Date(monthCursor);
@@ -113,37 +114,51 @@ function SubjectSchedule({ subjectId }: { subjectId: string }) {
 
   return (
     <div className="amv-root">
+      {/* Header */}
       <div className="amv-topbar">
         <div>
           <div className="amv-brand">AURORA MIND VERSE</div>
           <div className="amv-tag">STEP INTO THE NEW ERA</div>
         </div>
+
         <div className="amv-right">
           <Link href="/about" className="toplink">About Us</Link>
           <Link href="/contact" className="toplink">Contact</Link>
+
           <div className="amv-pill">
-            <svg className="avatar" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-3.866 3.134-6 8-6s8 2.134 8 6v1H4v-1z"/></svg>
+            <svg className="avatar" viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="12" cy="8" r="4" />
+              <path d="M4 20c0-3.866 3.134-6 8-6s8 2.134 8 6v1H4v-1z" />
+            </svg>
             <span>{userName}</span>
           </div>
         </div>
       </div>
 
       <div className="gridwrap">
+        {/* Calendar */}
         <div className="cal-wrap">
-          <Link href="/teacher" className="outside-back">←</Link>
+          {/* >>> Back arrow: big, no underline, next to calendar */}
+          <Link href="/teacher" className="outside-back" aria-label="Back to Teacher">←</Link>
+
           <div className="cal-card">
             <div className="cal-head">
-              <button onClick={prevMonth} className="arrow">⬅</button>
+              <button onClick={prevMonth} className="arrow" aria-label="Previous month">⬅</button>
               <div className="title">{monthName}</div>
               <div className="year">{yearNum}</div>
-              <button onClick={nextMonth} className="arrow">➡</button>
+              <button onClick={nextMonth} className="arrow" aria-label="Next month">➡</button>
             </div>
+
             <div className="days">
               {days.map((d) => {
                 const cellDate = new Date(monthCursor.getFullYear(), monthCursor.getMonth(), d);
                 const isSelected = isoDateOnly(cellDate) === isoDateOnly(selectedDate);
                 return (
-                  <button key={d} onClick={() => setSelectedDate(cellDate)} className={"day" + (isSelected ? " sel" : "")}>
+                  <button
+                    key={d}
+                    onClick={() => setSelectedDate(cellDate)}
+                    className={"day" + (isSelected ? " sel" : "")}
+                  >
                     <span className="num">{d}</span>
                   </button>
                 );
@@ -152,6 +167,7 @@ function SubjectSchedule({ subjectId }: { subjectId: string }) {
           </div>
         </div>
 
+        {/* Booking */}
         <div className="book-card">
           <h1 className="book-title">BOOKING CLASS</h1>
           <div className="book-date">{fmtLongUpper(selectedDate)}</div>
@@ -159,23 +175,33 @@ function SubjectSchedule({ subjectId }: { subjectId: string }) {
           {!loading && (
             <div className="book-line">
               <span className="bld">BOOKING :</span>
-              {bookings.length === 0 ? <span>{` - NO BOOKING -`}</span> :
-                <span className="book-list">{bookings.map((b, i) => {
-                  const s = new Date(b.start_at), e = new Date(b.end_at);
-                  return `${i + 1}) ${b.name.toUpperCase()} (${fmt24(s)} - ${fmt24(e)})`;
-                }).join("   ")}</span>}
+              {bookings.length === 0 ? (
+                <span>{` - NO BOOKING -`}</span>
+              ) : (
+                <span className="book-list">
+                  {" "}
+                  {bookings.map((b, i) => {
+                    const s = new Date(b.start_at), e = new Date(b.end_at);
+                    return `${i + 1}) ${b.name.toUpperCase()} (${fmt24(s)} - ${fmt24(e)})`;
+                  }).join("   ")}
+                </span>
+              )}
             </div>
           )}
 
           <div className="rule" />
           <div className="book-sub">BOOKING</div>
+
           {error && <div className="err">{error}</div>}
 
           <form onSubmit={onSave} className="book-form">
+            {/* NAME (left-aligned) */}
             <div className="row">
               <span className="lab">NAME :</span>
               <input value={name} onChange={(e) => setName(e.target.value)} className="name-line" />
             </div>
+
+            {/* TIME (left-aligned, no underline) */}
             <div className="row">
               <span className="lab">TIME :</span>
               <div className="time-field">
@@ -184,6 +210,8 @@ function SubjectSchedule({ subjectId }: { subjectId: string }) {
                 <input type="text" value={endTime} onChange={(e) => setEndTime(e.target.value)} className="time-plain" />
               </div>
             </div>
+
+            {/* SAVE (right corner, inside) */}
             <div className="save-row">
               <button type="submit" className="save">SAVE</button>
             </div>
@@ -191,38 +219,72 @@ function SubjectSchedule({ subjectId }: { subjectId: string }) {
         </div>
       </div>
 
+      {/* Styling */}
       <style jsx>{`
+/* ---------- Base ---------- */
 .amv-root{min-height:100vh;background:#7cc9f5;color:#000}
 .amv-topbar{background:#39a8f0;padding:16px 32px;display:flex;justify-content:space-between;align-items:center}
 .amv-brand{font-size:32px;font-weight:900}
-.amv-tag{font-size:14px;font-weight:700}
+.amv-tag{margin-top:2px;font-size:14px;font-weight:700}
 .amv-right{display:flex;align-items:center;gap:24px}
 .toplink{color:#000;text-decoration:none;font-weight:700}
+.toplink:visited{color:#000}
 .toplink:hover{text-decoration:underline}
 .amv-pill{background:#fff;border:1px solid rgba(0,0,0,.25);padding:8px 16px;border-radius:9999px;display:flex;align-items:center;gap:10px;font-weight:900}
 .avatar{width:18px;height:18px;color:#6b46c1;fill:currentColor}
 
-.gridwrap{max-width:1120px;margin:10px auto 56px;padding:0 24px;display:grid;grid-template-columns:560px minmax(0,1fr);gap:36px;}
-.cal-wrap{position:relative;padding-left:80px;}
-.outside-back{position:absolute;left:0;top:12px;font-size:54px;color:#000;text-decoration:none}
-.cal-card{background:#fff;border-radius:28px;padding:26px 30px 32px}
+/* ---------- Layout ---------- */
+.gridwrap{max-width:1120px;margin:10px auto 56px;padding:0 24px;display:grid;grid-template-columns:560px minmax(0,1fr);gap:36px;align-items:stretch}
+
+/* ---------- Calendar ---------- */
+.cal-wrap{position:relative;padding-left:80px;} /* keep a margin for the back arrow */
+.outside-back{
+  position:absolute;
+  left:16px;                 /* sits right next to the calendar card */
+  top:50%;
+  transform:translateY(-50%);
+  font-size:56px;            /* a bit big */
+  line-height:1;
+  color:#000 !important;     /* always black */
+  text-decoration:none !important; /* no underline ever */
+  cursor:pointer;
+  user-select:none;
+}
+.outside-back:visited{color:#000;text-decoration:none}
+.outside-back:hover{transform:translateY(-50%) scale(0.98);} /* subtle tap feel */
+
+.cal-card{background:#fff;border-radius:28px;padding:26px 30px 32px;overflow:hidden}
 .cal-head{display:grid;grid-template-columns:44px 1fr auto 44px;align-items:center}
 .arrow{background:none;border:none;font-size:20px;font-weight:900;cursor:pointer}
 .title{justify-self:center;font-size:28px;font-weight:900}
 .year{justify-self:start;font-size:28px;font-weight:900;margin-left:10px}
-.days{display:grid;grid-template-columns:repeat(7,55px);gap:10px;justify-content:center;margin-top:8px;}
-.day{width:55px;height:48px;border:3px solid #000;border-radius:12px;display:flex;align-items:center;justify-content:center;}
+.days{
+  display:grid;
+  grid-template-columns:repeat(7,55px);
+  gap:10px;
+  justify-content:center;
+  margin-top:8px;
+  padding-bottom:10px;
+}
+.day{
+  width:55px;height:48px;border:3px solid #000;border-radius:12px;background:#fff;
+  display:flex;align-items:center;justify-content:center;transition:transform .15s;
+}
+.day:hover{transform:scale(0.95);}
+.num{font-weight:800;font-size:18px;line-height:1;}
 .sel .num{background:#7eff85;border:3px solid #2a8f32;border-radius:8px;padding:2px 6px;}
 
-.book-card{background:#4fb4f0;border-radius:28px;padding:28px;}
+/* ---------- Booking ---------- */
+.book-card{background:#4fb4f0;border-radius:28px;padding:28px;display:flex;flex-direction:column}
 .book-title{font-size:42px;font-weight:900;text-align:center;margin-bottom:12px}
 .book-date{text-align:center;text-decoration:underline;font-weight:900;margin-bottom:8px}
 .book-line{font-weight:900;text-align:center;margin:6px 0 10px}
-.rule{height:3px;background:#000;width:100%;margin:12px 0}
+.rule{height:3px;background:#000;width:100%;margin:12px 0 14px}
 .book-sub{text-align:center;text-decoration:underline;font-weight:900;margin-bottom:18px}
 .err{color:#b91c1c;text-align:center;font-weight:900;margin-bottom:10px}
 
-.book-form{max-width:700px;margin:0 auto;padding-left:40px;} /* shift left */
+/* ---------- Form (left-aligned fields) ---------- */
+.book-form{max-width:700px;margin:0 auto;padding-left:40px;}
 .row{display:flex;align-items:center;gap:12px;margin-bottom:22px;}
 .lab{font-weight:900;min-width:100px;text-align:left;}
 .name-line{width:400px;border:none;border-bottom:4px solid #000;outline:none;background:transparent;height:34px;}
