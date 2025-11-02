@@ -345,3 +345,16 @@ body.amv-fullscreen-about > * { max-width: none !important; width: 100% !importa
   text-decoration: none;
 }
 .schedule-btn:hover { color: #333; }
+
+/* Center the welcome section horizontally */
+.welcome-section {
+  text-align: center;           /* center all text inside */
+  margin: 0 auto;               /* center the whole block */
+  max-width: 800px;             /* optional: keep nice readable width */
+}
+
+/* Optional: center the divider line under title */
+.divider {
+  margin: 0.5rem auto 1rem auto;  /* top/bottom spacing */
+  width: 80%;                     /* reduce line width a bit */
+}
