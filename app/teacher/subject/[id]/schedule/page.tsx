@@ -122,20 +122,11 @@ function SubjectSchedule({ subjectId }: { subjectId: string }) {
         </div>
 
         <div className="amv-right">
-          {/* ✅ Links are black (normal & visited) */}
           <Link href="/about" className="toplink">About Us</Link>
           <Link href="/contact" className="toplink">Contact</Link>
-
-          {/* ✅ Profile pill with purple user icon */}
           <div className="amv-pill">
-            <svg
-              className="avatar"
-              viewBox="0 0 24 24"
-              aria-hidden="true"
-            >
-              {/* head */}
+            <svg className="avatar" viewBox="0 0 24 24" aria-hidden="true">
               <circle cx="12" cy="8" r="4" />
-              {/* shoulders */}
               <path d="M4 20c0-3.866 3.134-6 8-6s8 2.134 8 6v1H4v-1z" />
             </svg>
             <span>{userName}</span>
@@ -146,7 +137,6 @@ function SubjectSchedule({ subjectId }: { subjectId: string }) {
       <div className="gridwrap">
         {/* Calendar */}
         <div className="cal-wrap">
-          {/* Big black back arrow (outside the white card) */}
           <Link href="/teacher" className="outside-back" aria-label="Back to Teacher">←</Link>
 
           <div className="cal-card">
@@ -203,18 +193,34 @@ function SubjectSchedule({ subjectId }: { subjectId: string }) {
           {error && <div className="err">{error}</div>}
 
           <form onSubmit={onSave} className="book-form">
+            {/* NAME (unchanged) */}
             <div className="row">
               <span className="lab">NAME :</span>
               <input value={name} onChange={(e) => setName(e.target.value)} className="name-line" />
             </div>
 
+            {/* TIME (repositioned to match NAME layout) */}
             <div className="row time-row">
               <span className="lab">TIME :</span>
-              <input type="text" value={startTime} onChange={(e) => setStartTime(e.target.value)} className="time-plain" />
-              <span className="dash"> - </span>
-              <input type="text" value={endTime} onChange={(e) => setEndTime(e.target.value)} className="time-plain" />
+              <div className="time-field">
+                <div className="time-underline" />
+                <input
+                  type="text"
+                  value={startTime}
+                  onChange={(e) => setStartTime(e.target.value)}
+                  className="time-plain"
+                />
+                <span className="dash"> - </span>
+                <input
+                  type="text"
+                  value={endTime}
+                  onChange={(e) => setEndTime(e.target.value)}
+                  className="time-plain"
+                />
+              </div>
             </div>
 
+            {/* SAVE (moved clearly inside the box) */}
             <div className="save-row">
               <button type="submit" className="save">SAVE</button>
             </div>
@@ -230,54 +236,25 @@ function SubjectSchedule({ subjectId }: { subjectId: string }) {
 .amv-brand{font-size:32px;font-weight:900}
 .amv-tag{margin-top:2px;font-size:14px;font-weight:700}
 .amv-right{display:flex;align-items:center;gap:24px}
-
-/* ✅ Links are black even when visited */
 .toplink{color:#000;text-decoration:none;font-weight:700}
 .toplink:visited{color:#000}
 .toplink:hover{text-decoration:underline}
+.amv-pill{background:#fff;border:1px solid rgba(0,0,0,.25);padding:8px 16px;border-radius:9999px;display:flex;align-items:center;gap:10px;font-weight:900}
+.avatar{width:18px;height:18px;color:#6b46c1;fill:currentColor}
 
-/* ✅ Profile pill with purple icon */
-.amv-pill{
-  background:#fff;border:1px solid rgba(0,0,0,.25);
-  padding:8px 16px;border-radius:9999px;
-  display:flex;align-items:center;gap:10px;font-weight:900
-}
-.avatar{
-  width:18px;height:18px;
-  color:#6b46c1; /* purple */
-  fill:currentColor;
-}
-
-/* >>> CHANGED: make calendar card a bit wider (520px → 560px) */
+/* Layout */
 .gridwrap{max-width:1120px;margin:10px auto 56px;padding:0 24px;display:grid;grid-template-columns:560px minmax(0,1fr);gap:36px;align-items:stretch}
 
 /* ---------- Calendar ---------- */
 .cal-wrap{position:relative;padding-left:80px;}
-.outside-back{
-  position:absolute;left:0;top:12px;
-  width:60px;height:60px;display:flex;align-items:center;justify-content:center;
-  font-size:54px;font-weight:900;color:#000;cursor:pointer;text-decoration:none;
-}
-
-/* >>> CHANGED: slightly larger padding on the white card */
+.outside-back{position:absolute;left:0;top:12px;width:60px;height:60px;display:flex;align-items:center;justify-content:center;font-size:54px;font-weight:900;color:#000;cursor:pointer;text-decoration:none;}
 .cal-card{background:#fff;border-radius:28px;padding:26px 30px 32px;overflow:hidden}
-
 .cal-head{display:grid;grid-template-columns:44px 1fr auto 44px;align-items:center}
 .arrow{background:none;border:none;font-size:20px;font-weight:900;cursor:pointer}
 .title{justify-self:center;font-size:28px;font-weight:900}
 .year{justify-self:start;font-size:28px;font-weight:900;margin-left:10px}
-.days{
-  display:grid;
-  grid-template-columns:repeat(7,55px);
-  gap:10px;
-  justify-content:center;
-  margin-top:8px;
-  padding-bottom:10px;
-}
-.day{
-  width:55px;height:48px;border:3px solid #000;border-radius:12px;background:#fff;
-  display:flex;align-items:center;justify-content:center;transition:transform .15s;
-}
+.days{display:grid;grid-template-columns:repeat(7,55px);gap:10px;justify-content:center;margin-top:8px;padding-bottom:10px;}
+.day{width:55px;height:48px;border:3px solid #000;border-radius:12px;background:#fff;display:flex;align-items:center;justify-content:center;transition:transform .15s;}
 .day:hover{transform:scale(0.95);}
 .num{font-weight:800;font-size:18px;line-height:1;}
 .sel .num{background:#7eff85;border:3px solid #2a8f32;border-radius:8px;padding:2px 6px;}
@@ -290,14 +267,37 @@ function SubjectSchedule({ subjectId }: { subjectId: string }) {
 .rule{height:3px;background:#000;width:100%;margin:12px 0 14px}
 .book-sub{text-align:center;text-decoration:underline;font-weight:900;margin-bottom:18px}
 .err{color:#b91c1c;text-align:center;font-weight:900;margin-bottom:10px}
-.book-form{max-width:700px;margin:0 auto}
+
+/* Form container stays centered so SAVE can't spill outside */
+.book-form{max-width:700px;margin:0 auto;padding:0 8px}
 .row{display:flex;align-items:center;justify-content:center;gap:16px;margin-bottom:22px}
 .lab{font-weight:900;min-width:110px}
+
+/* NAME (unchanged) */
 .name-line{width:400px;border:none;border-bottom:4px solid #000;outline:none;background:transparent;height:34px}
+
+/* TIME — align to look like NAME */
 .time-row{gap:16px}
-.dash{font-weight:900}
-.time-plain{width:120px;font-weight:900;font-size:20px;text-align:center}
-.save-row{display:flex;justify-content:flex-end;padding-right:8px;margin-top:4px}
+.time-field{
+  position:relative;
+  width:400px;              /* same visual width as NAME line */
+  height:48px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.time-underline{
+  position:absolute;
+  left:0; right:0;
+  bottom:6px;
+  height:0;
+  border-bottom:4px solid #000;  /* same underline style */
+}
+.time-plain{width:120px;font-weight:900;font-size:20px;text-align:center;position:relative;z-index:1}
+.dash{font-weight:900;margin:0 8px}
+
+/* SAVE — clearly inside the blue box */
+.save-row{display:flex;justify-content:center;margin-top:6px}
 .save{background:#2E59BA;color:#fff;border:none;border-radius:16px;padding:12px 28px;font-weight:900;cursor:pointer}
       `}</style>
     </div>
