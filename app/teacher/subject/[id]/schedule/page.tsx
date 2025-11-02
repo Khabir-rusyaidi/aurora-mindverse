@@ -45,7 +45,7 @@ function SubjectSchedule({ subjectId }: { subjectId: string }) {
     })();
   }, []);
 
-  // Default calendar (Nov 2025, selected 6)
+  // Default (Nov 2025, select 6)
   const [monthCursor, setMonthCursor] = useState(() => new Date(2025, 10, 1));
   const [selectedDate, setSelectedDate] = useState(() => new Date(2025, 10, 6));
 
@@ -132,9 +132,10 @@ function SubjectSchedule({ subjectId }: { subjectId: string }) {
 
       {/* Main grid */}
       <div className="gridwrap">
-        {/* Calendar + back arrow (arrow sits to the left of the card) */}
+        {/* Calendar + back arrow */}
         <div className="cal-wrap">
-          <Link href="/teacher" className="outside-back" aria-label="Back to Teacher">←</Link>
+          {/* ⬅ heavy, bigger, top-aligned next to the card */}
+          <Link href="/teacher" className="outside-back" aria-label="Back to Teacher">⬅</Link>
 
           <div className="cal-card">
             <div className="cal-head">
@@ -211,7 +212,6 @@ function SubjectSchedule({ subjectId }: { subjectId: string }) {
         </div>
       </div>
 
-      {/* Styles (only arrow size/position adjusted) */}
       <style jsx>{`
 /* ---------- Base ---------- */
 .amv-root{min-height:100vh;background:#7cc9f5;color:#000}
@@ -228,21 +228,20 @@ function SubjectSchedule({ subjectId }: { subjectId: string }) {
 .gridwrap{max-width:1120px;margin:10px auto 56px;padding:0 24px;display:grid;grid-template-columns:560px minmax(0,1fr);gap:36px;align-items:start}
 
 /* ---------- Calendar + Back ---------- */
-.cal-wrap{position:relative;padding-left:72px;} /* space for the arrow on the left */
+.cal-wrap{position:relative;padding-left:84px;} /* leave room for arrow */
 .outside-back{
   position:absolute;
-  left:16px;
-  top:50%;
-  transform:translateY(-50%);
-  font-size:44px;          /* smaller (but bold) arrow */
-  font-weight:900;
+  left:18px;
+  top:10px;                /* align with the top of the white card */
+  font-size:56px;          /* a little bigger */
+  font-weight:900;         /* bold */
   color:#000 !important;
   text-decoration:none !important;
   line-height:1;
   user-select:none;
   cursor:pointer;
 }
-.outside-back:hover{transform:translateY(-50%) scale(0.97);}
+.outside-back:hover{transform:scale(0.98);}
 
 .cal-card{background:#fff;border-radius:28px;padding:26px 30px 32px}
 .cal-head{display:grid;grid-template-columns:44px 1fr auto 44px;align-items:center}
